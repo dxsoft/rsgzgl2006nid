@@ -1,0 +1,5 @@
+*.fxp
+*.tmp
+*.err
+FOXUSER.*
+temp/

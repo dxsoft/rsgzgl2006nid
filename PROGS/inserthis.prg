@@ -1,0 +1,85 @@
+FUNCTION inserthis
+
+LPARAMETERS tcjsnf,tcjsyf,tcjslb,tcjb,tcdc,tcdjc,tngznx,tckhjg,tcxckhndzw
+
+oGUID = CreateObject("scriptlet.typelib")
+cGUID = substr( oGUID.GUID, 2, 36 )
+	    
+SELECT hisbase
+
+SET ORDER TO bmlbhj DESCENDING
+GO TOP IN hisbase
+
+SCAN FOR dwbm+grbm=ryjbxx.dwbm+ryjbxx.grbm
+    IF jsnf+jsyf>tcjsnf+tcjsyf
+        REPLACE jbgzjb2 WITH tcjb,zwgzdc2 WITH tcdc
+        m.cid = id
+        gzjs06("hisbase")
+        LOOP
+    ENDIF
+    
+    &&找到第一条之前变动
+    SCATTER MEMVAR
+
+    &&找到第一条提前晋升的记录后，插入新记录	
+	REPLACE sid WITH cguid
+
+	m.jslb=tcjslb
+	m.jsnf=tcjsnf
+	m.jsyf=tcjsyf
+	m.id = cguid
+    m.tfnf = ALLTRIM(STR(m.pnyear))
+    m.tfyf = PADL(ALLTRIM(STR(m.pnmonth)),2,'0')
+    m.bgdwjc = PADL(ALLTRIM(STR(m.pnday)),2,'0')
+    m.denkh = m.czy
+    m.jbgzjb2 = tcjb
+    m.zwgzdc2 = tcdc
+    m.djc2=tcdjc
+    m.gznx=tngznx
+    m.khjg=tckhjg
+    m.sid=m.cid
+    
+	IF m.bb="zhj"
+        m.bbz = '审批通过'
+    ELSE
+        m.bbz = "申报"
+    ENDIF
+    
+    IF tcjslb='正常档次'
+        m.xckhndzw = tcjsnf
+    ENDIF
+    
+    IF tcjslb='正常级别'
+        m.xckhndjb = tcjsnf
+        m.xckhndzw=tcxckhndzw
+    ENDIF
+
+	INSERT INTO hisbase FROM MEMVAR
+    gzjs06("hisbase")
+
+	EXIT
+*!*	ELSE
+*!*	    AFIELDS(afld,"hisbase")
+*!*		FOR i=1 TO ALEN(afld,1)
+*!*		    IF afld[i,2]="N" OR afld[i,2]="I" OR afld[i,2]="B"
+*!*		        m. &afld[i,1] = 0
+*!*		    ELSE
+*!*		        m. &afld[i,1] = ''
+*!*		    ENDIF
+*!*		ENDFOR	
+*!*	    SELECT ryjbxx
+*!*	    SCATTER MEMVAR
+*!*	    m.id = cguid
+*!*	    m.sid=''
+*!*		m.jslb=tcjslb
+*!*		m.jsnf=tcjsnf
+*!*		m.jsyf=tcjsyf    
+*!*	    m.tfnf = ALLTRIM(STR(m.pnyear))
+*!*	    m.tfyf = PADL(ALLTRIM(STR(m.pnmonth)),2,'0')
+*!*	    m.bgdwjc = PADL(ALLTRIM(STR(m.pnday)),2,'0')
+*!*	    m.denkh = m.czy
+
+*!*	    SELECT hisbase
+*!*	    INSERT INTO hisbase FROM MEMVAR
+*!*	ENDIF
+ENDSCAN

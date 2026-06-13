@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>&#20154;&#20107;&#24037;&#36164;&#31649;&#29702;</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<section id="loginView" class="login-view hidden" aria-label="&#30331;&#24405;">
+    <form id="loginForm" class="login-panel">
+        <div>
+            <h1>&#20154;&#20107;&#24037;&#36164;&#31649;&#29702;</h1>
+            <p id="loginMessage">&#35831;&#20351;&#29992;&#31995;&#32479;&#36134;&#21495;&#30331;&#24405;</p>
+        </div>
+        <label>
+            <span>&#29992;&#25143;&#21517;</span>
+            <input id="loginUsername" name="username" type="text" value="admin" autocomplete="username" required>
+        </label>
+        <label>
+            <span>&#23494;&#30721;</span>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button id="loginButton" type="submit">&#30331;&#24405;</button>
+    </form>
+</section>
+
+<div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+        <div>
+            <h1>&#20154;&#20107;&#24037;&#36164;&#31649;&#29702;</h1>
+            <p id="statusText">&#27491;&#22312;&#36830;&#25509;&#26381;&#21153;...</p>
+        </div>
+        <div class="toolbar">
+            <input id="batchYearInput" type="number" min="2006" max="2099" value="2024" aria-label="&#23545;&#36134;&#24180;&#24230;">
+            <input id="batchMonthInput" type="number" min="1" max="12" value="7" aria-label="&#23545;&#36134;&#26376;&#20221;">
+            <input id="batchLimitInput" type="number" min="1" max="500" value="100" aria-label="&#23545;&#36134;&#20154;&#25968;">
+            <input id="batchChangeTypeInput" type="text" placeholder="&#21464;&#21160;&#31867;&#22411;" aria-label="&#21464;&#21160;&#31867;&#22411;">
+            <select id="acceptanceSampleSelect" aria-label="&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">
+                <option value="">&#25277;&#26597;&#26679;&#26412;</option>
+            </select>
+            <button id="loadAcceptanceSampleButton" type="button" title="&#36733;&#20837;&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">&#36733;&#20837;&#26679;&#26412;</button>
+            <button id="batchReconcileButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#25209;&#37327;&#23545;&#36134;</button>
+            <button id="normalGradeBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#25209;&#37327;&#26187;&#26723;</button>
+            <button id="exportBatchReconcileButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23548;&#20986;&#23545;&#36134;</button>
+            <button id="exportNormalGradeButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#23548;&#20986;&#26187;&#26723;</button>
+            <button id="refreshButton" type="button" title="&#21047;&#26032;&#24403;&#21069;&#25968;&#25454;">&#21047;&#26032;</button>
+        </div>
+    </header>
+
+    <div class="desktop-body">
+        <aside class="desktop-menu" aria-label="&#21151;&#33021;&#33756;&#21333;">
+            <div class="desktop-user">
+                <strong id="currentUserName">System User</strong>
+                <span id="currentUserMeta">&#31649;&#29702;&#21592;</span>
+                <div class="user-actions">
+                    <button id="changePasswordToggleButton" type="button">&#25913;&#23494;</button>
+                    <button id="logoutButton" type="button">&#36864;&#20986;</button>
+                </div>
+                <form id="changePasswordForm" class="password-form hidden">
+                    <input id="oldPasswordInput" name="oldPassword" type="password" placeholder="&#21407;&#23494;&#30721;" autocomplete="current-password" required>
+                    <input id="newPasswordInput" name="newPassword" type="password" placeholder="&#26032;&#23494;&#30721;" autocomplete="new-password" required>
+                    <div>
+                        <button id="savePasswordButton" type="submit">&#20445;&#23384;</button>
+                        <button id="cancelPasswordButton" type="button">&#21462;&#28040;</button>
+                    </div>
+                </form>
+            </div>
+            <nav id="menuTree" class="menu-tree"></nav>
+        </aside>
+
+        <main class="desktop-main">
+            <section id="workbenchView" class="workbench-view" aria-label="&#24037;&#20316;&#21488;">
+                <div class="workbench-header">
+                    <div>
+                        <h2>&#24037;&#20316;&#21488;</h2>
+                        <p>&#27719;&#24635;&#24453;&#21150;&#19994;&#21153;&#12289;&#24050;&#21150;&#19994;&#21153;&#21644;&#21487;&#21150;&#29702;&#30340;&#24037;&#36164;&#21464;&#21160;&#12290;</p>
+                    </div>
+                    <form id="workbenchFilterForm" class="workbench-tools">
+                        <input id="workbenchKeywordInput" type="search" placeholder="&#22995;&#21517;&#12289;&#32534;&#21495;&#12289;&#21333;&#20301;" autocomplete="off">
+                        <select id="workbenchChangeTypeSelect" aria-label="&#21464;&#21160;&#31867;&#22411;">
+                            <option value="">&#20840;&#37096;&#21464;&#21160;</option>
+                            <option value="&#27491;&#24120;&#32423;&#21035;">&#27491;&#24120;&#32423;&#21035;</option>
+                            <option value="&#27491;&#24120;&#26723;&#27425;">&#27491;&#24120;&#26723;&#27425;</option>
+                            <option value="&#32844;&#21153;&#21464;&#21270;">&#32844;&#21153;&#21464;&#21270;</option>
+                            <option value="&#23398;&#21382;&#21464;&#21270;">&#23398;&#21382;&#21464;&#21270;</option>
+                            <option value="&#32844;&#32423;&#22871;&#25913;">&#32844;&#32423;&#22871;&#25913;</option>
+                            <option value="&#32844;&#32423;&#26187;&#21319;">&#32844;&#32423;&#26187;&#21319;</option>
+                            <option value="&#35686;&#21592;&#22871;&#25913;">&#35686;&#21592;&#22871;&#25913;</option>
+                            <option value="&#35843;&#20837;&#23450;&#36164;">&#35843;&#20837;&#23450;&#36164;</option>
+                            <option value="&#36716;&#27491;&#23450;&#32423;">&#36716;&#27491;&#23450;&#32423;</option>
+                            <option value="2006&#22871;&#25913;">2006&#22871;&#25913;</option>
+                        </select>
+                        <select id="workbenchCaseStatusSelect" aria-label="&#24050;&#21150;&#29366;&#24577;">
+                            <option value="DONE">&#24050;&#21150;</option>
+                            <option value="CANCELLED">&#24050;&#25764;&#22238;</option>
+                            <option value="ALL">&#20840;&#37096;&#24050;&#21150;/&#25764;&#22238;</option>
+                        </select>
+                        <select id="workbenchTrialStatusSelect" aria-label="&#35797;&#31639;&#29366;&#24577;">
+                            <option value="">&#20840;&#37096;&#35797;&#31639;</option>
+                            <option value="MATCH">&#21305;&#37197;</option>
+                            <option value="DIFFERENT">&#26377;&#24046;&#24322;</option>
+                            <option value="ERROR">&#35797;&#31639;&#24322;&#24120;</option>
+                            <option value="SKIPPED">&#26410;&#35797;&#31639;</option>
+                        </select>
+                        <select id="workbenchReviewStatusSelect" aria-label="&#22797;&#26680;&#29366;&#24577;">
+                            <option value="">&#20840;&#37096;&#22797;&#26680;</option>
+                            <option value="PENDING">&#24453;&#22797;&#26680;</option>
+                            <option value="REVIEWED">&#24050;&#22797;&#26680;</option>
+                        </select>
+                        <button id="workbenchApplyFilterButton" type="submit">&#31579;&#36873;</button>
+                        <button id="refreshTodoCacheButton" type="button">&#21047;&#26032;&#24453;&#21150;&#32531;&#23384;</button>
+                        <button id="workbenchRefreshButton" type="button">&#21047;&#26032;</button>
+                        <button id="exportTodoButton" type="button">&#23548;&#20986;&#24453;&#21150;</button>
+                        <button id="exportDoneButton" type="button">&#23548;&#20986;&#24050;&#21150;</button>
+                    </form>
+                </div>
+                <div id="workbenchFilterSummary" class="workbench-filter-summary"></div>
+                <div id="workbenchMetrics" class="workbench-metrics"></div>
+                <div class="workbench-grid">
+                    <section class="workbench-panel">
+                        <div class="pane-title">
+                            <h2>&#24453;&#21150;&#19994;&#21153;</h2>
+                            <span id="todoCount">0</span>
+                        </div>
+                        <div id="todoWorkItems" class="work-item-list"></div>
+                        <button id="loadMoreTodoButton" class="load-more-button" type="button">&#21152;&#36733;&#26356;&#22810;</button>
+                    </section>
+                    <section class="workbench-panel">
+                        <div class="pane-title">
+                            <h2>&#24050;&#21150;&#19994;&#21153;</h2>
+                            <span id="doneCount">0</span>
+                        </div>
+                        <div id="doneWorkItems" class="work-item-list"></div>
+                        <button id="loadMoreDoneButton" class="load-more-button" type="button">&#21152;&#36733;&#26356;&#22810;</button>
+                    </section>
+                    <section class="workbench-panel history-plan-panel">
+                        <div class="pane-title">
+                            <h2>&#21382;&#21490;&#20889;&#20837;&#35745;&#21010;</h2>
+                            <div class="pane-actions">
+                                <select id="historyPlanStatusSelect" aria-label="&#20889;&#20837;&#35745;&#21010;&#29366;&#24577;">
+                                    <option value="">&#20840;&#37096;</option>
+                                    <option value="PREPARED">&#24453;&#25191;&#34892;</option>
+                                    <option value="EXECUTED">&#24050;&#20889;&#20837;</option>
+                                    <option value="ROLLED_BACK">&#24050;&#25764;&#38144;</option>
+                                    <option value="BLOCKED">&#24050;&#38459;&#26029;</option>
+                                </select>
+                                <select id="historyPlanComparisonSelect" aria-label="&#23545;&#29031;&#29366;&#24577;">
+                                    <option value="">&#20840;&#37096;&#23545;&#29031;</option>
+                                    <option value="NOT_WRITTEN">&#26410;&#20889;&#20837;</option>
+                                    <option value="MATCHED">&#24050;&#19968;&#33268;</option>
+                                    <option value="MISMATCHED">&#20889;&#20837;&#21518;&#19981;&#19968;&#33268;</option>
+                                    <option value="ROLLED_BACK">&#24050;&#22238;&#28378;</option>
+                                    <option value="BLOCKED">&#24050;&#38459;&#26029;</option>
+                                    <option value="UNKNOWN">&#26410;&#30693;</option>
+                                </select>
+                                <select id="historyPlanReviewSelect" aria-label="&#26680;&#26597;&#29366;&#24577;">
+                                    <option value="">&#20840;&#37096;&#26680;&#26597;</option>
+                                    <option value="PENDING">&#26410;&#26680;&#26597;</option>
+                                    <option value="REVIEWED">&#24050;&#26680;&#26597;</option>
+                                </select>
+                                <select id="historyPlanRetestSelect" aria-label="&#22797;&#27979;&#29366;&#24577;">
+                                    <option value="">&#20840;&#37096;&#22797;&#27979;</option>
+                                    <option value="NOT_RETESTED">&#26410;&#22797;&#27979;</option>
+                                    <option value="RETEST_MISMATCHED">&#22797;&#27979;&#20173;&#26377;&#24046;&#24322;</option>
+                                    <option value="RETEST_MATCHED">&#22797;&#27979;&#19968;&#33268;</option>
+                                </select>
+                                <select id="historyPlanMaintenanceSelect" aria-label="&#24314;&#35758;&#26816;&#26597;&#26041;&#21521;">
+                                    <option value="">&#20840;&#37096;&#24314;&#35758;</option>
+                                    <option value="base">&#22522;&#26412;&#20449;&#24687;</option>
+                                    <option value="post">&#20219;&#32844;</option>
+                                    <option value="education">&#23398;&#21382;</option>
+                                    <option value="assessment">&#32771;&#26680;</option>
+                                    <option value="standard">&#26631;&#20934;/&#27941;&#34917;&#36148;</option>
+                                    <option value="other">&#20854;&#20182;</option>
+                                </select>
+                                <select id="historyPlanPrioritySelect" aria-label="&#22788;&#29702;&#20248;&#20808;&#32423;">
+                                    <option value="">&#20840;&#37096;&#20248;&#20808;&#32423;</option>
+                                    <option value="HIGH">&#39640;&#20248;&#20808;&#32423;</option>
+                                    <option value="MEDIUM">&#20013;&#20248;&#20808;&#32423;</option>
+                                    <option value="DONE">&#24050;&#23436;&#25104;</option>
+                                </select>
+                                <select id="historyPlanActionSelect" aria-label="&#19979;&#19968;&#27493;&#21160;&#20316;">
+                                    <option value="">&#20840;&#37096;&#21160;&#20316;</option>
+                                    <option value="RETEST_FIRST">&#25353;&#24403;&#21069;&#22522;&#30784;&#22797;&#27979;</option>
+                                    <option value="MAINTAIN_AND_RETEST">&#32500;&#25252;&#21518;&#22797;&#27979;</option>
+                                    <option value="APPROVE_RETEST">&#26631;&#35760;&#22797;&#27979;&#36890;&#36807;</option>
+                                    <option value="REVIEWED">&#24050;&#26680;&#26597;</option>
+                                    <option value="NOT_REQUIRED">&#26080;&#38656;&#26680;&#26597;</option>
+                                </select>
+                                <button id="historyPlanRefreshButton" type="button">&#21047;&#26032;</button>
+                                <button id="historyPlanClearFiltersButton" type="button">&#28165;&#38500;&#31579;&#36873;</button>
+                                <button id="historyPlanBatchPreviewButton" type="button">&#25209;&#37327;&#39044;&#26816;</button>
+                                <button id="historyPlanBatchRetestButton" type="button">&#25209;&#37327;&#22797;&#27979;</button>
+                                <button id="historyPlanBatchRetestApproveButton" type="button">&#25209;&#37327;&#22797;&#27979;&#36890;&#36807;</button>
+                                <button id="historyPlanBatchExecuteButton" type="button">&#25209;&#37327;&#20889;&#20837;</button>
+                                <button id="historyPlanBatchRollbackButton" type="button">&#25209;&#37327;&#25764;&#38144;</button>
+                                <button id="historyPlanExportButton" type="button">&#23548;&#20986;</button>
+                            </div>
+                        </div>
+                        <div id="historyPlanSummary" class="history-plan-summary"></div>
+                        <div id="historyReviewLedger" class="history-review-ledger"></div>
+                        <div id="historyWritePlans" class="history-plan-list"></div>
+                    </section>
+                </div>
+            </section>
+
+            <section id="systemView" class="system-view hidden" aria-label="&#31995;&#32479;&#31649;&#29702;">
+                <div class="system-header">
+                    <div>
+                        <h2 id="systemViewTitle">&#31995;&#32479;&#31649;&#29702;</h2>
+                        <p id="systemViewHint">&#26597;&#30475;&#33756;&#21333;&#12289;&#35282;&#33394;&#21644;&#29992;&#25143;&#30340;&#22522;&#30784;&#26435;&#38480;&#37197;&#32622;&#12290;</p>
+                    </div>
+                    <button id="systemRefreshButton" type="button">&#21047;&#26032;</button>
+                </div>
+                <div id="systemContent" class="system-content"></div>
+            </section>
+
+            <section id="salaryWorkspace" class="workspace hidden" aria-label="&#20154;&#21592;&#24037;&#36164;">
+        <aside class="org-pane" aria-label="&#21333;&#20301;&#32452;&#32455;&#26641;">
+            <div class="pane-title">
+                <h2>&#21333;&#20301;</h2>
+                <span id="orgCount">0</span>
+            </div>
+            <div id="orgTree" class="org-tree"></div>
+        </aside>
+
+        <section class="people-pane" aria-label="&#20154;&#21592;&#21015;&#34920;">
+            <div class="pane-title">
+                <h2>&#20154;&#21592;</h2>
+                <span id="peopleTotal">0</span>
+            </div>
+            <form id="searchForm" class="searchbar">
+                <input id="keywordInput" name="keyword" type="search" placeholder="&#22995;&#21517;&#12289;&#32534;&#21495;&#12289;&#21333;&#20301;" autocomplete="off">
+                <button type="submit">&#25628;&#32034;</button>
+            </form>
+            <div id="peopleList" class="people-list"></div>
+            <div class="pager">
+                <button id="prevPageButton" type="button">&#19978;&#19968;&#39029;</button>
+                <span id="pageText">&#31532; 1 &#39029;</span>
+                <button id="nextPageButton" type="button">&#19979;&#19968;&#39029;</button>
+            </div>
+        </section>
+
+        <section class="detail-pane" aria-label="&#20154;&#21592;&#35814;&#24773;">
+            <div id="emptyState" class="empty-state">
+                <h2>&#36873;&#25321;&#19968;&#21517;&#20154;&#21592;</h2>
+                <p>&#26597;&#30475;&#26723;&#26696;&#12289;&#24037;&#36164;&#21382;&#21490;&#21644;&#24037;&#36164;&#32452;&#25104;&#12290;</p>
+            </div>
+
+            <section class="config-band">
+                <div class="section-heading config-heading">
+                    <div>
+                        <h2>&#24037;&#36164;&#39033;&#30446;&#37197;&#32622;</h2>
+                        <p id="configHint">&#25353;&#20154;&#21592;&#31867;&#21035;&#26597;&#30475; fldgz &#30340;&#26377;&#25928;&#39033;&#30446;</p>
+                    </div>
+                    <div class="config-tools">
+                        <button id="civilConfigButton" type="button" data-category="01" data-dwsx="01">&#20844;&#21153;&#21592;</button>
+                        <button id="institutionConfigButton" type="button" data-category="10" data-dwsx="07">&#20107;&#19994;&#20154;&#21592;</button>
+                        <button id="allConfigButton" type="button">&#20840;&#37096;</button>
+                        <input id="configYearInput" type="number" min="2006" max="2099" value="2026" aria-label="&#24180;&#24230;">
+                    </div>
+                </div>
+                <div id="fieldConfigList" class="field-config-list"></div>
+                <form id="fieldConfigEditor" class="field-config-editor hidden">
+                    <div class="editor-title">
+                        <strong id="configEditorTitle">&#32534;&#36753;&#24037;&#36164;&#39033;</strong>
+                        <button id="cancelConfigEditButton" type="button">&#21462;&#28040;</button>
+                    </div>
+                    <div class="editor-grid">
+                        <label>
+                            <span>&#20844;&#21153;&#21592;&#26631;&#39064;</span>
+                            <input id="configFieldCapInput" type="text">
+                        </label>
+                        <label>
+                            <span>&#20107;&#19994;&#20154;&#21592;&#26631;&#39064;</span>
+                            <input id="configFieldCapsInput" type="text">
+                        </label>
+                        <label>
+                            <span>category</span>
+                            <select id="configCategoryInput">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="10">10</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>category6</span>
+                            <select id="configCategory6Input">
+                                <option value="00">00</option>
+                                <option value="01">01</option>
+                                <option value="10">10</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>sfsy</span>
+                            <input id="configActiveInput" type="text">
+                        </label>
+                        <label>
+                            <span>sfsy06</span>
+                            <input id="configActive2006Input" type="text">
+                        </label>
+                        <label>
+                            <span>sequence</span>
+                            <input id="configSequenceInput" type="number" min="0" max="9999">
+                        </label>
+                    </div>
+                    <div class="editor-actions">
+                        <button id="saveConfigButton" type="submit">&#20445;&#23384;&#37197;&#32622;</button>
+                    </div>
+                    <div class="config-audit">
+                        <strong>&#26368;&#36817;&#21464;&#26356;</strong>
+                        <div id="configAuditList" class="config-audit-list"></div>
+                    </div>
+                </form>
+            </section>
+
+            <div id="detailContent" class="detail-content hidden">
+                <div id="maintenanceReturnBar" class="maintenance-return-bar hidden"></div>
+                <section class="profile-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="personName">-</h2>
+                            <p id="personMeta">-</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="trialCalcButton" type="button">&#35797;&#31639;</button>
+                            <button id="reconcileButton" type="button">&#23545;&#36134;</button>
+                            <button id="timelineButton" type="button">&#26102;&#38388;&#32447;</button>
+                            <button id="generatedTimelineButton" type="button">&#24212;&#21457;&#32447;</button>
+                        </div>
+                    </div>
+                    <dl id="profileGrid" class="profile-grid"></dl>
+                </section>
+
+                <section class="person-base-info-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#20154;&#21592;&#22522;&#26412;&#20449;&#24687;</h2>
+                            <p>&#32500;&#25252; dryjbxx &#20013;&#24433;&#21709;&#24037;&#36164;&#25512;&#23548;&#30340;&#20154;&#21592;&#31867;&#21035;&#12289;&#21333;&#20301;&#24615;&#36136;&#12289;&#23703;&#20301;&#31867;&#21035;&#12289;&#21442;&#21152;&#24037;&#20316;&#21644;&#25945;&#25252;&#40836;&#20449;&#24687;&#12290;</p>
+                        </div>
+                    </div>
+                    <div id="baseStatusSummary" class="base-status-summary"></div>
+                    <form id="personBaseInfoForm" class="person-base-info-form">
+                        <input id="basePersonCategoryInput" type="text" placeholder="&#20154;&#21592;&#31867;&#21035;" aria-label="&#20154;&#21592;&#31867;&#21035;">
+                        <input id="baseOrganizationTypeInput" type="text" maxlength="2" placeholder="&#21333;&#20301;&#24615;&#36136;" aria-label="&#21333;&#20301;&#24615;&#36136;">
+                        <input id="basePostCategoryInput" type="text" placeholder="&#23703;&#20301;&#31867;&#21035;" aria-label="&#23703;&#20301;&#31867;&#21035;">
+                        <input id="baseWorkStartInput" type="text" placeholder="&#21442;&#24037; yyyy.MM" aria-label="&#21442;&#21152;&#24037;&#20316;&#24180;&#26376;">
+                        <input id="baseJoinOrgInput" type="text" placeholder="&#20837;&#21333;&#20301; yyyy.MM" aria-label="&#20837;&#21333;&#20301;&#24180;&#26376;">
+                        <input id="baseTeacherNurseStartInput" type="text" placeholder="&#25945;&#25252;&#40836; yyyy.MM" aria-label="&#25945;&#25252;&#40836;&#36215;&#31639;">
+                        <input id="baseTeacherNurseFixedInput" type="number" min="0" max="99" value="0" aria-label="&#25351;&#23450;&#25945;&#25252;&#40836;">
+                        <input id="baseEducationCodeInput" type="text" maxlength="2" placeholder="&#23398;&#21382;&#32534;&#30721;" aria-label="&#23398;&#21382;&#32534;&#30721;">
+                        <input id="baseEducationInput" type="text" placeholder="&#26368;&#39640;&#23398;&#21382;" aria-label="&#26368;&#39640;&#23398;&#21382;">
+                        <input id="baseRankCodeInput" type="text" maxlength="4" placeholder="&#32844;&#32423;&#32534;&#30721;" aria-label="&#32844;&#32423;&#32534;&#30721;">
+                        <input id="baseCurrentPostInput" type="text" placeholder="&#29616;&#20219;&#32844;&#21153;" aria-label="&#29616;&#20219;&#32844;&#21153;">
+                        <input id="basePostLevelInput" type="text" placeholder="&#32844;&#21153;&#23618;&#32423;" aria-label="&#32844;&#21153;&#23618;&#32423;">
+                        <input id="basePostStartInput" type="text" placeholder="&#20219;&#32844; yyyy.MM" aria-label="&#20219;&#32844;&#24180;&#26376;">
+                        <input id="baseInfoSummaryInput" type="text" placeholder="&#21464;&#26356;&#25688;&#35201;" aria-label="&#21464;&#26356;&#25688;&#35201;">
+                        <button id="saveBaseInfoButton" type="submit">&#20445;&#23384;</button>
+                    </form>
+                </section>
+
+                <section class="base-change-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#22522;&#30784;&#36164;&#26009;&#21464;&#26356;</h2>
+                            <p>&#30331;&#35760;&#24433;&#21709;&#24037;&#36164;&#24453;&#21150;&#25512;&#23548;&#30340;&#20219;&#32844;&#12289;&#23398;&#21382;&#12289;&#32771;&#26680;&#31561;&#22522;&#30784;&#20449;&#24687;&#21464;&#21270;&#12290;</p>
+                        </div>
+                    </div>
+                    <form id="baseChangeForm" class="base-change-form">
+                        <select id="baseChangeTypeInput" aria-label="&#21464;&#26356;&#31867;&#22411;">
+                            <option value="dryzwbh">&#20219;&#32844;&#20449;&#24687;</option>
+                            <option value="dxl">&#23398;&#21382;&#20449;&#24687;</option>
+                            <option value="dndkh">&#24180;&#24230;&#32771;&#26680;</option>
+                            <option value="dryjbxx">&#20154;&#21592;&#22522;&#26412;&#20449;&#24687;</option>
+                        </select>
+                        <input id="baseChangeYearInput" type="number" min="1900" max="2099" placeholder="&#24180;&#24230;" aria-label="&#21464;&#26356;&#24180;&#24230;">
+                        <input id="baseChangeMonthInput" type="number" min="1" max="12" placeholder="&#26376;&#20221;" aria-label="&#21464;&#26356;&#26376;&#20221;">
+                        <input id="baseChangeSourceIdInput" type="text" placeholder="&#26469;&#28304;ID" aria-label="&#26469;&#28304;ID">
+                        <input id="baseChangeSummaryInput" type="text" placeholder="&#21464;&#26356;&#25688;&#35201;" aria-label="&#21464;&#26356;&#25688;&#35201;" required>
+                        <button id="saveBaseChangeButton" type="submit">&#30331;&#35760;</button>
+                    </form>
+                    <div id="baseChangeList" class="base-change-list"></div>
+                </section>
+
+                <section class="person-post-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#20219;&#32844;&#20449;&#24687;</h2>
+                            <p>&#32500;&#25252; dryzwbh &#20219;&#32844;&#21464;&#21270;&#35760;&#24405;&#65292;&#20445;&#23384;&#21518;&#33258;&#21160;&#26631;&#35760;&#24037;&#36164;&#24453;&#21150;&#32531;&#23384;&#38656;&#21047;&#26032;&#12290;</p>
+                        </div>
+                        <button id="newPersonPostButton" type="button">&#26032;&#22686;</button>
+                    </div>
+                    <form id="personPostForm" class="person-post-form">
+                        <input id="personPostIdInput" type="hidden">
+                        <input id="personPostCodeInput" type="text" maxlength="4" placeholder="&#20219;&#32844;&#32534;&#30721;" aria-label="&#20219;&#32844;&#32534;&#30721;" required>
+                        <input id="personPostNameInput" type="text" placeholder="&#20219;&#32844;&#21517;&#31216;" aria-label="&#20219;&#32844;&#21517;&#31216;">
+                        <input id="personPostLevelInput" type="text" placeholder="&#32844;&#21153;&#23618;&#32423;" aria-label="&#32844;&#21153;&#23618;&#32423;">
+                        <input id="personPostStartInput" type="text" placeholder="yyyy.MM" aria-label="&#20219;&#32844;&#24180;&#26376;" required>
+                        <input id="personPostRankInput" type="text" maxlength="4" placeholder="&#32844;&#32423;&#32534;&#30721;" aria-label="&#32844;&#32423;&#32534;&#30721;">
+                        <input id="personPostCurrentCodeInput" type="text" maxlength="4" placeholder="&#29616;&#20219;&#32534;&#30721;" aria-label="&#29616;&#20219;&#32534;&#30721;">
+                        <input id="personPostExcludedYearsInput" type="number" min="0" max="99" value="0" aria-label="&#25187;&#20943;&#24180;&#38480;">
+                        <input id="personPostCurrentFlagInput" type="text" maxlength="1" placeholder="&#29616;&#20219;" aria-label="&#29616;&#20219;&#26631;&#24535;">
+                        <input id="personPostPayrollFlagInput" type="text" maxlength="7" placeholder="&#35745;&#31639;&#26631;&#24535;" aria-label="&#35745;&#31639;&#26631;&#24535;">
+                        <input id="personPostSummaryInput" type="text" placeholder="&#21464;&#26356;&#25688;&#35201;" aria-label="&#21464;&#26356;&#25688;&#35201;">
+                        <button id="savePersonPostButton" type="submit">&#20445;&#23384;</button>
+                        <button id="cancelPersonPostEditButton" type="button">&#21462;&#28040;</button>
+                    </form>
+                    <div id="personPostList" class="person-post-list"></div>
+                </section>
+
+                <section class="person-education-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#23398;&#21382;&#20449;&#24687;</h2>
+                            <p>&#32500;&#25252; dxl &#23398;&#21382;&#21464;&#21270;&#35760;&#24405;&#65292;&#23398;&#21382;&#31867;&#21035;&#20026;&#20854;&#20182;&#30340;&#35760;&#24405;&#19981;&#21442;&#19982;&#24037;&#36164;&#25512;&#23548;&#12290;</p>
+                        </div>
+                        <button id="newEducationButton" type="button">&#26032;&#22686;</button>
+                    </div>
+                    <form id="educationForm" class="education-form">
+                        <input id="educationIdInput" type="hidden">
+                        <input id="educationCodeInput" type="text" maxlength="2" placeholder="&#23398;&#21382;&#32534;&#30721;" aria-label="&#23398;&#21382;&#32534;&#30721;" required>
+                        <input id="educationNameInput" type="text" placeholder="&#23398;&#21382;&#21517;&#31216;" aria-label="&#23398;&#21382;&#21517;&#31216;">
+                        <input id="educationSchoolInput" type="text" placeholder="&#27605;&#19994;&#38498;&#26657;" aria-label="&#27605;&#19994;&#38498;&#26657;">
+                        <input id="educationEnrollInput" type="text" placeholder="&#20837;&#23398; yyyy.MM" aria-label="&#20837;&#23398;&#26102;&#38388;">
+                        <input id="educationGraduationInput" type="text" placeholder="&#27605;&#19994; yyyy.MM" aria-label="&#27605;&#19994;&#26102;&#38388;" required>
+                        <input id="educationYearsInput" type="number" min="0" max="20" value="0" aria-label="&#23398;&#21046;">
+                        <input id="educationTypeInput" type="text" placeholder="&#23398;&#21382;&#31867;&#21035;" aria-label="&#23398;&#21382;&#31867;&#21035;">
+                        <input id="educationNoteInput" type="text" maxlength="10" placeholder="&#22791;&#27880;" aria-label="&#22791;&#27880;">
+                        <input id="educationSummaryInput" type="text" placeholder="&#21464;&#26356;&#25688;&#35201;" aria-label="&#21464;&#26356;&#25688;&#35201;">
+                        <button id="saveEducationButton" type="submit">&#20445;&#23384;</button>
+                        <button id="cancelEducationEditButton" type="button">&#21462;&#28040;</button>
+                    </form>
+                    <div id="educationList" class="education-list"></div>
+                </section>
+
+                <section class="person-assessment-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#24180;&#24230;&#32771;&#26680;</h2>
+                            <p>&#32500;&#25252; dndkh &#24180;&#24230;&#32771;&#26680;&#32467;&#26524;&#65292;&#20248;&#31168;&#12289;&#31216;&#32844;&#12289;&#21512;&#26684;&#23558;&#21442;&#19982;&#27491;&#24120;&#26187;&#26723;&#21644;&#32423;&#21035;&#26187;&#21319;&#25512;&#23548;&#12290;</p>
+                        </div>
+                        <button id="newAssessmentButton" type="button">&#26032;&#22686;</button>
+                    </div>
+                    <form id="assessmentForm" class="assessment-form">
+                        <input id="assessmentIdInput" type="hidden">
+                        <input id="assessmentYearInput" type="text" maxlength="4" placeholder="&#24180;&#24230;" aria-label="&#32771;&#26680;&#24180;&#24230;" required>
+                        <select id="assessmentResultInput" aria-label="&#32771;&#26680;&#32467;&#26524;">
+                            <option value="&#20248;&#31168;">&#20248;&#31168;</option>
+                            <option value="&#31216;&#32844;">&#31216;&#32844;</option>
+                            <option value="&#21512;&#26684;">&#21512;&#26684;</option>
+                            <option value="&#26410;&#23450;&#31561;&#27425;">&#26410;&#23450;&#31561;&#27425;</option>
+                            <option value="&#19981;&#21512;&#26684;">&#19981;&#21512;&#26684;</option>
+                        </select>
+                        <input id="assessmentSummaryInput" type="text" placeholder="&#21464;&#26356;&#25688;&#35201;" aria-label="&#21464;&#26356;&#25688;&#35201;">
+                        <button id="saveAssessmentButton" type="submit">&#20445;&#23384;</button>
+                        <button id="cancelAssessmentEditButton" type="button">&#21462;&#28040;</button>
+                    </form>
+                    <div id="assessmentList" class="assessment-list"></div>
+                </section>
+
+                <section class="history-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2>&#24037;&#36164;&#21382;&#21490;</h2>
+                            <p id="historyHint">&#36873;&#25321;&#19968;&#26465;&#21382;&#21490;&#35760;&#24405;&#26597;&#30475;&#26126;&#32454;&#12290;</p>
+                        </div>
+                    </div>
+                    <div id="salaryHistory" class="history-list"></div>
+                </section>
+
+                <section class="salary-band">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="salaryTitle">&#24037;&#36164;&#26126;&#32454;</h2>
+                            <p id="salaryTotal">-</p>
+                        </div>
+                    </div>
+                    <div id="salaryDetails" class="salary-details"></div>
+                </section>
+            </div>
+        </section>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

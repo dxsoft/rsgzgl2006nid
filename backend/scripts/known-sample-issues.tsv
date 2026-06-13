@@ -1,0 +1,6 @@
+sampleSet	personCode	status	reason
+cross-type	107-00360	ERROR	deleted legacy row; no baseline before target month
+cross-type	107-00361	ERROR	deleted legacy row; no baseline before target month
+cross-type	107-00350	ERROR	deleted legacy row; no baseline before target month
+cross-type	045-00254	DIFF	manual JZMCBT/NZGWSF values retained in legacy target row
+normal-grade	002-00104	ERROR	forecast sample has no target-month legacy row

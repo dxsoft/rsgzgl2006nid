@@ -317,6 +317,8 @@ public class SalaryReportController {
                         updated_at = NOW()
                     """, reportCode, sampleKey, text(row.get("orgCode")), text(row.get("personCode")), text(row.get("period")),
                     safeReviewStatus, safeReviewCategory, safeReviewReason, username);
+            syncReportMigrationSampleGovernanceTask(reportCode, sampleKey, text(row.get("orgCode")), text(row.get("personCode")),
+                    text(row.get("personName")), text(row.get("period")), safeReviewStatus, safeReviewCategory, safeReviewReason);
             updated++;
         }
         String safeOrgCode = text(sampleResult.get("orgCode"));
@@ -380,6 +382,8 @@ public class SalaryReportController {
                     updated_at = NOW()
                 """, safeReportCode, safeSampleKey, safeOrgCode, text(personCode), text(period),
                 safeReviewStatus, safeReviewCategory, safeReviewReason, username);
+        syncReportMigrationSampleGovernanceTask(safeReportCode, safeSampleKey, safeOrgCode, text(personCode), "", text(period),
+                safeReviewStatus, safeReviewCategory, safeReviewReason);
         systemAuditService.record("report", "report-migration-sample-comparison-review", "REPORT_MIGRATION_SAMPLE_COMPARISON", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
                 reportAuditSummary(
                         auditPart("reportCode", safeReportCode),
@@ -5875,6 +5879,145 @@ public class SalaryReportController {
                 """);
     }
 
+    private void syncReportMigrationSampleGovernanceTask(
+            String reportCode,
+            String sampleKey,
+            String orgCode,
+            String personCode,
+            String personName,
+            String period,
+            String reviewStatus,
+            String reviewCategory,
+            String reviewReason
+    ) {
+        ensureSalaryTodoCandidateCacheTable();
+        String workItemId = reportMigrationSampleGovernanceWorkItemId(reportCode, sampleKey, orgCode, period);
+        String safeStatus = text(reviewStatus);
+        if (!Set.of("MISMATCHED", "SPECIAL").contains(safeStatus)) {
+            jdbcTemplate.update("DELETE FROM salary_todo_candidate_cache WHERE work_item_id = ?", workItemId);
+            markSalaryTodoCacheDirty();
+            return;
+        }
+        int[] eventPeriod = reportMigrationSampleEventPeriod(period);
+        String safePersonCode = text(personCode);
+        String safeOrgCode = text(orgCode);
+        jdbcTemplate.update("""
+                INSERT INTO salary_todo_candidate_cache(work_item_id, source, source_id, person_code, org_code,
+                                                        person_no, person_name, event_year, event_month, change_type, note)
+                VALUES (?, 'REPORT_SAMPLE_COMPARISON', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    source = VALUES(source),
+                    source_id = VALUES(source_id),
+                    person_code = VALUES(person_code),
+                    org_code = VALUES(org_code),
+                    person_no = VALUES(person_no),
+                    person_name = VALUES(person_name),
+                    event_year = VALUES(event_year),
+                    event_month = VALUES(event_month),
+                    change_type = VALUES(change_type),
+                    note = VALUES(note),
+                    generated_at = CURRENT_TIMESTAMP
+                """,
+                workItemId,
+                text(reportCode) + ":" + text(sampleKey),
+                safePersonCode,
+                safeOrgCode,
+                personNoFromCode(safePersonCode),
+                text(personName),
+                eventPeriod[0],
+                eventPeriod[1],
+                "报表样本对照复核",
+                left("报表样本对照" + safeStatus + " " + text(reportCode) + " " + text(sampleKey)
+                        + (text(reviewCategory).isBlank() ? "" : " " + text(reviewCategory))
+                        + (text(reviewReason).isBlank() ? "" : " " + text(reviewReason)), 1000));
+        markSalaryTodoCacheDirty();
+        systemAuditService.record("report", "report-migration-sample-governance-task-sync", "SALARY_TODO", workItemId,
+                reportAuditSummary(
+                        auditPart("reportCode", reportCode),
+                        auditPart("sampleKey", sampleKey),
+                        auditPart("status", safeStatus),
+                        auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode)
+                ));
+    }
+
+    private String reportMigrationSampleGovernanceWorkItemId(String reportCode, String sampleKey, String orgCode, String period) {
+        return "report-sample-comparison-"
+                + reportMigrationGovernanceKeyPart(reportCode)
+                + "-"
+                + reportMigrationGovernanceKeyPart(orgCode)
+                + "-"
+                + reportMigrationGovernanceKeyPart(period)
+                + "-"
+                + reportMigrationGovernanceKeyPart(sampleKey);
+    }
+
+    private String reportMigrationGovernanceKeyPart(String value) {
+        String safe = text(value).toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9\\u4e00-\\u9fa5]+", "-");
+        safe = safe.replaceAll("^-+", "").replaceAll("-+$", "");
+        return safe.isBlank() ? "all" : left(safe, 80);
+    }
+
+    private int[] reportMigrationSampleEventPeriod(String period) {
+        String safePeriod = text(period);
+        LocalDateTime now = LocalDateTime.now();
+        if (safePeriod.matches("^\\d{4}-\\d{1,2}$")) {
+            String[] parts = safePeriod.split("-", 2);
+            return new int[]{Math.max(1900, Math.min(Integer.parseInt(parts[0]), 2099)),
+                    Math.max(1, Math.min(Integer.parseInt(parts[1]), 12))};
+        }
+        if (safePeriod.matches("^\\d{4}$")) {
+            return new int[]{Math.max(1900, Math.min(Integer.parseInt(safePeriod), 2099)), 1};
+        }
+        return new int[]{now.getYear(), now.getMonthValue()};
+    }
+
+    private String personNoFromCode(String personCode) {
+        String safePersonCode = text(personCode);
+        int index = safePersonCode.indexOf('-');
+        return index >= 0 && index + 1 < safePersonCode.length() ? safePersonCode.substring(index + 1) : safePersonCode;
+    }
+
+    private void ensureSalaryTodoCandidateCacheTable() {
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS salary_todo_candidate_cache (
+                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                    work_item_id VARCHAR(255) NOT NULL,
+                    source VARCHAR(64) NOT NULL,
+                    source_id VARCHAR(128) NULL,
+                    person_code VARCHAR(128) NOT NULL,
+                    org_code VARCHAR(64) NOT NULL,
+                    person_no VARCHAR(64) NULL,
+                    person_name VARCHAR(128) NULL,
+                    event_year INT NOT NULL,
+                    event_month INT NOT NULL,
+                    change_type VARCHAR(128) NOT NULL,
+                    note VARCHAR(1024) NULL,
+                    generated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uk_salary_todo_cache_work_item (work_item_id),
+                    KEY idx_salary_todo_cache_org_period (org_code, event_year, event_month),
+                    KEY idx_salary_todo_cache_change (change_type),
+                    KEY idx_salary_todo_cache_person (person_code)
+                )
+                """);
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS salary_todo_cache_meta (
+                    cache_key VARCHAR(64) PRIMARY KEY,
+                    last_refreshed_at DATETIME NOT NULL,
+                    total_count BIGINT NOT NULL DEFAULT 0,
+                    cache_status VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+                    dirty_at DATETIME NULL
+                )
+                """);
+    }
+
+    private void markSalaryTodoCacheDirty() {
+        jdbcTemplate.update("""
+                REPLACE INTO salary_todo_cache_meta(cache_key, last_refreshed_at, total_count, cache_status, dirty_at)
+                SELECT 'TODO', NOW(), COUNT(*), 'DIRTY', NOW()
+                FROM salary_todo_candidate_cache
+                """);
+    }
+
     private String normalizeReportMigrationSampleReviewStatus(String status) {
         String safeStatus = text(status).toUpperCase(Locale.ROOT);
         if (safeStatus.isBlank()) {
@@ -7145,6 +7288,14 @@ public class SalaryReportController {
 
     private String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private String left(String value, int maxLength) {
+        String safeValue = text(value);
+        if (maxLength <= 0 || safeValue.length() <= maxLength) {
+            return safeValue;
+        }
+        return safeValue.substring(0, maxLength);
     }
 
     private String normalizeDateTime(String value) {

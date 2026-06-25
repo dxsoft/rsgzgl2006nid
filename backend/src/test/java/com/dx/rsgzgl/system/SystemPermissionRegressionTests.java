@@ -1850,6 +1850,7 @@ class SystemPermissionRegressionTests {
                 )
                 """);
         jdbcTemplate.update("DELETE FROM salary_report_migration_sample_review WHERE sample_key = ?", caseNo);
+        jdbcTemplate.update("DELETE FROM salary_todo_candidate_cache WHERE work_item_id LIKE 'report-sample-comparison-%'");
         mockMvc.perform(get("/api/workbench/items?status=DONE&workflowStatus=HISTORY_CLOSED&keyword=History Write&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
                 .andExpect(status().isOk())
@@ -2264,13 +2265,32 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"legacyComparisonStatus\":\"MATCHED\"")))
                 .andExpect(content().string(containsString(caseNo)));
 
+        mockMvc.perform(post("/api/reports/migration-sample-comparison/review")
+                        .param("reportCode", "approvalBatch")
+                        .param("sampleKey", caseNo)
+                        .param("orgCode", "001")
+                        .param("personCode", "001-00055")
+                        .param("period", "2099-01")
+                        .param("reviewStatus", "SPECIAL")
+                        .param("reviewCategory", "LEGACY_SPECIAL")
+                        .param("reviewReason", "unit-test report sample special")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"reviewStatus\":\"SPECIAL\"")));
+
+        mockMvc.perform(get("/api/workbench/items?status=TODO&keyword=unit-test report sample special&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"source\":\"REPORT_SAMPLE_COMPARISON\"")))
+                .andExpect(content().string(containsString("report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write")));
+
         mockMvc.perform(post("/api/reports/migration-sample-comparison/batch-review")
                         .param("orgCode", "001")
                         .param("year", "2099")
                         .param("month", "1")
                         .param("keyword", "UT-PRINT-" + caseNo)
                         .param("personCode", "001-00055")
-                        .param("reviewStatus", "MATCHED")
+                        .param("reviewStatus", "SPECIAL")
                         .param("batchReviewStatus", "MATCHED")
                         .param("reviewCategory", "OTHER")
                         .param("reviewReason", "unit-test batch report sample matched")
@@ -2280,17 +2300,28 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"reviewStatus\":\"MATCHED\"")))
                 .andExpect(content().string(containsString("\"rows\":")));
 
+        mockMvc.perform(get("/api/workbench/items?status=TODO&keyword=unit-test report sample special&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write"))));
+
         mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-comparison-review&targetCode=001&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-review\"")))
-                .andExpect(content().string(containsString("status=MATCHED")));
+                .andExpect(content().string(containsString("status=SPECIAL")));
 
         mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-comparison-batch-review&targetCode=001&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-batch-review\"")))
                 .andExpect(content().string(containsString("rows=")));
+
+        mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-governance-task-sync&targetCode=report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-governance-task-sync\"")))
+                .andExpect(content().string(containsString("status=SPECIAL")));
 
         var reportMigrationDeliveryPackage = mockMvc.perform(get("/api/reports/migration-delivery-package.zip?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))

@@ -223,6 +223,51 @@ public class SalaryReportController {
         return csvResponse("salary-report-migration-sample-evidence-" + suffix + ".csv", csv);
     }
 
+    @GetMapping("/migration-sample-comparison")
+    public ApiResponse<Map<String, Object>> reportMigrationSampleComparison(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        return ApiResponse.ok(result);
+    }
+
+    @GetMapping(value = "/migration-sample-comparison.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> reportMigrationSampleComparisonCsv(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        String csv = reportMigrationSampleComparisonCsvContent(result);
+        String safeOrgCode = text(result.get("orgCode"));
+        systemAuditService.record("report", "report-migration-sample-comparison-csv", "REPORT_MIGRATION_SAMPLE_COMPARISON", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
+                reportAuditSummary(
+                        auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
+                        auditPart("period", result.get("period")),
+                        auditPart("status", result.get("status")),
+                        auditPart("rows", result.get("rows")),
+                        auditPart("legacyPending", result.get("legacyPending"))
+                ));
+        String suffix = safeOrgCode.isBlank() ? "all" : safeOrgCode;
+        return csvResponse("salary-report-migration-sample-comparison-" + suffix + ".csv", csv);
+    }
+
     @GetMapping(value = "/migration-guide.csv", produces = "text/csv")
     public ResponseEntity<byte[]> reportMigrationGuideCsv() {
         requireReportPermission();
@@ -253,34 +298,37 @@ public class SalaryReportController {
                 Summary:
                 - orgCode: %s
                 - status: %s
-                - fileCount: 10
+                - fileCount: 11
                 Files:
                 - salary-report-catalog.csv
                 - salary-report-migration-matrix.csv
                 - salary-report-migration-acceptance-checklist-%s.csv
                 - salary-report-migration-sample-evidence-%s.csv
+                - salary-report-migration-sample-comparison-%s.csv
                 - salary-report-migration-guide.csv
                 - salary-report-migration-closure-%s.csv
                 - salary-report-print-self-check-%s.csv
                 - delivery-package-meta.csv
                 - delivery-package-audits.csv
                 GeneratedAt: %s
-                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, suffix, suffix, LocalDateTime.now().withNano(0)));
+                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, suffix, suffix, suffix, LocalDateTime.now().withNano(0)));
         entries.put("salary-report-catalog.csv", reportCatalogCsvContent());
         entries.put("salary-report-migration-matrix.csv", reportMigrationMatrixCsvContent());
         entries.put("salary-report-migration-acceptance-checklist-" + suffix + ".csv",
                 reportMigrationAcceptanceChecklistCsvContent(reportMigrationAcceptanceChecklistResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, limit)));
         entries.put("salary-report-migration-sample-evidence-" + suffix + ".csv",
                 reportMigrationSampleEvidenceCsvContent(reportMigrationSampleEvidenceResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, Math.min(limit, 20))));
+        entries.put("salary-report-migration-sample-comparison-" + suffix + ".csv",
+                reportMigrationSampleComparisonCsvContent(reportMigrationSampleComparisonResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, Math.min(limit, 20))));
         entries.put("salary-report-migration-guide.csv", reportMigrationGuideCsvContent());
         entries.put("salary-report-migration-closure-" + suffix + ".csv", reportMigrationClosureCsvContent(result));
         entries.put("salary-report-print-self-check-" + suffix + ".csv", reportPrintSelfCheckCsvContent(result));
-        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 10));
+        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 11));
         systemAuditService.record("report", "report-migration-delivery-package", "REPORT_MIGRATION_DELIVERY", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
                 reportAuditSummary(
                         auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
                         auditPart("status", result.get("status")),
-                        auditPart("files", 10)
+                        auditPart("files", 11)
                 ));
         entries.put("delivery-package-audits.csv", reportMigrationDeliveryAuditsCsv(safeOrgCode.isBlank() ? "ALL" : safeOrgCode));
         return ResponseEntity.ok()
@@ -730,6 +778,123 @@ public class SalaryReportController {
                     row.get("sourceTable"),
                     row.get("printUrl"),
                     row.get("csvUrl"),
+                    row.get("note"));
+        }
+        return csv.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> reportMigrationSampleComparisonResult(
+            String orgCode,
+            int year,
+            int month,
+            String businessType,
+            String keyword,
+            String personCode,
+            int yearFrom,
+            int yearTo,
+            int limit
+    ) {
+        Map<String, Object> evidence = reportMigrationSampleEvidenceResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        List<Map<String, Object>> evidenceRows = (List<Map<String, Object>>) evidence.getOrDefault("items", List.of());
+        List<Map<String, Object>> rows = evidenceRows.stream()
+                .map(this::reportMigrationSampleComparisonRow)
+                .toList();
+        long pass = rows.stream().filter(row -> "PASS".equals(text(row.get("evidenceStatus")))).count();
+        long warn = rows.stream().filter(row -> "WARN".equals(text(row.get("evidenceStatus")))).count();
+        long todo = rows.stream().filter(row -> "TODO".equals(text(row.get("evidenceStatus")))).count();
+        String status = todo > 0 ? "TODO" : (warn > 0 ? "WARN" : "READY");
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", rows.isEmpty() ? "TODO" : status);
+        result.put("orgCode", evidence.get("orgCode"));
+        result.put("year", evidence.get("year"));
+        result.put("month", evidence.get("month"));
+        result.put("period", evidence.get("period"));
+        result.put("yearFrom", evidence.get("yearFrom"));
+        result.put("yearTo", evidence.get("yearTo"));
+        result.put("businessType", evidence.get("businessType"));
+        result.put("keyword", evidence.get("keyword"));
+        result.put("personCode", evidence.get("personCode"));
+        result.put("limit", evidence.get("limit"));
+        result.put("rows", rows.size());
+        result.put("pass", pass);
+        result.put("warn", warn);
+        result.put("todo", rows.isEmpty() ? 1 : todo);
+        result.put("legacyPending", rows.size());
+        result.put("items", rows);
+        result.put("checkedAt", LocalDateTime.now().withNano(0).toString());
+        return result;
+    }
+
+    private Map<String, Object> reportMigrationSampleComparisonRow(Map<String, Object> evidence) {
+        boolean hasSample = !text(evidence.get("sampleKey")).isBlank();
+        boolean hasSource = !text(evidence.get("sourceTable")).isBlank();
+        boolean hasPrint = !text(evidence.get("printUrl")).isBlank();
+        boolean hasCsv = !text(evidence.get("csvUrl")).isBlank();
+        String evidenceStatus = hasSample && hasSource && hasPrint ? (hasCsv ? "PASS" : "WARN") : "TODO";
+        String conclusion;
+        String nextAction;
+        if ("PASS".equals(evidenceStatus)) {
+            conclusion = "新系统样本证据、打印入口和导出入口已具备，待与旧系统同样本输出核对。";
+            nextAction = "提取旧系统同人员/同期间打印件，核对字段、金额、排序和版式。";
+        } else if ("WARN".equals(evidenceStatus)) {
+            conclusion = "新系统样本证据和打印入口已具备，当前报表没有独立CSV导出入口。";
+            nextAction = "优先进行打印件版式核对，确需明细导出时再补CSV入口。";
+        } else {
+            conclusion = "样本证据不完整，暂不能作为迁移对照样本。";
+            nextAction = "补齐基础数据、样本来源或报表入口后重新生成对照表。";
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("reportCode", evidence.get("reportCode"));
+        result.put("sampleKey", evidence.get("sampleKey"));
+        result.put("personCode", evidence.get("personCode"));
+        result.put("personName", evidence.get("personName"));
+        result.put("orgCode", evidence.get("orgCode"));
+        result.put("period", evidence.get("period"));
+        result.put("sourceTable", evidence.get("sourceTable"));
+        result.put("printUrl", evidence.get("printUrl"));
+        result.put("csvUrl", evidence.get("csvUrl"));
+        result.put("evidenceStatus", evidenceStatus);
+        result.put("legacyComparisonStatus", "PENDING_LEGACY");
+        result.put("comparisonConclusion", conclusion);
+        result.put("nextAction", nextAction);
+        result.put("note", evidence.get("note"));
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String reportMigrationSampleComparisonCsvContent(Map<String, Object> result) {
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) result.getOrDefault("items", List.of());
+        StringBuilder csv = new StringBuilder();
+        csvRow(csv, "filter", "status", result.get("status"));
+        csvRow(csv, "filter", "orgCode", text(result.get("orgCode")).isBlank() ? "ALL" : result.get("orgCode"));
+        csvRow(csv, "filter", "period", result.get("period"));
+        csvRow(csv, "filter", "yearRange", result.get("yearFrom") + "-" + result.get("yearTo"));
+        csvRow(csv, "filter", "businessType", text(result.get("businessType")).isBlank() ? "ALL" : result.get("businessType"));
+        csvRow(csv, "filter", "keyword", text(result.get("keyword")).isBlank() ? "ALL" : result.get("keyword"));
+        csvRow(csv, "filter", "personCode", text(result.get("personCode")).isBlank() ? "ALL" : result.get("personCode"));
+        csvRow(csv, "filter", "pass", result.get("pass"));
+        csvRow(csv, "filter", "warn", result.get("warn"));
+        csvRow(csv, "filter", "todo", result.get("todo"));
+        csvRow(csv, "filter", "legacyPending", result.get("legacyPending"));
+        csvRow(csv, "filter", "checkedAt", result.get("checkedAt"));
+        csv.append('\n');
+        csvRow(csv, "reportCode", "sampleKey", "personCode", "personName", "orgCode", "period", "sourceTable", "evidenceStatus", "legacyComparisonStatus", "printUrl", "csvUrl", "comparisonConclusion", "nextAction", "note");
+        for (Map<String, Object> row : rows) {
+            csvRow(csv,
+                    row.get("reportCode"),
+                    row.get("sampleKey"),
+                    row.get("personCode"),
+                    row.get("personName"),
+                    row.get("orgCode"),
+                    row.get("period"),
+                    row.get("sourceTable"),
+                    row.get("evidenceStatus"),
+                    row.get("legacyComparisonStatus"),
+                    row.get("printUrl"),
+                    row.get("csvUrl"),
+                    row.get("comparisonConclusion"),
+                    row.get("nextAction"),
                     row.get("note"));
         }
         return csv.toString();

@@ -1031,6 +1031,7 @@ const Format = {
             "report-migration-matrix-csv": "\u5bfc\u51fa\u62a5\u8868\u8fc1\u79fb\u77e9\u9635",
             "report-migration-acceptance-checklist-csv": "\u5bfc\u51fa\u62a5\u8868\u9a8c\u6536\u6e05\u5355",
             "report-migration-sample-evidence-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e",
+            "report-migration-sample-comparison-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167",
             "report-migration-guide-csv": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e",
             "report-migration-delivery-package": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305",
             "salary-case-approval-roster-print": "\u6253\u5370\u5ba1\u6279\u6e05\u518c",
@@ -3216,6 +3217,21 @@ const WorkbenchPanel = {
             limit: Math.min(Number(values.limit || 5), 50)
         }).toString()}`;
     },
+    reportMigrationSampleComparisonUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-sample-comparison${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            limit: Math.min(Number(values.limit || 5), 50)
+        }).toString()}`;
+    },
     reportCenterShowMessage(html, warning = false) {
         const root = els.migrationToolResult?.querySelector("[data-report-center]");
         const previewNode = root?.querySelector("[data-report-preview-result]");
@@ -3322,6 +3338,41 @@ const WorkbenchPanel = {
                 </div>
             `;
             setStatus(`\u62a5\u8868\u6837\u672c\u8bc1\u636e\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportMigrationSampleComparison() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u6837\u672c\u5bf9\u7167...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationSampleComparisonUrl("json"));
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span class="${result.status === "READY" ? "" : "warning"}">\u5bf9\u7167 ${Format.html(result.status || "-")}</span>
+                    <span>PASS ${Format.html(result.pass || 0)}</span>
+                    <span>WARN ${Format.html(result.warn || 0)}</span>
+                    <span>TODO ${Format.html(result.todo || 0)}</span>
+                    <span>\u65e7\u7cfb\u7edf\u5f85\u6838 ${Format.html(result.legacyPending || 0)}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.slice(0, 40).map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.reportCode || "-")} | ${Format.html(item.sampleKey || "-")}</strong>
+                            <span>${Format.html(item.evidenceStatus || "-")} | ${Format.html(item.legacyComparisonStatus || "-")} | ${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")}</span>
+                            <small>${Format.html(item.comparisonConclusion || "-")}</small>
+                            <em>${Format.html(item.nextAction || "-")}</em>
+                        </div>
+                    `).join("") || `<span class="warning">\u5f53\u524d\u8303\u56f4\u672a\u751f\u6210\u6837\u672c\u5bf9\u7167</span>`}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
         } catch (error) {
             previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
             setStatus(error.message);
@@ -3755,6 +3806,8 @@ const WorkbenchPanel = {
                     <button type="button" data-report-acceptance-checklist-export>\u5bfc\u51fa\u9a8c\u6536\u6e05\u5355</button>
                     <button type="button" data-report-sample-evidence>\u6837\u672c\u8bc1\u636e</button>
                     <button type="button" data-report-sample-evidence-export>\u5bfc\u51fa\u6837\u672c\u8bc1\u636e</button>
+                    <button type="button" data-report-sample-comparison>\u6837\u672c\u5bf9\u7167</button>
+                    <button type="button" data-report-sample-comparison-export>\u5bfc\u51fa\u6837\u672c\u5bf9\u7167</button>
                     <button type="button" data-report-migration-guide-export>\u5bfc\u51fa\u8fc1\u79fb\u8bf4\u660e</button>
                     <button type="button" data-report-migration-delivery-package>\u5bfc\u51fa\u4ea4\u4ed8\u5305</button>
                     <button type="button" data-report-batch-export-audits data-audit-action="report-migration-delivery-package">\u67e5\u770b\u4ea4\u4ed8\u5305\u5ba1\u8ba1</button>
@@ -3858,6 +3911,7 @@ const WorkbenchPanel = {
                             <button type="button" class="link-button" data-report-migration-matrix>\u8fc1\u79fb\u77e9\u9635</button>
                             <button type="button" class="link-button" data-report-acceptance-checklist>\u9a8c\u6536\u6e05\u5355</button>
                             <button type="button" class="link-button" data-report-sample-evidence>\u6837\u672c\u8bc1\u636e</button>
+                            <button type="button" class="link-button" data-report-sample-comparison>\u6837\u672c\u5bf9\u7167</button>
                             <button type="button" class="link-button" data-report-migration-delivery-package>\u4ea4\u4ed8\u5305</button>
                             <button type="button" class="link-button" data-report-print-self-check>\u6253\u5370\u81ea\u68c0</button>
                             <button type="button" class="link-button" data-report-closure-view>\u95ed\u73af\u603b\u89c8</button>
@@ -3905,6 +3959,8 @@ const WorkbenchPanel = {
                                 ${auditActionOption("report-print-batch-acceptance-package", "\u5bfc\u51fa\u6279\u6b21\u9a8c\u6536\u5305")}
                                 ${auditActionOption("report-print-batch-acceptance-package-bulk", "\u6279\u91cf\u5bfc\u51fa\u9a8c\u6536\u5305")}
                                 ${auditActionOption("report-print-self-check-csv", "\u5bfc\u51fa\u6253\u5370\u81ea\u68c0\u9a8c\u6536\u5355")}
+                                ${auditActionOption("report-migration-sample-evidence-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e")}
+                                ${auditActionOption("report-migration-sample-comparison-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
                                 ${auditActionOption("report-migration-delivery-package", "\u5bfc\u51fa\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305")}
                                 ${auditActionOption("salary-migration-delivery-package", "\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305")}
                             </select></label>
@@ -3939,7 +3995,7 @@ const WorkbenchPanel = {
                         ${actionGroup("\u5ba1\u6279\u6253\u5370", "\u5ba1\u6279\u6e05\u518c\u3001\u6279\u91cf\u5ba1\u6279\u8868\u548c\u5199\u5165\u524d\u5f52\u6863", `${actionButton("approvalRoster", "print", "\u6253\u5370\u5ba1\u6279\u6e05\u518c")}${actionButton("approvalRoster", "csv", "\u5bfc\u51fa\u5ba1\u6279\u6e05\u518cCSV")}${actionButton("approvalBatch", "print", "\u6279\u91cf\u6253\u5370\u5ba1\u6279\u8868")}`)}
                         ${actionGroup("\u5de5\u8d44\u540d\u518c", "\u4eba\u5458\u82b1\u540d\u518c\u3001\u5de5\u8d44\u8868\u53ca\u81ea\u5b9a\u4e49\u5de5\u8d44\u5217", `${actionButton("personRoster", "print", "\u6253\u5370\u82b1\u540d\u518c")}${actionButton("personRoster", "csv", "\u5bfc\u51fa\u82b1\u540d\u518cCSV")}${actionButton("salaryRoster", "print", "\u6253\u5370\u5de5\u8d44\u8868")}${actionButton("salaryRoster", "csv", "\u5bfc\u51fa\u5de5\u8d44\u8868CSV")}`)}
                         ${actionGroup("\u5386\u53f2\u548c\u53f0\u8d26", "\u5de5\u8d44\u53d8\u52a8\u53f0\u8d26\u3001\u4e2a\u4eba\u5386\u53f2\u660e\u7ec6\u548c\u8ffd\u6eaf", `${actionButton("changeLedger", "print", "\u6253\u5370\u53d8\u52a8\u53f0\u8d26")}${actionButton("changeLedger", "csv", "\u5bfc\u51fa\u53d8\u52a8\u53f0\u8d26CSV")}${actionButton("salaryHistory", "print", "\u6253\u5370\u5386\u53f2\u660e\u7ec6")}${actionButton("salaryHistory", "csv", "\u5bfc\u51fa\u5386\u53f2\u660e\u7ec6CSV")}`)}
-                        ${actionGroup("\u7edf\u8ba1/\u6807\u51c6/\u5ba1\u8ba1", "\u8003\u6838\u7edf\u8ba1\u3001\u6807\u51c6\u8868\u6838\u5bf9\u548c\u64cd\u4f5c\u5ba1\u8ba1", `${actionButton("assessment", "print", "\u6253\u5370\u8003\u6838\u7edf\u8ba1")}${actionButton("standardTable", "print", "\u6253\u5370\u6807\u51c6\u8868", false)}${actionButton("reportAudit", "csv", "\u5bfc\u51fa\u64cd\u4f5c\u5ba1\u8ba1CSV", false)}<button type="button" class="link-button" data-report-catalog-export>\u5bfc\u51fa\u62a5\u8868\u76ee\u5f55</button><button type="button" class="link-button" data-report-migration-matrix-export>\u5bfc\u51fa\u8fc1\u79fb\u77e9\u9635</button><button type="button" class="link-button" data-report-acceptance-checklist-export>\u5bfc\u51fa\u9a8c\u6536\u6e05\u5355</button><button type="button" class="link-button" data-report-sample-evidence-export>\u5bfc\u51fa\u6837\u672c\u8bc1\u636e</button>`)}
+                        ${actionGroup("\u7edf\u8ba1/\u6807\u51c6/\u5ba1\u8ba1", "\u8003\u6838\u7edf\u8ba1\u3001\u6807\u51c6\u8868\u6838\u5bf9\u548c\u64cd\u4f5c\u5ba1\u8ba1", `${actionButton("assessment", "print", "\u6253\u5370\u8003\u6838\u7edf\u8ba1")}${actionButton("standardTable", "print", "\u6253\u5370\u6807\u51c6\u8868", false)}${actionButton("reportAudit", "csv", "\u5bfc\u51fa\u64cd\u4f5c\u5ba1\u8ba1CSV", false)}<button type="button" class="link-button" data-report-catalog-export>\u5bfc\u51fa\u62a5\u8868\u76ee\u5f55</button><button type="button" class="link-button" data-report-migration-matrix-export>\u5bfc\u51fa\u8fc1\u79fb\u77e9\u9635</button><button type="button" class="link-button" data-report-acceptance-checklist-export>\u5bfc\u51fa\u9a8c\u6536\u6e05\u5355</button><button type="button" class="link-button" data-report-sample-evidence-export>\u5bfc\u51fa\u6837\u672c\u8bc1\u636e</button><button type="button" class="link-button" data-report-sample-comparison-export>\u5bfc\u51fa\u6837\u672c\u5bf9\u7167</button>`)}
                     </div>
                     <div class="report-center-catalog" data-report-catalog-summary>
                         <section class="report-catalog-section" data-report-catalog-migrated-section>
@@ -16692,6 +16748,16 @@ function bindEvents() {
         const reportSampleEvidenceExportButton = event.target.closest("button[data-report-sample-evidence-export]");
         if (reportSampleEvidenceExportButton) {
             window.location.href = WorkbenchPanel.reportMigrationSampleEvidenceUrl("csv");
+            return;
+        }
+        const reportSampleComparisonButton = event.target.closest("button[data-report-sample-comparison]");
+        if (reportSampleComparisonButton) {
+            WorkbenchPanel.loadReportMigrationSampleComparison();
+            return;
+        }
+        const reportSampleComparisonExportButton = event.target.closest("button[data-report-sample-comparison-export]");
+        if (reportSampleComparisonExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationSampleComparisonUrl("csv");
             return;
         }
         const reportMigrationGuideExportButton = event.target.closest("button[data-report-migration-guide-export]");

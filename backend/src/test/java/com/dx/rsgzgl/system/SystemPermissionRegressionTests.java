@@ -452,14 +452,21 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("data-report-print-self-check"));
         assertTrue(app.contains("data-report-migration-guide"));
         assertTrue(app.contains("data-report-migration-guide-export"));
+        assertTrue(app.contains("data-report-migration-matrix"));
+        assertTrue(app.contains("data-report-migration-matrix-export"));
         assertTrue(app.contains("data-report-migration-delivery-package"));
         assertTrue(app.contains("data-report-print-self-check-export"));
         assertTrue(app.contains("loadReportPrintSelfCheck()"));
         assertTrue(app.contains("showReportMigrationGuide()"));
         assertTrue(app.contains("/api/reports/migration-guide.csv"));
+        assertTrue(app.contains("/api/reports/migration-matrix"));
+        assertTrue(app.contains("/api/reports/migration-matrix.csv"));
         assertTrue(app.contains("/api/reports/migration-delivery-package.zip"));
         assertTrue(app.contains("reportMigrationDeliveryPackageUrl()"));
+        assertTrue(app.contains("reportMigrationMatrixCsvUrl()"));
+        assertTrue(app.contains("loadReportMigrationMatrix()"));
         assertTrue(app.contains("report-migration-guide-csv"));
+        assertTrue(app.contains("report-migration-matrix-csv"));
         assertTrue(app.contains("report-migration-delivery-package"));
         assertTrue(app.contains("data-audit-action=\"report-migration-delivery-package\""));
         assertTrue(app.contains("reportPrintSelfCheckCsvUrl()"));
@@ -2099,6 +2106,28 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-guide-csv\"")))
                 .andExpect(content().string(containsString("sections=6")));
 
+        mockMvc.perform(get("/api/reports/migration-matrix")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"items\"")))
+                .andExpect(content().string(containsString("\"status\":\"MIGRATED\"")))
+                .andExpect(content().string(containsString("SALARY_CASE_APPROVAL_PRINT")))
+                .andExpect(content().string(containsString("salary-case-approvals-print")));
+
+        mockMvc.perform(get("/api/reports/migration-matrix.csv")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, containsString("salary-report-migration-matrix.csv")))
+                .andExpect(content().string(containsString("\"code\",\"title\",\"category\",\"legacyTemplate\",\"status\"")))
+                .andExpect(content().string(containsString("SALARY_CASE_APPROVAL_PRINT")))
+                .andExpect(content().string(containsString("salary-case-approvals-print")));
+
+        mockMvc.perform(get("/api/reports/audits?action=report-migration-matrix-csv&targetCode=REPORT_PRINT&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"actionName\":\"report-migration-matrix-csv\"")))
+                .andExpect(content().string(containsString("rows=")));
+
         var reportMigrationDeliveryPackage = mockMvc.perform(get("/api/reports/migration-delivery-package.zip?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
@@ -2107,6 +2136,7 @@ class SystemPermissionRegressionTests {
         Set<String> reportMigrationDeliveryPackageEntries = new HashSet<>();
         String reportMigrationDeliveryReadme = "";
         String reportMigrationDeliverySelfCheck = "";
+        String reportMigrationDeliveryMatrix = "";
         String reportMigrationDeliveryMeta = "";
         String reportMigrationDeliveryAudits = "";
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(reportMigrationDeliveryPackage.getResponse().getContentAsByteArray()))) {
@@ -2119,6 +2149,8 @@ class SystemPermissionRegressionTests {
                     reportMigrationDeliveryMeta = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 } else if ("delivery-package-audits.csv".equals(entry.getName())) {
                     reportMigrationDeliveryAudits = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
+                } else if ("salary-report-migration-matrix.csv".equals(entry.getName())) {
+                    reportMigrationDeliveryMatrix = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 } else if ("salary-report-print-self-check-001.csv".equals(entry.getName())) {
                     reportMigrationDeliverySelfCheck = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 }
@@ -2127,6 +2159,7 @@ class SystemPermissionRegressionTests {
         }
         assertTrue(reportMigrationDeliveryPackageEntries.contains("README.txt"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-catalog.csv"));
+        assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-matrix.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-guide.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-closure-001.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-print-self-check-001.csv"));
@@ -2134,13 +2167,16 @@ class SystemPermissionRegressionTests {
         assertTrue(reportMigrationDeliveryPackageEntries.contains("delivery-package-audits.csv"));
         assertTrue(reportMigrationDeliveryReadme.contains("Report print migration delivery package"));
         assertTrue(reportMigrationDeliveryReadme.contains("orgCode: 001"));
-        assertTrue(reportMigrationDeliveryReadme.contains("fileCount: 7"));
+        assertTrue(reportMigrationDeliveryReadme.contains("fileCount: 8"));
+        assertTrue(reportMigrationDeliveryReadme.contains("salary-report-migration-matrix.csv"));
         assertTrue(reportMigrationDeliveryReadme.contains("delivery-package-audits.csv"));
+        assertTrue(reportMigrationDeliveryMatrix.contains("SALARY_CASE_APPROVAL_PRINT"));
+        assertTrue(reportMigrationDeliveryMatrix.contains("salary-case-approvals-print"));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"orgCode\",\"001\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"keyword\",\"UT-PRINT-" + caseNo + "\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"auditAction\",\"report-migration-delivery-package\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"auditTargetType\",\"REPORT_MIGRATION_DELIVERY\""));
-        assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"fileCount\",\"7\""));
+        assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"fileCount\",\"8\""));
         assertTrue(reportMigrationDeliveryAudits.contains("\"filter\",\"targetCode\",\"001\""));
         assertTrue(reportMigrationDeliveryAudits.contains("report-migration-delivery-package"));
         assertTrue(reportMigrationDeliverySelfCheck.contains("\"filter\",\"keyword\",\"UT-PRINT-" + caseNo + "\""));
@@ -2149,7 +2185,7 @@ class SystemPermissionRegressionTests {
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-delivery-package\"")))
-                .andExpect(content().string(containsString("files=7")));
+                .andExpect(content().string(containsString("files=8")));
 
         mockMvc.perform(get("/api/workbench/salary-cases/" + caseNo + "/history-write-comparison.csv")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))

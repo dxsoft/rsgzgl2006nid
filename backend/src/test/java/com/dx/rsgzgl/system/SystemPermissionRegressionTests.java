@@ -460,6 +460,7 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("data-report-sample-evidence-export"));
         assertTrue(app.contains("data-report-sample-comparison"));
         assertTrue(app.contains("data-report-sample-comparison-export"));
+        assertTrue(app.contains("data-report-sample-comparison-review"));
         assertTrue(app.contains("data-report-migration-delivery-package"));
         assertTrue(app.contains("data-report-print-self-check-export"));
         assertTrue(app.contains("loadReportPrintSelfCheck()"));
@@ -477,11 +478,13 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("loadReportMigrationSampleEvidence()"));
         assertTrue(app.contains("reportMigrationSampleComparisonUrl("));
         assertTrue(app.contains("loadReportMigrationSampleComparison()"));
+        assertTrue(app.contains("reviewReportMigrationSampleComparison("));
         assertTrue(app.contains("report-migration-guide-csv"));
         assertTrue(app.contains("report-migration-matrix-csv"));
         assertTrue(app.contains("report-migration-acceptance-checklist-csv"));
         assertTrue(app.contains("report-migration-sample-evidence-csv"));
         assertTrue(app.contains("report-migration-sample-comparison-csv"));
+        assertTrue(app.contains("report-migration-sample-comparison-review"));
         assertTrue(app.contains("report-migration-delivery-package"));
         assertTrue(app.contains("data-audit-action=\"report-migration-delivery-package\""));
         assertTrue(app.contains("reportPrintSelfCheckCsvUrl()"));
@@ -1823,6 +1826,25 @@ class SystemPermissionRegressionTests {
 
         jdbcTemplate.update("DELETE FROM salary_report_print_batch_item WHERE case_no = ?", caseNo);
         jdbcTemplate.update("DELETE FROM salary_report_print_batch WHERE batch_no = ?", "UT-PRINT-" + caseNo);
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS salary_report_migration_sample_review (
+                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                    report_code VARCHAR(64) NOT NULL,
+                    sample_key VARCHAR(128) NOT NULL,
+                    org_code VARCHAR(64) NOT NULL DEFAULT '',
+                    person_code VARCHAR(128) NULL,
+                    period_text VARCHAR(32) NOT NULL DEFAULT '',
+                    review_status VARCHAR(32) NOT NULL DEFAULT 'PENDING_LEGACY',
+                    review_category VARCHAR(64) NULL,
+                    review_reason VARCHAR(1024) NULL,
+                    reviewed_by VARCHAR(64) NULL,
+                    reviewed_at DATETIME NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY uk_report_migration_sample_review (report_code, sample_key, org_code, period_text)
+                )
+                """);
+        jdbcTemplate.update("DELETE FROM salary_report_migration_sample_review WHERE sample_key = ?", caseNo);
         mockMvc.perform(get("/api/workbench/items?status=DONE&workflowStatus=HISTORY_CLOSED&keyword=History Write&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
                 .andExpect(status().isOk())
@@ -2210,6 +2232,32 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-csv\"")))
                 .andExpect(content().string(containsString("legacyPending=")));
 
+        mockMvc.perform(post("/api/reports/migration-sample-comparison/review")
+                        .param("reportCode", "approvalBatch")
+                        .param("sampleKey", caseNo)
+                        .param("orgCode", "001")
+                        .param("personCode", "001-00055")
+                        .param("period", "2099-01")
+                        .param("reviewStatus", "MATCHED")
+                        .param("reviewCategory", "OTHER")
+                        .param("reviewReason", "unit-test report sample matched")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"reviewStatus\":\"MATCHED\"")))
+                .andExpect(content().string(containsString("unit-test report sample matched")));
+
+        mockMvc.perform(get("/api/reports/migration-sample-comparison?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&personCode=001-00055&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"legacyComparisonStatus\":\"MATCHED\"")))
+                .andExpect(content().string(containsString("\"reviewReason\":\"unit-test report sample matched\"")));
+
+        mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-comparison-review&targetCode=001&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-review\"")))
+                .andExpect(content().string(containsString("status=MATCHED")));
+
         var reportMigrationDeliveryPackage = mockMvc.perform(get("/api/reports/migration-delivery-package.zip?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
@@ -2274,6 +2322,8 @@ class SystemPermissionRegressionTests {
         assertTrue(reportMigrationDeliverySampleEvidence.contains("approvalBatch"));
         assertTrue(reportMigrationDeliverySampleEvidence.contains(caseNo));
         assertTrue(reportMigrationDeliverySampleComparison.contains("approvalBatch"));
+        assertTrue(reportMigrationDeliverySampleComparison.contains("MATCHED"));
+        assertTrue(reportMigrationDeliverySampleComparison.contains("unit-test report sample matched"));
         assertTrue(reportMigrationDeliverySampleComparison.contains("PENDING_LEGACY"));
         assertTrue(reportMigrationDeliverySampleComparison.contains(caseNo));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"orgCode\",\"001\""));

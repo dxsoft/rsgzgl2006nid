@@ -1032,6 +1032,7 @@ const Format = {
             "report-migration-acceptance-checklist-csv": "\u5bfc\u51fa\u62a5\u8868\u9a8c\u6536\u6e05\u5355",
             "report-migration-sample-evidence-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e",
             "report-migration-sample-comparison-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            "report-migration-sample-comparison-review": "\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167",
             "report-migration-guide-csv": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e",
             "report-migration-delivery-package": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305",
             "salary-case-approval-roster-print": "\u6253\u5370\u5ba1\u6279\u6e05\u518c",
@@ -3360,14 +3361,19 @@ const WorkbenchPanel = {
                     <span>WARN ${Format.html(result.warn || 0)}</span>
                     <span>TODO ${Format.html(result.todo || 0)}</span>
                     <span>\u65e7\u7cfb\u7edf\u5f85\u6838 ${Format.html(result.legacyPending || 0)}</span>
+                    <span>\u5df2\u590d\u6838 ${Format.html(result.legacyReviewed || 0)}</span>
                 </div>
                 <div class="report-audit-list">
                     ${items.slice(0, 40).map((item) => `
                         <div class="report-audit-row">
                             <strong>${Format.html(item.reportCode || "-")} | ${Format.html(item.sampleKey || "-")}</strong>
                             <span>${Format.html(item.evidenceStatus || "-")} | ${Format.html(item.legacyComparisonStatus || "-")} | ${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")}</span>
-                            <small>${Format.html(item.comparisonConclusion || "-")}</small>
+                            <small>${Format.html(item.reviewReason || item.comparisonConclusion || "-")}</small>
                             <em>${Format.html(item.nextAction || "-")}</em>
+                            <div class="report-batch-actions">
+                                <button type="button" data-report-sample-comparison-review="MATCHED" data-report-code="${Format.html(item.reportCode || "")}" data-sample-key="${Format.html(item.sampleKey || "")}" data-person-code="${Format.html(item.personCode || "")}" data-org-code="${Format.html(item.orgCode || "")}" data-period="${Format.html(item.period || "")}">\u4e00\u81f4</button>
+                                <button type="button" data-report-sample-comparison-review="SPECIAL" data-report-code="${Format.html(item.reportCode || "")}" data-sample-key="${Format.html(item.sampleKey || "")}" data-person-code="${Format.html(item.personCode || "")}" data-org-code="${Format.html(item.orgCode || "")}" data-period="${Format.html(item.period || "")}">\u7279\u6b8a</button>
+                            </div>
                         </div>
                     `).join("") || `<span class="warning">\u5f53\u524d\u8303\u56f4\u672a\u751f\u6210\u6837\u672c\u5bf9\u7167</span>`}
                 </div>
@@ -3375,6 +3381,28 @@ const WorkbenchPanel = {
             setStatus(`\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
         } catch (error) {
             previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async reviewReportMigrationSampleComparison(button) {
+        const status = button.dataset.reportSampleComparisonReview || "MATCHED";
+        const params = new URLSearchParams({
+            reportCode: button.dataset.reportCode || "",
+            sampleKey: button.dataset.sampleKey || "",
+            orgCode: button.dataset.orgCode || "",
+            personCode: button.dataset.personCode || "",
+            period: button.dataset.period || "",
+            reviewStatus: status,
+            reviewCategory: status === "SPECIAL" ? "LEGACY_SPECIAL" : "OTHER",
+            reviewReason: status === "SPECIAL" ? "\u65e7\u7cfb\u7edf\u7279\u6b8a\u60c5\u51b5\uff0c\u7eb3\u5165\u4ea4\u4ed8\u8bf4\u660e" : "\u65b0\u65e7\u6837\u672c\u5bf9\u7167\u4e00\u81f4"
+        });
+        button.disabled = true;
+        try {
+            await Api.request(`/api/reports/migration-sample-comparison/review?${params.toString()}`, { method: "POST" });
+            await WorkbenchPanel.loadReportMigrationSampleComparison();
+            setStatus("\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u590d\u6838");
+        } catch (error) {
+            button.disabled = false;
             setStatus(error.message);
         }
     },
@@ -16758,6 +16786,11 @@ function bindEvents() {
         const reportSampleComparisonExportButton = event.target.closest("button[data-report-sample-comparison-export]");
         if (reportSampleComparisonExportButton) {
             window.location.href = WorkbenchPanel.reportMigrationSampleComparisonUrl("csv");
+            return;
+        }
+        const reportSampleComparisonReviewButton = event.target.closest("button[data-report-sample-comparison-review]");
+        if (reportSampleComparisonReviewButton) {
+            await WorkbenchPanel.reviewReportMigrationSampleComparison(reportSampleComparisonReviewButton);
             return;
         }
         const reportMigrationGuideExportButton = event.target.closest("button[data-report-migration-guide-export]");

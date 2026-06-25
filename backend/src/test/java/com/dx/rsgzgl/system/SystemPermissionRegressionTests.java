@@ -456,6 +456,8 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("data-report-migration-matrix-export"));
         assertTrue(app.contains("data-report-acceptance-checklist"));
         assertTrue(app.contains("data-report-acceptance-checklist-export"));
+        assertTrue(app.contains("data-report-sample-evidence"));
+        assertTrue(app.contains("data-report-sample-evidence-export"));
         assertTrue(app.contains("data-report-migration-delivery-package"));
         assertTrue(app.contains("data-report-print-self-check-export"));
         assertTrue(app.contains("loadReportPrintSelfCheck()"));
@@ -469,9 +471,12 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("loadReportMigrationMatrix()"));
         assertTrue(app.contains("reportMigrationAcceptanceChecklistUrl("));
         assertTrue(app.contains("loadReportMigrationAcceptanceChecklist()"));
+        assertTrue(app.contains("reportMigrationSampleEvidenceUrl("));
+        assertTrue(app.contains("loadReportMigrationSampleEvidence()"));
         assertTrue(app.contains("report-migration-guide-csv"));
         assertTrue(app.contains("report-migration-matrix-csv"));
         assertTrue(app.contains("report-migration-acceptance-checklist-csv"));
+        assertTrue(app.contains("report-migration-sample-evidence-csv"));
         assertTrue(app.contains("report-migration-delivery-package"));
         assertTrue(app.contains("data-audit-action=\"report-migration-delivery-package\""));
         assertTrue(app.contains("reportPrintSelfCheckCsvUrl()"));
@@ -2155,6 +2160,28 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-acceptance-checklist-csv\"")))
                 .andExpect(content().string(containsString("pass=")));
 
+        mockMvc.perform(get("/api/reports/migration-sample-evidence?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&personCode=001-00055&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"items\"")))
+                .andExpect(content().string(containsString("\"reportCode\":\"approvalBatch\"")))
+                .andExpect(content().string(containsString("\"sourceTable\":\"salary_business_case\"")))
+                .andExpect(content().string(containsString(caseNo)));
+
+        mockMvc.perform(get("/api/reports/migration-sample-evidence.csv?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&personCode=001-00055&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, containsString("salary-report-migration-sample-evidence-001.csv")))
+                .andExpect(content().string(containsString("\"reportCode\",\"sampleKey\",\"personCode\"")))
+                .andExpect(content().string(containsString("approvalBatch")))
+                .andExpect(content().string(containsString(caseNo)));
+
+        mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-evidence-csv&targetCode=001&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-evidence-csv\"")))
+                .andExpect(content().string(containsString("rows=")));
+
         var reportMigrationDeliveryPackage = mockMvc.perform(get("/api/reports/migration-delivery-package.zip?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
@@ -2165,6 +2192,7 @@ class SystemPermissionRegressionTests {
         String reportMigrationDeliverySelfCheck = "";
         String reportMigrationDeliveryMatrix = "";
         String reportMigrationDeliveryAcceptanceChecklist = "";
+        String reportMigrationDeliverySampleEvidence = "";
         String reportMigrationDeliveryMeta = "";
         String reportMigrationDeliveryAudits = "";
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(reportMigrationDeliveryPackage.getResponse().getContentAsByteArray()))) {
@@ -2181,6 +2209,8 @@ class SystemPermissionRegressionTests {
                     reportMigrationDeliveryMatrix = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 } else if ("salary-report-migration-acceptance-checklist-001.csv".equals(entry.getName())) {
                     reportMigrationDeliveryAcceptanceChecklist = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
+                } else if ("salary-report-migration-sample-evidence-001.csv".equals(entry.getName())) {
+                    reportMigrationDeliverySampleEvidence = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 } else if ("salary-report-print-self-check-001.csv".equals(entry.getName())) {
                     reportMigrationDeliverySelfCheck = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 }
@@ -2191,6 +2221,7 @@ class SystemPermissionRegressionTests {
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-catalog.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-matrix.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-acceptance-checklist-001.csv"));
+        assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-sample-evidence-001.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-guide.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-migration-closure-001.csv"));
         assertTrue(reportMigrationDeliveryPackageEntries.contains("salary-report-print-self-check-001.csv"));
@@ -2198,19 +2229,22 @@ class SystemPermissionRegressionTests {
         assertTrue(reportMigrationDeliveryPackageEntries.contains("delivery-package-audits.csv"));
         assertTrue(reportMigrationDeliveryReadme.contains("Report print migration delivery package"));
         assertTrue(reportMigrationDeliveryReadme.contains("orgCode: 001"));
-        assertTrue(reportMigrationDeliveryReadme.contains("fileCount: 9"));
+        assertTrue(reportMigrationDeliveryReadme.contains("fileCount: 10"));
         assertTrue(reportMigrationDeliveryReadme.contains("salary-report-migration-matrix.csv"));
         assertTrue(reportMigrationDeliveryReadme.contains("salary-report-migration-acceptance-checklist-001.csv"));
+        assertTrue(reportMigrationDeliveryReadme.contains("salary-report-migration-sample-evidence-001.csv"));
         assertTrue(reportMigrationDeliveryReadme.contains("delivery-package-audits.csv"));
         assertTrue(reportMigrationDeliveryMatrix.contains("SALARY_CASE_APPROVAL_PRINT"));
         assertTrue(reportMigrationDeliveryMatrix.contains("salary-case-approvals-print"));
         assertTrue(reportMigrationDeliveryAcceptanceChecklist.contains("approvalBatch"));
         assertTrue(reportMigrationDeliveryAcceptanceChecklist.contains("salary-case-approvals-print"));
+        assertTrue(reportMigrationDeliverySampleEvidence.contains("approvalBatch"));
+        assertTrue(reportMigrationDeliverySampleEvidence.contains(caseNo));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"orgCode\",\"001\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"keyword\",\"UT-PRINT-" + caseNo + "\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"auditAction\",\"report-migration-delivery-package\""));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"auditTargetType\",\"REPORT_MIGRATION_DELIVERY\""));
-        assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"fileCount\",\"9\""));
+        assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"fileCount\",\"10\""));
         assertTrue(reportMigrationDeliveryAudits.contains("\"filter\",\"targetCode\",\"001\""));
         assertTrue(reportMigrationDeliveryAudits.contains("report-migration-delivery-package"));
         assertTrue(reportMigrationDeliverySelfCheck.contains("\"filter\",\"keyword\",\"UT-PRINT-" + caseNo + "\""));
@@ -2219,7 +2253,7 @@ class SystemPermissionRegressionTests {
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-delivery-package\"")))
-                .andExpect(content().string(containsString("files=9")));
+                .andExpect(content().string(containsString("files=10")));
 
         mockMvc.perform(get("/api/workbench/salary-cases/" + caseNo + "/history-write-comparison.csv")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))

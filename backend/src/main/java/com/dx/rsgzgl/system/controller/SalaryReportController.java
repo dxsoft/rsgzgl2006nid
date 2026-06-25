@@ -179,6 +179,50 @@ public class SalaryReportController {
         return csvResponse("salary-report-migration-acceptance-checklist-" + suffix + ".csv", csv);
     }
 
+    @GetMapping("/migration-sample-evidence")
+    public ApiResponse<Map<String, Object>> reportMigrationSampleEvidence(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationSampleEvidenceResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        return ApiResponse.ok(result);
+    }
+
+    @GetMapping(value = "/migration-sample-evidence.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> reportMigrationSampleEvidenceCsv(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationSampleEvidenceResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        String csv = reportMigrationSampleEvidenceCsvContent(result);
+        String safeOrgCode = text(result.get("orgCode"));
+        systemAuditService.record("report", "report-migration-sample-evidence-csv", "REPORT_MIGRATION_SAMPLE", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
+                reportAuditSummary(
+                        auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
+                        auditPart("period", result.get("period")),
+                        auditPart("rows", result.get("rows")),
+                        auditPart("limit", result.get("limit"))
+                ));
+        String suffix = safeOrgCode.isBlank() ? "all" : safeOrgCode;
+        return csvResponse("salary-report-migration-sample-evidence-" + suffix + ".csv", csv);
+    }
+
     @GetMapping(value = "/migration-guide.csv", produces = "text/csv")
     public ResponseEntity<byte[]> reportMigrationGuideCsv() {
         requireReportPermission();
@@ -209,31 +253,34 @@ public class SalaryReportController {
                 Summary:
                 - orgCode: %s
                 - status: %s
-                - fileCount: 9
+                - fileCount: 10
                 Files:
                 - salary-report-catalog.csv
                 - salary-report-migration-matrix.csv
                 - salary-report-migration-acceptance-checklist-%s.csv
+                - salary-report-migration-sample-evidence-%s.csv
                 - salary-report-migration-guide.csv
                 - salary-report-migration-closure-%s.csv
                 - salary-report-print-self-check-%s.csv
                 - delivery-package-meta.csv
                 - delivery-package-audits.csv
                 GeneratedAt: %s
-                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, suffix, LocalDateTime.now().withNano(0)));
+                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, suffix, suffix, LocalDateTime.now().withNano(0)));
         entries.put("salary-report-catalog.csv", reportCatalogCsvContent());
         entries.put("salary-report-migration-matrix.csv", reportMigrationMatrixCsvContent());
         entries.put("salary-report-migration-acceptance-checklist-" + suffix + ".csv",
                 reportMigrationAcceptanceChecklistCsvContent(reportMigrationAcceptanceChecklistResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, limit)));
+        entries.put("salary-report-migration-sample-evidence-" + suffix + ".csv",
+                reportMigrationSampleEvidenceCsvContent(reportMigrationSampleEvidenceResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, Math.min(limit, 20))));
         entries.put("salary-report-migration-guide.csv", reportMigrationGuideCsvContent());
         entries.put("salary-report-migration-closure-" + suffix + ".csv", reportMigrationClosureCsvContent(result));
         entries.put("salary-report-print-self-check-" + suffix + ".csv", reportPrintSelfCheckCsvContent(result));
-        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 9));
+        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 10));
         systemAuditService.record("report", "report-migration-delivery-package", "REPORT_MIGRATION_DELIVERY", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
                 reportAuditSummary(
                         auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
                         auditPart("status", result.get("status")),
-                        auditPart("files", 9)
+                        auditPart("files", 10)
                 ));
         entries.put("delivery-package-audits.csv", reportMigrationDeliveryAuditsCsv(safeOrgCode.isBlank() ? "ALL" : safeOrgCode));
         return ResponseEntity.ok()
@@ -606,6 +653,343 @@ public class SalaryReportController {
                     item.get("nextAction"));
         }
         return csv.toString();
+    }
+
+    private Map<String, Object> reportMigrationSampleEvidenceResult(
+            String orgCode,
+            int year,
+            int month,
+            String businessType,
+            String keyword,
+            String personCode,
+            int yearFrom,
+            int yearTo,
+            int limit
+    ) {
+        String safeOrgCode = text(orgCode);
+        if (!safeOrgCode.isBlank()) {
+            organizationAccessService.requireOrgAccess(safeOrgCode);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        int safeYear = year > 0 ? Math.max(1900, Math.min(year, 2099)) : now.getYear();
+        int safeMonth = month > 0 ? Math.max(1, Math.min(month, 12)) : now.getMonthValue();
+        int safeYearFrom = Math.max(1900, Math.min(yearFrom, 2099));
+        int safeYearTo = Math.max(safeYearFrom, Math.min(yearTo, 2099));
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        List<Map<String, Object>> rows = new ArrayList<>();
+        if (!safeOrgCode.isBlank()) {
+            rows.addAll(reportMigrationCaseEvidenceRows("approvalBatch", safeOrgCode, safeYear, safeMonth, businessType, keyword, safeLimit));
+            rows.addAll(reportMigrationCaseEvidenceRows("changeLedger", safeOrgCode, safeYear, safeMonth, businessType, keyword, safeLimit));
+            rows.addAll(reportMigrationPersonEvidenceRows(safeOrgCode, keyword, safeLimit));
+            rows.addAll(reportMigrationSalaryRosterEvidenceRows(safeOrgCode, safeYear, safeMonth, safeLimit));
+            rows.addAll(reportMigrationSalaryHistoryEvidenceRows(safeOrgCode, personCode, safeYearFrom, safeYearTo, safeLimit));
+            rows.addAll(reportMigrationAssessmentEvidenceRows(safeOrgCode, safeYearFrom > 0 ? safeYearFrom : safeYear, keyword, safeLimit));
+        }
+        rows.addAll(reportMigrationStandardTableEvidenceRows(keyword, safeLimit));
+        rows.addAll(reportMigrationAuditEvidenceRows(safeOrgCode, keyword, safeLimit));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("orgCode", safeOrgCode);
+        result.put("year", safeYear);
+        result.put("month", safeMonth);
+        result.put("period", periodText(safeYear, safeMonth));
+        result.put("yearFrom", safeYearFrom);
+        result.put("yearTo", safeYearTo);
+        result.put("businessType", text(businessType));
+        result.put("keyword", text(keyword));
+        result.put("personCode", text(personCode));
+        result.put("limit", safeLimit);
+        result.put("rows", rows.size());
+        result.put("items", rows);
+        result.put("checkedAt", LocalDateTime.now().withNano(0).toString());
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String reportMigrationSampleEvidenceCsvContent(Map<String, Object> result) {
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) result.getOrDefault("items", List.of());
+        StringBuilder csv = new StringBuilder();
+        csvRow(csv, "filter", "orgCode", text(result.get("orgCode")).isBlank() ? "ALL" : result.get("orgCode"));
+        csvRow(csv, "filter", "period", result.get("period"));
+        csvRow(csv, "filter", "yearRange", result.get("yearFrom") + "-" + result.get("yearTo"));
+        csvRow(csv, "filter", "businessType", text(result.get("businessType")).isBlank() ? "ALL" : result.get("businessType"));
+        csvRow(csv, "filter", "keyword", text(result.get("keyword")).isBlank() ? "ALL" : result.get("keyword"));
+        csvRow(csv, "filter", "personCode", text(result.get("personCode")).isBlank() ? "ALL" : result.get("personCode"));
+        csvRow(csv, "filter", "limitPerReport", result.get("limit"));
+        csvRow(csv, "filter", "rows", result.get("rows"));
+        csvRow(csv, "filter", "checkedAt", result.get("checkedAt"));
+        csv.append('\n');
+        csvRow(csv, "reportCode", "sampleKey", "personCode", "personName", "orgCode", "period", "sourceTable", "printUrl", "csvUrl", "note");
+        for (Map<String, Object> row : rows) {
+            csvRow(csv,
+                    row.get("reportCode"),
+                    row.get("sampleKey"),
+                    row.get("personCode"),
+                    row.get("personName"),
+                    row.get("orgCode"),
+                    row.get("period"),
+                    row.get("sourceTable"),
+                    row.get("printUrl"),
+                    row.get("csvUrl"),
+                    row.get("note"));
+        }
+        return csv.toString();
+    }
+
+    private List<Map<String, Object>> reportMigrationCaseEvidenceRows(String reportCode, String orgCode, int year, int month, String businessType, String keyword, int limit) {
+        List<Object> args = new ArrayList<>();
+        args.add(orgCode);
+        args.add(year);
+        args.add(month);
+        String businessTypeWhere = "";
+        if (!text(businessType).isBlank()) {
+            businessTypeWhere = "AND business_type = ?";
+            args.add(text(businessType));
+        }
+        String keywordWhere = "";
+        String safeKeyword = text(keyword);
+        String caseKeyword = safeKeyword.startsWith("UT-PRINT-") ? safeKeyword.substring("UT-PRINT-".length()) : "";
+        if (!safeKeyword.isBlank()) {
+            keywordWhere = """
+                      AND (
+                          case_no LIKE CONCAT('%', ?, '%')
+                          __CASE_KEYWORD_WHERE__
+                          OR person_code LIKE CONCAT('%', ?, '%')
+                          OR person_name LIKE CONCAT('%', ?, '%')
+                          OR title LIKE CONCAT('%', ?, '%')
+                          OR summary LIKE CONCAT('%', ?, '%')
+                      )
+                    """;
+            if (!caseKeyword.isBlank()) {
+                keywordWhere = keywordWhere.replace("__CASE_KEYWORD_WHERE__", "OR case_no LIKE CONCAT('%', ?, '%')");
+            } else {
+                keywordWhere = keywordWhere.replace("__CASE_KEYWORD_WHERE__", "");
+            }
+            args.add(safeKeyword);
+            if (!caseKeyword.isBlank()) {
+                args.add(caseKeyword);
+            }
+            args.add(safeKeyword);
+            args.add(safeKeyword);
+            args.add(safeKeyword);
+            args.add(safeKeyword);
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT case_no AS sampleKey, person_code AS personCode, person_name AS personName,
+                       org_code AS orgCode, CONCAT(event_year, '-', LPAD(event_month, 2, '0')) AS period,
+                       business_type AS note
+                FROM salary_business_case
+                WHERE org_code LIKE CONCAT(?, '%')
+                  AND event_year = ?
+                  AND event_month = ?
+                __BUSINESS_TYPE_WHERE__
+                __KEYWORD_WHERE__
+                ORDER BY created_at DESC, id DESC
+                LIMIT ?
+                """.replace("__BUSINESS_TYPE_WHERE__", businessTypeWhere)
+                .replace("__KEYWORD_WHERE__", keywordWhere), args.toArray());
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow(reportCode, row, "salary_business_case",
+                        "approvalBatch".equals(reportCode) ? "/api/reports/salary-case-approvals/print" : "/api/reports/salary-change-ledger/print",
+                        "approvalBatch".equals(reportCode) ? "/api/reports/salary-case-approval-roster.csv" : "/api/reports/salary-change-ledger.csv"))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationPersonEvidenceRows(String orgCode, String keyword, int limit) {
+        List<Object> args = new ArrayList<>();
+        args.add(orgCode);
+        String keywordWhere = "";
+        if (!text(keyword).isBlank()) {
+            keywordWhere = "AND (TRIM(p.grbm) LIKE CONCAT('%', ?, '%') OR TRIM(COALESCE(p.xm, '')) LIKE CONCAT('%', ?, '%'))";
+            args.add(text(keyword));
+            args.add(text(keyword));
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) AS sampleKey,
+                       CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) AS personCode,
+                       TRIM(COALESCE(p.xm, '')) AS personName,
+                       TRIM(p.dwbm) AS orgCode,
+                       '' AS period,
+                       TRIM(COALESCE(p.sfzh, '')) AS note
+                FROM dryjbxx p
+                WHERE TRIM(p.dwbm) LIKE CONCAT(?, '%')
+                __KEYWORD_WHERE__
+                ORDER BY TRIM(p.dwbm), TRIM(p.grbm)
+                LIMIT ?
+                """.replace("__KEYWORD_WHERE__", keywordWhere), args.toArray());
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("personRoster", row, "dryjbxx", "/api/reports/person-roster/print", "/api/reports/person-roster.csv"))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationSalaryRosterEvidenceRows(String orgCode, int year, int month, int limit) {
+        int periodKey = year * 100 + month;
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT TRIM(h.id) AS sampleKey,
+                       CONCAT(TRIM(h.dwbm), '-', TRIM(h.grbm)) AS personCode,
+                       TRIM(COALESCE(p.xm, '')) AS personName,
+                       TRIM(h.dwbm) AS orgCode,
+                       CONCAT(TRIM(h.jsnf), '-', LPAD(TRIM(h.jsyf), 2, '0')) AS period,
+                       CONCAT(TRIM(COALESCE(h.jslb, '')), ':', COALESCE(h.hj2, 0)) AS note
+                FROM hisbase h
+                LEFT JOIN dryjbxx p ON p.dwbm = h.dwbm AND p.grbm = h.grbm
+                WHERE TRIM(h.dwbm) LIKE CONCAT(?, '%')
+                  AND TRIM(COALESCE(h.jsnf, '')) REGEXP '^[0-9]{4}$'
+                  AND TRIM(COALESCE(h.jsyf, '')) REGEXP '^[0-9]{1,2}$'
+                  AND (CAST(TRIM(h.jsnf) AS UNSIGNED) * 100 + CAST(TRIM(h.jsyf) AS UNSIGNED)) <= ?
+                ORDER BY CAST(TRIM(h.jsnf) AS UNSIGNED) DESC, CAST(TRIM(h.jsyf) AS UNSIGNED) DESC, TRIM(h.id) DESC
+                LIMIT ?
+                """, orgCode, periodKey, limit);
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("salaryRoster", row, "hisbase", "/api/reports/salary-roster/print", "/api/reports/salary-roster.csv"))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationSalaryHistoryEvidenceRows(String orgCode, String personCode, int yearFrom, int yearTo, int limit) {
+        List<Object> args = new ArrayList<>();
+        args.add(orgCode);
+        args.add(yearFrom);
+        args.add(yearTo);
+        String personWhere = "";
+        if (!text(personCode).isBlank()) {
+            String[] parts = text(personCode).split("-", 2);
+            if (parts.length == 2) {
+                personWhere = "AND TRIM(h.dwbm) = ? AND TRIM(h.grbm) = ?";
+                args.add(parts[0].trim());
+                args.add(parts[1].trim());
+            } else {
+                personWhere = "AND CONCAT(TRIM(h.dwbm), '-', TRIM(h.grbm)) = ?";
+                args.add(text(personCode));
+            }
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT TRIM(h.id) AS sampleKey,
+                       CONCAT(TRIM(h.dwbm), '-', TRIM(h.grbm)) AS personCode,
+                       TRIM(COALESCE(p.xm, '')) AS personName,
+                       TRIM(h.dwbm) AS orgCode,
+                       CONCAT(TRIM(h.jsnf), '-', LPAD(TRIM(h.jsyf), 2, '0')) AS period,
+                       TRIM(COALESCE(h.jslb, '')) AS note
+                FROM hisbase h
+                LEFT JOIN dryjbxx p ON p.dwbm = h.dwbm AND p.grbm = h.grbm
+                WHERE TRIM(h.dwbm) LIKE CONCAT(?, '%')
+                  AND TRIM(COALESCE(h.jsnf, '')) REGEXP '^[0-9]{4}$'
+                  AND CAST(TRIM(h.jsnf) AS UNSIGNED) BETWEEN ? AND ?
+                __PERSON_WHERE__
+                ORDER BY CAST(TRIM(h.jsnf) AS UNSIGNED) DESC, CAST(TRIM(COALESCE(h.jsyf, '0')) AS UNSIGNED) DESC, TRIM(h.id) DESC
+                LIMIT ?
+                """.replace("__PERSON_WHERE__", personWhere), args.toArray());
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("salaryHistory", row, "hisbase", "/api/reports/salary-history/print", "/api/reports/salary-history.csv"))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationAssessmentEvidenceRows(String orgCode, int year, String keyword, int limit) {
+        List<Object> args = new ArrayList<>();
+        args.add(orgCode);
+        args.add(String.valueOf(year));
+        String keywordWhere = "";
+        if (!text(keyword).isBlank()) {
+            keywordWhere = "AND (TRIM(k.grbm) LIKE CONCAT('%', ?, '%') OR TRIM(COALESCE(p.xm, '')) LIKE CONCAT('%', ?, '%') OR TRIM(COALESCE(k.khjg, '')) LIKE CONCAT('%', ?, '%'))";
+            args.add(text(keyword));
+            args.add(text(keyword));
+            args.add(text(keyword));
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CONCAT(TRIM(k.dwbm), '-', TRIM(k.grbm), '-', TRIM(COALESCE(k.khnd, ''))) AS sampleKey,
+                       CONCAT(TRIM(k.dwbm), '-', TRIM(k.grbm)) AS personCode,
+                       TRIM(COALESCE(p.xm, '')) AS personName,
+                       TRIM(k.dwbm) AS orgCode,
+                       TRIM(COALESCE(k.khnd, '')) AS period,
+                       TRIM(COALESCE(k.khjg, '')) AS note
+                FROM dndkh k
+                LEFT JOIN dryjbxx p ON p.dwbm = k.dwbm AND p.grbm = k.grbm
+                WHERE TRIM(k.dwbm) LIKE CONCAT(?, '%')
+                  AND TRIM(COALESCE(k.khnd, '')) = ?
+                __KEYWORD_WHERE__
+                ORDER BY TRIM(k.dwbm), TRIM(k.grbm)
+                LIMIT ?
+                """.replace("__KEYWORD_WHERE__", keywordWhere), args.toArray());
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("assessment", row, "dndkh", "/api/reports/assessment-summary/print", ""))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationStandardTableEvidenceRows(String keyword, int limit) {
+        String safeTable = "bz06_jbt";
+        List<String> columns = standardTableColumns(safeTable);
+        if (columns.isEmpty()) {
+            return List.of();
+        }
+        List<Object> args = new ArrayList<>();
+        String keywordWhere = "";
+        if (!text(keyword).isBlank()) {
+            String concatSql = columns.stream()
+                    .map(column -> "COALESCE(CAST(" + quotedIdentifier(column) + " AS CHAR), '')")
+                    .collect(java.util.stream.Collectors.joining(", "));
+            keywordWhere = " WHERE CONCAT_WS('|', " + concatSql + ") LIKE CONCAT('%', ?, '%')";
+            args.add(text(keyword));
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT CONCAT('row-', ROW_NUMBER() OVER (ORDER BY " + quotedIdentifier(columns.getFirst()) + ")) AS sampleKey, "
+                        + "'' AS personCode, '' AS personName, '' AS orgCode, '' AS period, "
+                        + "CONCAT('table=', '" + safeTable + "') AS note FROM " + quotedIdentifier(safeTable) + keywordWhere + " LIMIT ?",
+                args.toArray()
+        );
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("standardTable", row, safeTable, "/api/reports/standard-tables/print?tableName=bz06_jbt", ""))
+                .toList();
+    }
+
+    private List<Map<String, Object>> reportMigrationAuditEvidenceRows(String orgCode, String keyword, int limit) {
+        List<Object> args = new ArrayList<>();
+        String targetWhere = "";
+        if (!text(orgCode).isBlank()) {
+            targetWhere = "AND target_code LIKE CONCAT(?, '%')";
+            args.add(text(orgCode));
+        }
+        String actionWhere = "";
+        if (!text(keyword).isBlank()) {
+            actionWhere = "AND action_name LIKE CONCAT('%', ?, '%')";
+            args.add(text(keyword));
+        }
+        args.add(limit);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CONCAT('SYS-', id) AS sampleKey,
+                       '' AS personCode,
+                       '' AS personName,
+                       target_code AS orgCode,
+                       DATE_FORMAT(created_at, '%Y-%m-%d') AS period,
+                       CONCAT(action_name, ':', target_type) AS note
+                FROM sys_audit_log
+                WHERE module_name = 'report'
+                __TARGET_WHERE__
+                __ACTION_WHERE__
+                ORDER BY id DESC
+                LIMIT ?
+                """.replace("__TARGET_WHERE__", targetWhere)
+                .replace("__ACTION_WHERE__", actionWhere), args.toArray());
+        return rows.stream()
+                .map(row -> reportMigrationEvidenceRow("auditTrail", row, "sys_audit_log", "/api/reports/audits", "/api/reports/audits.csv"))
+                .toList();
+    }
+
+    private Map<String, Object> reportMigrationEvidenceRow(String reportCode, Map<String, Object> row, String sourceTable, String printUrl, String csvUrl) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("reportCode", reportCode);
+        result.put("sampleKey", row.get("sampleKey"));
+        result.put("personCode", row.get("personCode"));
+        result.put("personName", row.get("personName"));
+        result.put("orgCode", row.get("orgCode"));
+        result.put("period", row.get("period"));
+        result.put("sourceTable", sourceTable);
+        result.put("printUrl", printUrl);
+        result.put("csvUrl", csvUrl);
+        result.put("note", row.get("note"));
+        return result;
     }
 
     private String reportMigrationMatrixCsvUrl(String code) {

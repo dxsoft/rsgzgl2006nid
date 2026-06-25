@@ -133,6 +133,52 @@ public class SalaryReportController {
         return csvResponse("salary-report-migration-matrix.csv", csv);
     }
 
+    @GetMapping("/migration-acceptance-checklist")
+    public ApiResponse<Map<String, Object>> reportMigrationAcceptanceChecklist(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "300") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationAcceptanceChecklistResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        return ApiResponse.ok(result);
+    }
+
+    @GetMapping(value = "/migration-acceptance-checklist.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> reportMigrationAcceptanceChecklistCsv(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "300") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> result = reportMigrationAcceptanceChecklistResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        String csv = reportMigrationAcceptanceChecklistCsvContent(result);
+        String safeOrgCode = text(result.get("orgCode"));
+        systemAuditService.record("report", "report-migration-acceptance-checklist-csv", "REPORT_MIGRATION_ACCEPTANCE", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
+                reportAuditSummary(
+                        auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
+                        auditPart("period", result.get("period")),
+                        auditPart("status", result.get("status")),
+                        auditPart("pass", result.get("pass")),
+                        auditPart("todo", result.get("todo")),
+                        auditPart("warn", result.get("warn"))
+                ));
+        String suffix = safeOrgCode.isBlank() ? "all" : safeOrgCode;
+        return csvResponse("salary-report-migration-acceptance-checklist-" + suffix + ".csv", csv);
+    }
+
     @GetMapping(value = "/migration-guide.csv", produces = "text/csv")
     public ResponseEntity<byte[]> reportMigrationGuideCsv() {
         requireReportPermission();
@@ -163,28 +209,31 @@ public class SalaryReportController {
                 Summary:
                 - orgCode: %s
                 - status: %s
-                - fileCount: 8
+                - fileCount: 9
                 Files:
                 - salary-report-catalog.csv
                 - salary-report-migration-matrix.csv
+                - salary-report-migration-acceptance-checklist-%s.csv
                 - salary-report-migration-guide.csv
                 - salary-report-migration-closure-%s.csv
                 - salary-report-print-self-check-%s.csv
                 - delivery-package-meta.csv
                 - delivery-package-audits.csv
                 GeneratedAt: %s
-                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, LocalDateTime.now().withNano(0)));
+                """.formatted(safeOrgCode.isBlank() ? "ALL" : safeOrgCode, result.get("status"), suffix, suffix, suffix, LocalDateTime.now().withNano(0)));
         entries.put("salary-report-catalog.csv", reportCatalogCsvContent());
         entries.put("salary-report-migration-matrix.csv", reportMigrationMatrixCsvContent());
+        entries.put("salary-report-migration-acceptance-checklist-" + suffix + ".csv",
+                reportMigrationAcceptanceChecklistCsvContent(reportMigrationAcceptanceChecklistResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, limit)));
         entries.put("salary-report-migration-guide.csv", reportMigrationGuideCsvContent());
         entries.put("salary-report-migration-closure-" + suffix + ".csv", reportMigrationClosureCsvContent(result));
         entries.put("salary-report-print-self-check-" + suffix + ".csv", reportPrintSelfCheckCsvContent(result));
-        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 8));
+        entries.put("delivery-package-meta.csv", reportMigrationDeliveryPackageMetaCsv(result, 9));
         systemAuditService.record("report", "report-migration-delivery-package", "REPORT_MIGRATION_DELIVERY", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
                 reportAuditSummary(
                         auditPart("org", safeOrgCode.isBlank() ? "ALL" : safeOrgCode),
                         auditPart("status", result.get("status")),
-                        auditPart("files", 8)
+                        auditPart("files", 9)
                 ));
         entries.put("delivery-package-audits.csv", reportMigrationDeliveryAuditsCsv(safeOrgCode.isBlank() ? "ALL" : safeOrgCode));
         return ResponseEntity.ok()
@@ -420,6 +469,143 @@ public class SalaryReportController {
             rows.add(row);
         }
         return rows;
+    }
+
+    private Map<String, Object> reportMigrationAcceptanceChecklistResult(
+            String orgCode,
+            int year,
+            int month,
+            String businessType,
+            String keyword,
+            String personCode,
+            int yearFrom,
+            int yearTo,
+            int limit
+    ) {
+        String safeOrgCode = text(orgCode);
+        if (!safeOrgCode.isBlank()) {
+            organizationAccessService.requireOrgAccess(safeOrgCode);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        int safeYear = year > 0 ? Math.max(1900, Math.min(year, 2099)) : now.getYear();
+        int safeMonth = month > 0 ? Math.max(1, Math.min(month, 12)) : now.getMonthValue();
+        int safeYearFrom = Math.max(1900, Math.min(yearFrom, 2099));
+        int safeYearTo = Math.max(safeYearFrom, Math.min(yearTo, 2099));
+        int safeLimit = Math.max(1, Math.min(limit, 10000));
+        String safeBusinessType = text(businessType);
+        String safeKeyword = text(keyword);
+        String safePersonCode = text(personCode);
+        List<Map<String, Object>> items = new ArrayList<>();
+        boolean missingOrg = safeOrgCode.isBlank();
+        long caseCount = missingOrg ? 0 : countSalaryCases(safeOrgCode, safeYear, safeMonth, safeBusinessType, safeKeyword);
+        items.add(reportMigrationAcceptanceChecklistItem("approvalRoster", "Approval roster", caseCount, safeLimit, missingOrg,
+                "/api/reports/salary-case-approval-roster/print", "salary-case-approval-roster-print,salary-case-approval-roster-csv",
+                "Approval roster can be printed/exported for salary cases."));
+        items.add(reportMigrationAcceptanceChecklistItem("approvalBatch", "Approval batch print", caseCount, Math.min(safeLimit, 500), missingOrg,
+                "/api/reports/salary-case-approvals/print", "salary-case-approvals-print,salary-case-approvals-reprint",
+                "Approval batch print creates report print batch archive."));
+        items.add(reportMigrationAcceptanceChecklistItem("changeLedger", "Salary change ledger", caseCount, safeLimit, missingOrg,
+                "/api/reports/salary-change-ledger/print", "salary-change-ledger-print,salary-change-ledger-csv",
+                "Change ledger can be printed/exported for salary cases."));
+        items.add(reportMigrationAcceptanceChecklistItem("personRoster", "Person roster", missingOrg ? 0 : countPersonRoster(safeOrgCode, safeYear, safeMonth, safeKeyword), safeLimit, missingOrg,
+                "/api/reports/person-roster/print", "person-roster-print,person-roster-csv",
+                "Person roster uses base person and latest salary context."));
+        items.add(reportMigrationAcceptanceChecklistItem("salaryRoster", "Salary roster", missingOrg ? 0 : countSalaryRoster(safeOrgCode, safeYear, safeMonth), safeLimit, missingOrg,
+                "/api/reports/salary-roster/print", "salary-roster-print,salary-roster-csv",
+                "Salary roster uses hisbase salary rows by org and period."));
+        items.add(reportMigrationAcceptanceChecklistItem("salaryHistory", "Salary history detail", missingOrg ? 0 : countSalaryHistory(safeOrgCode, safePersonCode, safeYearFrom, safeYearTo), safeLimit, missingOrg,
+                "/api/reports/salary-history/print", "salary-history-print,salary-history-csv",
+                "Salary history can be traced by org, person and year range."));
+        items.add(reportMigrationAcceptanceChecklistItem("assessment", "Assessment summary", missingOrg ? 0 : countAssessment(safeOrgCode, safeYearFrom > 0 ? safeYearFrom : safeYear, safeKeyword), safeLimit, missingOrg,
+                "/api/reports/assessment-summary/print", "assessment-summary-print",
+                "Assessment summary is available for annual assessment rows."));
+        items.add(reportMigrationAcceptanceChecklistItem("standardTable", "Standard table print", countStandardTable("bz06_jbt", safeKeyword), safeLimit, false,
+                "/api/reports/standard-tables/print?tableName=bz06_jbt", "standard-table-print",
+                "Standard table print is available for whitelisted bz06 tables."));
+        items.add(reportMigrationAcceptanceChecklistItem("auditTrail", "Report audit trail", countReportAudits(safeOrgCode, safeKeyword), safeLimit, false,
+                "/api/reports/audits", "report-audits-csv",
+                "Report operations can be traced by action, target and operator."));
+        long pass = items.stream().filter(item -> "PASS".equals(text(item.get("status")))).count();
+        long warn = items.stream().filter(item -> "WARN".equals(text(item.get("status")))).count();
+        long todo = items.stream().filter(item -> "TODO".equals(text(item.get("status")))).count();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", todo > 0 ? "TODO" : (warn > 0 ? "WARN" : "PASS"));
+        result.put("orgCode", safeOrgCode);
+        result.put("year", safeYear);
+        result.put("month", safeMonth);
+        result.put("period", periodText(safeYear, safeMonth));
+        result.put("yearFrom", safeYearFrom);
+        result.put("yearTo", safeYearTo);
+        result.put("businessType", safeBusinessType);
+        result.put("keyword", safeKeyword);
+        result.put("personCode", safePersonCode);
+        result.put("limit", safeLimit);
+        result.put("pass", pass);
+        result.put("warn", warn);
+        result.put("todo", todo);
+        result.put("items", items);
+        result.put("checkedAt", LocalDateTime.now().withNano(0).toString());
+        return result;
+    }
+
+    private Map<String, Object> reportMigrationAcceptanceChecklistItem(
+            String code,
+            String title,
+            long sampleCount,
+            int limit,
+            boolean missingOrg,
+            String endpoint,
+            String auditActions,
+            String acceptanceEvidence
+    ) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        String status = missingOrg ? "WARN" : (sampleCount > 0 ? "PASS" : "TODO");
+        item.put("code", code);
+        item.put("title", title);
+        item.put("status", status);
+        item.put("sampleCount", sampleCount);
+        item.put("limit", limit);
+        item.put("limited", sampleCount > limit);
+        item.put("endpoint", endpoint);
+        item.put("auditActions", auditActions);
+        item.put("acceptanceEvidence", acceptanceEvidence);
+        item.put("nextAction", missingOrg
+                ? "Select orgCode and period, then rerun checklist."
+                : (sampleCount > 0 ? "Compare a printed/exported sample with the legacy report." : "Prepare sample data or confirm this report has no records in current scope."));
+        return item;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String reportMigrationAcceptanceChecklistCsvContent(Map<String, Object> result) {
+        List<Map<String, Object>> items = (List<Map<String, Object>>) result.getOrDefault("items", List.of());
+        StringBuilder csv = new StringBuilder();
+        csvRow(csv, "filter", "status", result.get("status"));
+        csvRow(csv, "filter", "orgCode", text(result.get("orgCode")).isBlank() ? "ALL" : result.get("orgCode"));
+        csvRow(csv, "filter", "period", result.get("period"));
+        csvRow(csv, "filter", "yearRange", result.get("yearFrom") + "-" + result.get("yearTo"));
+        csvRow(csv, "filter", "businessType", text(result.get("businessType")).isBlank() ? "ALL" : result.get("businessType"));
+        csvRow(csv, "filter", "keyword", text(result.get("keyword")).isBlank() ? "ALL" : result.get("keyword"));
+        csvRow(csv, "filter", "personCode", text(result.get("personCode")).isBlank() ? "ALL" : result.get("personCode"));
+        csvRow(csv, "filter", "pass", result.get("pass"));
+        csvRow(csv, "filter", "warn", result.get("warn"));
+        csvRow(csv, "filter", "todo", result.get("todo"));
+        csvRow(csv, "filter", "checkedAt", result.get("checkedAt"));
+        csv.append('\n');
+        csvRow(csv, "code", "title", "status", "sampleCount", "limit", "limited", "endpoint", "auditActions", "acceptanceEvidence", "nextAction");
+        for (Map<String, Object> item : items) {
+            csvRow(csv,
+                    item.get("code"),
+                    item.get("title"),
+                    item.get("status"),
+                    item.get("sampleCount"),
+                    item.get("limit"),
+                    item.get("limited"),
+                    item.get("endpoint"),
+                    item.get("auditActions"),
+                    item.get("acceptanceEvidence"),
+                    item.get("nextAction"));
+        }
+        return csv.toString();
     }
 
     private String reportMigrationMatrixCsvUrl(String code) {

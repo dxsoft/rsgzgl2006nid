@@ -1033,6 +1033,7 @@ const Format = {
             "report-migration-sample-evidence-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e",
             "report-migration-sample-comparison-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167",
             "report-migration-sample-comparison-review": "\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            "report-migration-sample-comparison-batch-review": "\u6279\u91cf\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167",
             "report-migration-guide-csv": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e",
             "report-migration-delivery-package": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305",
             "salary-case-approval-roster-print": "\u6253\u5370\u5ba1\u6279\u6e05\u518c",
@@ -3012,6 +3013,7 @@ const WorkbenchPanel = {
             keyword: value("keyword"),
             printStatus: value("printStatus") || "ALL",
             acceptanceStatus: value("acceptanceStatus") || "ALL",
+            sampleReviewStatus: value("sampleReviewStatus") || "ALL",
             auditAction: value("auditAction"),
             auditOperator: value("auditOperator"),
             auditStart: value("auditStart"),
@@ -3215,7 +3217,27 @@ const WorkbenchPanel = {
             businessType: values.businessType,
             keyword: values.keyword,
             personCode: values.personCode,
+            reviewStatus: values.sampleReviewStatus || "ALL",
             limit: Math.min(Number(values.limit || 5), 50)
+        }).toString()}`;
+    },
+    reportMigrationSampleComparisonBatchReviewUrl(status = "MATCHED") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-sample-comparison/batch-review?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            reviewStatus: values.sampleReviewStatus || "PENDING_LEGACY",
+            batchReviewStatus: status,
+            reviewCategory: status === "SPECIAL" ? "LEGACY_SPECIAL" : "OTHER",
+            reviewReason: status === "SPECIAL" ? "\u6279\u91cf\u6807\u8bb0\u4e3a\u65e7\u7cfb\u7edf\u7279\u6b8a\u60c5\u51b5" : "\u6279\u91cf\u6807\u8bb0\u4e3a\u65b0\u65e7\u6837\u672c\u4e00\u81f4",
+            limit: Math.min(Number(values.limit || 20), 50)
         }).toString()}`;
     },
     reportMigrationSampleComparisonUrl(mode = "json") {
@@ -3362,6 +3384,11 @@ const WorkbenchPanel = {
                     <span>TODO ${Format.html(result.todo || 0)}</span>
                     <span>\u65e7\u7cfb\u7edf\u5f85\u6838 ${Format.html(result.legacyPending || 0)}</span>
                     <span>\u5df2\u590d\u6838 ${Format.html(result.legacyReviewed || 0)}</span>
+                    <span>\u7b5b\u9009 ${Format.html(result.reviewStatus || "ALL")}</span>
+                </div>
+                <div class="report-batch-actions">
+                    <button type="button" data-report-sample-comparison-batch-review="MATCHED">\u5f53\u524d\u7b5b\u9009\u6279\u91cf\u4e00\u81f4</button>
+                    <button type="button" data-report-sample-comparison-batch-review="SPECIAL">\u5f53\u524d\u7b5b\u9009\u6279\u91cf\u7279\u6b8a</button>
                 </div>
                 <div class="report-audit-list">
                     ${items.slice(0, 40).map((item) => `
@@ -3401,6 +3428,18 @@ const WorkbenchPanel = {
             await Api.request(`/api/reports/migration-sample-comparison/review?${params.toString()}`, { method: "POST" });
             await WorkbenchPanel.loadReportMigrationSampleComparison();
             setStatus("\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u590d\u6838");
+        } catch (error) {
+            button.disabled = false;
+            setStatus(error.message);
+        }
+    },
+    async batchReviewReportMigrationSampleComparison(button) {
+        const status = button.dataset.reportSampleComparisonBatchReview || "MATCHED";
+        button.disabled = true;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationSampleComparisonBatchReviewUrl(status), { method: "POST" });
+            await WorkbenchPanel.loadReportMigrationSampleComparison();
+            setStatus(`\u6279\u91cf\u590d\u6838\u5b8c\u6210 ${Format.html(result.rows || 0)} \u6761`);
         } catch (error) {
             button.disabled = false;
             setStatus(error.message);
@@ -3865,6 +3904,7 @@ const WorkbenchPanel = {
             const defaultBusinessType = String(savedPrefs.businessType || els.workbenchChangeTypeSelect?.value || "");
             const defaultPrintStatus = String(savedPrefs.printStatus || "ALL");
             const defaultAcceptanceStatus = String(savedPrefs.acceptanceStatus || "ALL");
+            const defaultSampleReviewStatus = String(savedPrefs.sampleReviewStatus || "ALL");
             const defaultAuditAction = String(savedPrefs.auditAction || "");
             const defaultAuditOperator = String(savedPrefs.auditOperator || "");
             const defaultAuditStart = String(savedPrefs.auditStart || "");
@@ -3877,6 +3917,7 @@ const WorkbenchPanel = {
             const tableOption = (value, label) => `<option value="${Format.html(value)}" ${defaultTableName === value ? "selected" : ""}>${Format.html(label)}</option>`;
             const printStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultPrintStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
             const acceptanceStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultAcceptanceStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const sampleReviewStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultSampleReviewStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
             const auditActionOption = (value, label) => `<option value="${Format.html(value)}" ${defaultAuditAction === value ? "selected" : ""}>${Format.html(label)}</option>`;
             const actionButton = (kind, mode, label, requiresOrg = true) => `
                 <button type="button" class="link-button" data-report-action="${Format.html(kind)}" data-report-mode="${Format.html(mode)}" ${requiresOrg && !defaultOrgCode ? "disabled" : ""}>${Format.html(label)}</button>
@@ -3975,6 +4016,15 @@ const WorkbenchPanel = {
                                 ${acceptanceStatusOption("PENDING", "\u672a\u9a8c\u6536")}
                                 ${acceptanceStatusOption("EXPORTED", "\u5df2\u9a8c\u6536")}
                             </select></label>
+                            <label>\u6837\u672c\u590d\u6838<select name="sampleReviewStatus">
+                                ${sampleReviewStatusOption("ALL", "\u5168\u90e8")}
+                                ${sampleReviewStatusOption("PENDING_LEGACY", "\u5f85\u65e7\u7cfb\u7edf\u6838\u5bf9")}
+                                ${sampleReviewStatusOption("REVIEWED", "\u5df2\u590d\u6838")}
+                                ${sampleReviewStatusOption("MATCHED", "\u4e00\u81f4")}
+                                ${sampleReviewStatusOption("MISMATCHED", "\u4e0d\u4e00\u81f4")}
+                                ${sampleReviewStatusOption("SPECIAL", "\u7279\u6b8a")}
+                                ${sampleReviewStatusOption("IGNORED", "\u5ffd\u7565")}
+                            </select></label>
                             <label>\u5ba1\u8ba1\u52a8\u4f5c<select name="auditAction">
                                 ${auditActionOption("", "\u5168\u90e8\u52a8\u4f5c")}
                                 ${auditActionOption("salary-case-approval-print", "\u6253\u5370\u5ba1\u6279\u8868")}
@@ -3989,6 +4039,8 @@ const WorkbenchPanel = {
                                 ${auditActionOption("report-print-self-check-csv", "\u5bfc\u51fa\u6253\u5370\u81ea\u68c0\u9a8c\u6536\u5355")}
                                 ${auditActionOption("report-migration-sample-evidence-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e")}
                                 ${auditActionOption("report-migration-sample-comparison-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
+                                ${auditActionOption("report-migration-sample-comparison-review", "\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
+                                ${auditActionOption("report-migration-sample-comparison-batch-review", "\u6279\u91cf\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
                                 ${auditActionOption("report-migration-delivery-package", "\u5bfc\u51fa\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305")}
                                 ${auditActionOption("salary-migration-delivery-package", "\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305")}
                             </select></label>
@@ -16791,6 +16843,11 @@ function bindEvents() {
         const reportSampleComparisonReviewButton = event.target.closest("button[data-report-sample-comparison-review]");
         if (reportSampleComparisonReviewButton) {
             await WorkbenchPanel.reviewReportMigrationSampleComparison(reportSampleComparisonReviewButton);
+            return;
+        }
+        const reportSampleComparisonBatchReviewButton = event.target.closest("button[data-report-sample-comparison-batch-review]");
+        if (reportSampleComparisonBatchReviewButton) {
+            await WorkbenchPanel.batchReviewReportMigrationSampleComparison(reportSampleComparisonBatchReviewButton);
             return;
         }
         const reportMigrationGuideExportButton = event.target.closest("button[data-report-migration-guide-export]");

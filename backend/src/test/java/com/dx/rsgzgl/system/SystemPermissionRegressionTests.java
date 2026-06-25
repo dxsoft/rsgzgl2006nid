@@ -461,6 +461,8 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("data-report-sample-comparison"));
         assertTrue(app.contains("data-report-sample-comparison-export"));
         assertTrue(app.contains("data-report-sample-comparison-review"));
+        assertTrue(app.contains("data-report-sample-comparison-batch-review"));
+        assertTrue(app.contains("name=\"sampleReviewStatus\""));
         assertTrue(app.contains("data-report-migration-delivery-package"));
         assertTrue(app.contains("data-report-print-self-check-export"));
         assertTrue(app.contains("loadReportPrintSelfCheck()"));
@@ -477,14 +479,17 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("reportMigrationSampleEvidenceUrl("));
         assertTrue(app.contains("loadReportMigrationSampleEvidence()"));
         assertTrue(app.contains("reportMigrationSampleComparisonUrl("));
+        assertTrue(app.contains("reportMigrationSampleComparisonBatchReviewUrl("));
         assertTrue(app.contains("loadReportMigrationSampleComparison()"));
         assertTrue(app.contains("reviewReportMigrationSampleComparison("));
+        assertTrue(app.contains("batchReviewReportMigrationSampleComparison("));
         assertTrue(app.contains("report-migration-guide-csv"));
         assertTrue(app.contains("report-migration-matrix-csv"));
         assertTrue(app.contains("report-migration-acceptance-checklist-csv"));
         assertTrue(app.contains("report-migration-sample-evidence-csv"));
         assertTrue(app.contains("report-migration-sample-comparison-csv"));
         assertTrue(app.contains("report-migration-sample-comparison-review"));
+        assertTrue(app.contains("report-migration-sample-comparison-batch-review"));
         assertTrue(app.contains("report-migration-delivery-package"));
         assertTrue(app.contains("data-audit-action=\"report-migration-delivery-package\""));
         assertTrue(app.contains("reportPrintSelfCheckCsvUrl()"));
@@ -2252,11 +2257,40 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"legacyComparisonStatus\":\"MATCHED\"")))
                 .andExpect(content().string(containsString("\"reviewReason\":\"unit-test report sample matched\"")));
 
+        mockMvc.perform(get("/api/reports/migration-sample-comparison?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&personCode=001-00055&reviewStatus=MATCHED&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"reviewStatus\":\"MATCHED\"")))
+                .andExpect(content().string(containsString("\"legacyComparisonStatus\":\"MATCHED\"")))
+                .andExpect(content().string(containsString(caseNo)));
+
+        mockMvc.perform(post("/api/reports/migration-sample-comparison/batch-review")
+                        .param("orgCode", "001")
+                        .param("year", "2099")
+                        .param("month", "1")
+                        .param("keyword", "UT-PRINT-" + caseNo)
+                        .param("personCode", "001-00055")
+                        .param("reviewStatus", "MATCHED")
+                        .param("batchReviewStatus", "MATCHED")
+                        .param("reviewCategory", "OTHER")
+                        .param("reviewReason", "unit-test batch report sample matched")
+                        .param("limit", "3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"reviewStatus\":\"MATCHED\"")))
+                .andExpect(content().string(containsString("\"rows\":")));
+
         mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-comparison-review&targetCode=001&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-review\"")))
                 .andExpect(content().string(containsString("status=MATCHED")));
+
+        mockMvc.perform(get("/api/reports/audits?action=report-migration-sample-comparison-batch-review&targetCode=001&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"actionName\":\"report-migration-sample-comparison-batch-review\"")))
+                .andExpect(content().string(containsString("rows=")));
 
         var reportMigrationDeliveryPackage = mockMvc.perform(get("/api/reports/migration-delivery-package.zip?orgCode=001&year=2099&month=1&keyword=UT-PRINT-" + caseNo + "&limit=5")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
@@ -2323,7 +2357,7 @@ class SystemPermissionRegressionTests {
         assertTrue(reportMigrationDeliverySampleEvidence.contains(caseNo));
         assertTrue(reportMigrationDeliverySampleComparison.contains("approvalBatch"));
         assertTrue(reportMigrationDeliverySampleComparison.contains("MATCHED"));
-        assertTrue(reportMigrationDeliverySampleComparison.contains("unit-test report sample matched"));
+        assertTrue(reportMigrationDeliverySampleComparison.contains("unit-test batch report sample matched"));
         assertTrue(reportMigrationDeliverySampleComparison.contains("PENDING_LEGACY"));
         assertTrue(reportMigrationDeliverySampleComparison.contains(caseNo));
         assertTrue(reportMigrationDeliveryMeta.contains("\"meta\",\"orgCode\",\"001\""));
@@ -2339,7 +2373,7 @@ class SystemPermissionRegressionTests {
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"actionName\":\"report-migration-delivery-package\"")))
-                .andExpect(content().string(containsString("files=10")));
+                .andExpect(content().string(containsString("files=11")));
 
         mockMvc.perform(get("/api/workbench/salary-cases/" + caseNo + "/history-write-comparison.csv")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))

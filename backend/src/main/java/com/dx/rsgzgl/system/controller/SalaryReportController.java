@@ -231,12 +231,13 @@ public class SalaryReportController {
             @RequestParam(defaultValue = "") String businessType,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "ALL") String reviewStatus,
             @RequestParam(defaultValue = "2006") int yearFrom,
             @RequestParam(defaultValue = "2099") int yearTo,
             @RequestParam(defaultValue = "5") int limit
     ) {
         requireReportPermission();
-        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, reviewStatus, yearFrom, yearTo, limit);
         return ApiResponse.ok(result);
     }
 
@@ -248,12 +249,13 @@ public class SalaryReportController {
             @RequestParam(defaultValue = "") String businessType,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "ALL") String reviewStatus,
             @RequestParam(defaultValue = "2006") int yearFrom,
             @RequestParam(defaultValue = "2099") int yearTo,
             @RequestParam(defaultValue = "5") int limit
     ) {
         requireReportPermission();
-        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
+        Map<String, Object> result = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, reviewStatus, yearFrom, yearTo, limit);
         String csv = reportMigrationSampleComparisonCsvContent(result);
         String safeOrgCode = text(result.get("orgCode"));
         systemAuditService.record("report", "report-migration-sample-comparison-csv", "REPORT_MIGRATION_SAMPLE_COMPARISON", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
@@ -266,6 +268,74 @@ public class SalaryReportController {
                 ));
         String suffix = safeOrgCode.isBlank() ? "all" : safeOrgCode;
         return csvResponse("salary-report-migration-sample-comparison-" + suffix + ".csv", csv);
+    }
+
+    @PostMapping("/migration-sample-comparison/batch-review")
+    public ApiResponse<Map<String, Object>> batchReviewReportMigrationSampleComparison(
+            @RequestParam(defaultValue = "") String orgCode,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month,
+            @RequestParam(defaultValue = "") String businessType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String personCode,
+            @RequestParam(defaultValue = "PENDING_LEGACY") String reviewStatus,
+            @RequestParam(defaultValue = "MATCHED") String batchReviewStatus,
+            @RequestParam(defaultValue = "") String reviewCategory,
+            @RequestParam(defaultValue = "") String reviewReason,
+            @RequestParam(defaultValue = "2006") int yearFrom,
+            @RequestParam(defaultValue = "2099") int yearTo,
+            @RequestParam(defaultValue = "20") int limit
+    ) {
+        requireReportPermission();
+        Map<String, Object> sampleResult = reportMigrationSampleComparisonResult(orgCode, year, month, businessType, keyword, personCode, reviewStatus, yearFrom, yearTo, limit);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) sampleResult.getOrDefault("items", List.of());
+        String safeReviewStatus = normalizeReportMigrationSampleReviewStatus(batchReviewStatus);
+        String safeReviewCategory = normalizeReportMigrationSampleReviewCategory(reviewCategory);
+        String safeReviewReason = text(reviewReason).isBlank() ? "batch reviewed report migration samples" : text(reviewReason);
+        String username = text(currentUserService.currentUsername());
+        int updated = 0;
+        for (Map<String, Object> row : rows) {
+            String reportCode = text(row.get("reportCode"));
+            String sampleKey = text(row.get("sampleKey"));
+            if (reportCode.isBlank() || sampleKey.isBlank()) {
+                continue;
+            }
+            jdbcTemplate.update("""
+                    INSERT INTO salary_report_migration_sample_review(
+                        report_code, sample_key, org_code, person_code, period_text,
+                        review_status, review_category, review_reason, reviewed_by, reviewed_at, created_at, updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE
+                        person_code = VALUES(person_code),
+                        review_status = VALUES(review_status),
+                        review_category = VALUES(review_category),
+                        review_reason = VALUES(review_reason),
+                        reviewed_by = VALUES(reviewed_by),
+                        reviewed_at = VALUES(reviewed_at),
+                        updated_at = NOW()
+                    """, reportCode, sampleKey, text(row.get("orgCode")), text(row.get("personCode")), text(row.get("period")),
+                    safeReviewStatus, safeReviewCategory, safeReviewReason, username);
+            updated++;
+        }
+        String safeOrgCode = text(sampleResult.get("orgCode"));
+        systemAuditService.record("report", "report-migration-sample-comparison-batch-review", "REPORT_MIGRATION_SAMPLE_COMPARISON", safeOrgCode.isBlank() ? "ALL" : safeOrgCode,
+                reportAuditSummary(
+                        auditPart("filterStatus", reviewStatus),
+                        auditPart("status", safeReviewStatus),
+                        auditPart("category", safeReviewCategory),
+                        auditPart("rows", updated)
+                ));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("orgCode", safeOrgCode);
+        result.put("reviewStatus", safeReviewStatus);
+        result.put("reviewCategory", safeReviewCategory);
+        result.put("reviewReason", safeReviewReason);
+        result.put("rows", updated);
+        result.put("reviewedBy", username);
+        result.put("reviewedAt", LocalDateTime.now().withNano(0).toString());
+        return ApiResponse.ok(result);
     }
 
     @PostMapping("/migration-sample-comparison/review")
@@ -382,7 +452,7 @@ public class SalaryReportController {
         entries.put("salary-report-migration-sample-evidence-" + suffix + ".csv",
                 reportMigrationSampleEvidenceCsvContent(reportMigrationSampleEvidenceResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, Math.min(limit, 20))));
         entries.put("salary-report-migration-sample-comparison-" + suffix + ".csv",
-                reportMigrationSampleComparisonCsvContent(reportMigrationSampleComparisonResult(safeOrgCode, year, month, businessType, keyword, "", 2006, 2099, Math.min(limit, 20))));
+                reportMigrationSampleComparisonCsvContent(reportMigrationSampleComparisonResult(safeOrgCode, year, month, businessType, keyword, "", "ALL", 2006, 2099, Math.min(limit, 20))));
         entries.put("salary-report-migration-guide.csv", reportMigrationGuideCsvContent());
         entries.put("salary-report-migration-closure-" + suffix + ".csv", reportMigrationClosureCsvContent(result));
         entries.put("salary-report-print-self-check-" + suffix + ".csv", reportPrintSelfCheckCsvContent(result));
@@ -854,6 +924,7 @@ public class SalaryReportController {
             String businessType,
             String keyword,
             String personCode,
+            String reviewStatus,
             int yearFrom,
             int yearTo,
             int limit
@@ -861,8 +932,12 @@ public class SalaryReportController {
         ensureReportMigrationSampleComparisonReviewTable();
         Map<String, Object> evidence = reportMigrationSampleEvidenceResult(orgCode, year, month, businessType, keyword, personCode, yearFrom, yearTo, limit);
         List<Map<String, Object>> evidenceRows = (List<Map<String, Object>>) evidence.getOrDefault("items", List.of());
-        List<Map<String, Object>> rows = evidenceRows.stream()
+        String safeReviewStatus = text(reviewStatus).isBlank() ? "ALL" : text(reviewStatus).toUpperCase(Locale.ROOT);
+        List<Map<String, Object>> allRows = evidenceRows.stream()
                 .map(this::reportMigrationSampleComparisonRow)
+                .toList();
+        List<Map<String, Object>> rows = allRows.stream()
+                .filter(row -> reportMigrationSampleReviewStatusMatches(row, safeReviewStatus))
                 .toList();
         long pass = rows.stream().filter(row -> "PASS".equals(text(row.get("evidenceStatus")))).count();
         long warn = rows.stream().filter(row -> "WARN".equals(text(row.get("evidenceStatus")))).count();
@@ -881,6 +956,7 @@ public class SalaryReportController {
         result.put("businessType", evidence.get("businessType"));
         result.put("keyword", evidence.get("keyword"));
         result.put("personCode", evidence.get("personCode"));
+        result.put("reviewStatus", safeReviewStatus);
         result.put("limit", evidence.get("limit"));
         result.put("rows", rows.size());
         result.put("pass", pass);
@@ -891,6 +967,17 @@ public class SalaryReportController {
         result.put("items", rows);
         result.put("checkedAt", LocalDateTime.now().withNano(0).toString());
         return result;
+    }
+
+    private boolean reportMigrationSampleReviewStatusMatches(Map<String, Object> row, String reviewStatus) {
+        String status = text(row.get("legacyComparisonStatus"));
+        if (reviewStatus.isBlank() || "ALL".equals(reviewStatus)) {
+            return true;
+        }
+        if ("REVIEWED".equals(reviewStatus)) {
+            return !"PENDING_LEGACY".equals(status);
+        }
+        return reviewStatus.equals(status);
     }
 
     private Map<String, Object> reportMigrationSampleComparisonRow(Map<String, Object> evidence) {
@@ -972,6 +1059,7 @@ public class SalaryReportController {
         csvRow(csv, "filter", "businessType", text(result.get("businessType")).isBlank() ? "ALL" : result.get("businessType"));
         csvRow(csv, "filter", "keyword", text(result.get("keyword")).isBlank() ? "ALL" : result.get("keyword"));
         csvRow(csv, "filter", "personCode", text(result.get("personCode")).isBlank() ? "ALL" : result.get("personCode"));
+        csvRow(csv, "filter", "reviewStatus", result.get("reviewStatus"));
         csvRow(csv, "filter", "pass", result.get("pass"));
         csvRow(csv, "filter", "warn", result.get("warn"));
         csvRow(csv, "filter", "todo", result.get("todo"));

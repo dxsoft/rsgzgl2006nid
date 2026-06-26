@@ -356,8 +356,12 @@ button:disabled {
 
 .workbench-view {
     display: grid;
-    gap: 10px;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    gap: 9px;
     padding: 10px;
+    min-height: 0;
+    height: 100%;
+    background: #f3f5f7;
 }
 
 .workbench-view.hidden {
@@ -386,12 +390,12 @@ button:disabled {
 
 .workbench-header {
     display: grid;
-    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: minmax(190px, 260px) minmax(0, 1fr);
+    align-items: center;
     gap: 10px;
-    padding: 10px;
+    padding: 9px 10px;
     border: 1px solid var(--border);
-    background: var(--panel);
+    background: linear-gradient(#ffffff, #f8fafb);
 }
 
 .workbench-header h2 {
@@ -660,11 +664,12 @@ button:disabled {
     display: flex;
     align-items: stretch;
     gap: 8px;
-    min-height: 70px;
-    padding: 8px;
+    min-height: 68px;
+    padding: 7px;
     border: 1px solid var(--border);
-    background: var(--panel);
+    background: linear-gradient(#ffffff, #f8fafb);
     overflow-x: auto;
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .ribbon-group {
@@ -672,14 +677,16 @@ button:disabled {
     grid-template-columns: repeat(3, auto);
     align-content: start;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     min-width: max-content;
-    padding: 6px 9px 8px;
-    border-right: 1px solid var(--border);
+    padding: 6px 9px 7px;
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.78);
 }
 
 .ribbon-group:last-child {
-    border-right: 0;
+    border-right: 1px solid var(--border-soft);
 }
 
 .ribbon-group > span {
@@ -706,6 +713,10 @@ button:disabled {
     font-size: 12px;
 }
 
+.ribbon-group button:hover {
+    background: var(--selected);
+}
+
 .period-group {
     grid-template-columns: 72px 72px 72px 116px;
 }
@@ -728,18 +739,21 @@ button:disabled {
 
 .workbench-tools {
     display: grid;
-    gap: 7px;
+    gap: 6px;
     min-width: 0;
 }
 
 .filter-strip,
 .workbench-action-strip {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 5px;
     min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 1px;
 }
 
 .filter-strip input,
@@ -747,33 +761,35 @@ button:disabled {
 .workbench-tools input,
 .workbench-tools select {
     width: 100%;
-    min-height: 34px;
+    min-height: 32px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 0 8px;
     background: var(--panel);
 }
 
 .filter-strip input {
-    flex: 1 1 220px;
-    min-width: 180px;
+    flex: 0 0 210px;
+    min-width: 210px;
 }
 
 .filter-strip select {
-    flex: 0 1 132px;
+    flex: 0 0 128px;
 }
 
 .filter-strip button,
 .workbench-action-strip button {
-    min-height: 30px;
+    flex: 0 0 auto;
+    min-height: 28px;
     border-radius: 4px;
-    padding: 0 10px;
+    padding: 0 9px;
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .workbench-action-strip {
-    padding-top: 7px;
-    border-top: 1px dashed var(--border);
+    padding-top: 5px;
+    border-top: 1px solid var(--border-soft);
 }
 
 .workbench-filter-summary {
@@ -782,11 +798,10 @@ button:disabled {
     justify-content: space-between;
     gap: 8px;
     flex-wrap: wrap;
-    min-height: 30px;
-    padding: 7px 12px;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: var(--row);
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: #fbfcfd;
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
@@ -2622,7 +2637,8 @@ button:disabled {
 .workbench-metrics {
     display: grid;
     grid-template-columns: repeat(6, minmax(128px, 1fr));
-    gap: 8px;
+    gap: 7px;
+    min-height: 0;
 }
 
 .closure-queue-strip {
@@ -2728,20 +2744,23 @@ button:disabled {
 }
 
 .metric-card {
+    position: relative;
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     gap: 4px;
-    min-height: 82px;
-    padding: 10px;
+    min-height: 78px;
+    padding: 9px 10px;
     border: 1px solid var(--border);
-    border-radius: 0;
+    border-radius: 5px;
     background: var(--panel);
     color: inherit;
     text-align: left;
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.03);
 }
 
 .metric-card:hover {
-    background: var(--selected);
+    border-color: var(--selected-strong);
+    background: #fbfcfd;
 }
 
 .metric-card.risk {
@@ -2775,7 +2794,7 @@ button:disabled {
 }
 
 .metric-card strong {
-    font-size: 22px;
+    font-size: 21px;
     font-variant-numeric: tabular-nums;
 }
 
@@ -2801,8 +2820,9 @@ button:disabled {
 .workbench-grid {
     display: grid;
     grid-template-columns: minmax(280px, 0.95fr) minmax(300px, 1.05fr);
-    grid-template-rows: minmax(260px, calc(50vh - 150px)) auto;
-    gap: 10px;
+    grid-template-rows: minmax(220px, 1fr) minmax(180px, auto);
+    gap: 9px;
+    min-height: 0;
 }
 
 .workbench-panel {
@@ -2812,6 +2832,7 @@ button:disabled {
     grid-template-rows: auto 1fr auto;
     border: 1px solid var(--border);
     background: var(--panel);
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .history-plan-panel {
@@ -2823,12 +2844,16 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
     min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 1px;
 }
 
 .pane-actions select {
+    flex: 0 0 auto;
     min-height: 30px;
     max-width: 150px;
     border: 1px solid var(--border);
@@ -2838,10 +2863,12 @@ button:disabled {
 }
 
 .pane-actions button {
+    flex: 0 0 auto;
     min-height: 28px;
     border-radius: 4px;
     padding: 0 9px;
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .workbench-panel > .pane-title,
@@ -2878,6 +2905,7 @@ button:disabled {
     max-height: none;
     min-height: 0;
     overflow: auto;
+    background: #fbfcfd;
 }
 
 .history-plan-list {
@@ -3689,26 +3717,37 @@ button:disabled {
 }
 
 .work-item {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 4px 8px;
+    gap: 5px 8px;
     width: 100%;
-    padding: 9px 10px;
+    padding: 9px 10px 9px 13px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: var(--panel);
     text-align: left;
 }
 
 .work-item:hover {
-    background: var(--selected);
+    background: #f7fbfa;
 }
 
 .work-item.has-next-action {
-    border-left: 4px solid var(--accent);
+    border-left: 0;
     background: color-mix(in srgb, var(--accent) 4%, var(--panel));
+}
+
+.work-item.has-next-action::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
 }
 
 .work-item.has-next-action:hover {
@@ -3716,8 +3755,18 @@ button:disabled {
 }
 
 .work-item.migration-delivery-governance {
-    border-left: 4px solid var(--danger);
+    border-left: 0;
     background: color-mix(in srgb, var(--danger) 5%, var(--panel));
+}
+
+.work-item.migration-delivery-governance::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--danger);
 }
 
 .work-item.migration-delivery-governance:hover {
@@ -3736,7 +3785,7 @@ button:disabled {
 }
 
 .work-item-complete {
-    min-height: 28px;
+    min-height: 26px;
     padding: 0 10px;
     border-radius: 4px;
 }
@@ -3749,9 +3798,10 @@ button:disabled {
 }
 
 .work-item-actions button {
-    min-height: 26px;
+    min-height: 25px;
     padding: 0 8px;
     border-radius: 4px;
+    font-size: 12px;
 }
 
 .load-more-button {
@@ -3759,7 +3809,7 @@ button:disabled {
     border: 0;
     border-top: 1px solid var(--border);
     border-radius: 0;
-    background: var(--row);
+    background: linear-gradient(#ffffff, #f8fafb);
 }
 
 .work-item-main {
@@ -3781,7 +3831,7 @@ button:disabled {
 
 .work-item-state {
     width: fit-content;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border: 1px solid #e2c692;
     border-radius: 4px;
     background: #fff8e8;
@@ -3797,7 +3847,7 @@ button:disabled {
 .work-item-next-action,
 .work-item-delivery-warning {
     width: fit-content;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: var(--row);

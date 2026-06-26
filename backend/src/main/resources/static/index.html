@@ -314,6 +314,72 @@
                     </div>
                     <button id="systemRefreshButton" type="button">&#21047;&#26032;</button>
                 </div>
+                <section id="salaryConfigPanel" class="config-band hidden">
+                    <div class="section-heading config-heading">
+                        <div>
+                            <h2>&#24037;&#36164;&#39033;&#30446;&#37197;&#32622;</h2>
+                            <p id="configHint">&#25353;&#20154;&#21592;&#31867;&#21035;&#26597;&#30475; fldgz &#30340;&#26377;&#25928;&#39033;&#30446;</p>
+                        </div>
+                        <div class="config-tools">
+                            <button id="civilConfigButton" type="button" data-category="01" data-dwsx="01">&#20844;&#21153;&#21592;</button>
+                            <button id="institutionConfigButton" type="button" data-category="10" data-dwsx="07">&#20107;&#19994;&#20154;&#21592;</button>
+                            <button id="allConfigButton" type="button">&#20840;&#37096;</button>
+                            <input id="configYearInput" type="number" min="2006" max="2099" value="2026" aria-label="&#24180;&#24230;">
+                        </div>
+                    </div>
+                    <div id="fieldConfigList" class="field-config-list"></div>
+                    <form id="fieldConfigEditor" class="field-config-editor hidden">
+                        <div class="editor-title">
+                            <strong id="configEditorTitle">&#32534;&#36753;&#24037;&#36164;&#39033;</strong>
+                            <button id="cancelConfigEditButton" type="button">&#21462;&#28040;</button>
+                        </div>
+                        <div class="editor-grid">
+                            <label>
+                                <span>&#20844;&#21153;&#21592;&#26631;&#39064;</span>
+                                <input id="configFieldCapInput" type="text">
+                            </label>
+                            <label>
+                                <span>&#20107;&#19994;&#20154;&#21592;&#26631;&#39064;</span>
+                                <input id="configFieldCapsInput" type="text">
+                            </label>
+                            <label>
+                                <span>category</span>
+                                <select id="configCategoryInput">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>category6</span>
+                                <select id="configCategory6Input">
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>sfsy</span>
+                                <input id="configActiveInput" type="text">
+                            </label>
+                            <label>
+                                <span>sfsy06</span>
+                                <input id="configActive2006Input" type="text">
+                            </label>
+                            <label>
+                                <span>sequence</span>
+                                <input id="configSequenceInput" type="number" min="0" max="9999">
+                            </label>
+                        </div>
+                        <div class="editor-actions">
+                            <button id="saveConfigButton" type="submit">&#20445;&#23384;&#37197;&#32622;</button>
+                        </div>
+                        <div class="config-audit">
+                            <strong>&#26368;&#36817;&#21464;&#26356;</strong>
+                            <div id="configAuditList" class="config-audit-list"></div>
+                        </div>
+                    </form>
+                </section>
                 <div id="systemContent" class="system-content"></div>
             </section>
 
@@ -348,73 +414,6 @@
                 <h2>&#36873;&#25321;&#19968;&#21517;&#20154;&#21592;</h2>
                 <p>&#26597;&#30475;&#26723;&#26696;&#12289;&#24037;&#36164;&#21382;&#21490;&#21644;&#24037;&#36164;&#32452;&#25104;&#12290;</p>
             </div>
-
-            <section class="config-band">
-                <div class="section-heading config-heading">
-                    <div>
-                        <h2>&#24037;&#36164;&#39033;&#30446;&#37197;&#32622;</h2>
-                        <p id="configHint">&#25353;&#20154;&#21592;&#31867;&#21035;&#26597;&#30475; fldgz &#30340;&#26377;&#25928;&#39033;&#30446;</p>
-                    </div>
-                    <div class="config-tools">
-                        <button id="civilConfigButton" type="button" data-category="01" data-dwsx="01">&#20844;&#21153;&#21592;</button>
-                        <button id="institutionConfigButton" type="button" data-category="10" data-dwsx="07">&#20107;&#19994;&#20154;&#21592;</button>
-                        <button id="allConfigButton" type="button">&#20840;&#37096;</button>
-                        <input id="configYearInput" type="number" min="2006" max="2099" value="2026" aria-label="&#24180;&#24230;">
-                    </div>
-                </div>
-                <div id="fieldConfigList" class="field-config-list"></div>
-                <form id="fieldConfigEditor" class="field-config-editor hidden">
-                    <div class="editor-title">
-                        <strong id="configEditorTitle">&#32534;&#36753;&#24037;&#36164;&#39033;</strong>
-                        <button id="cancelConfigEditButton" type="button">&#21462;&#28040;</button>
-                    </div>
-                    <div class="editor-grid">
-                        <label>
-                            <span>&#20844;&#21153;&#21592;&#26631;&#39064;</span>
-                            <input id="configFieldCapInput" type="text">
-                        </label>
-                        <label>
-                            <span>&#20107;&#19994;&#20154;&#21592;&#26631;&#39064;</span>
-                            <input id="configFieldCapsInput" type="text">
-                        </label>
-                        <label>
-                            <span>category</span>
-                            <select id="configCategoryInput">
-                                <option value="00">00</option>
-                                <option value="01">01</option>
-                                <option value="10">10</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>category6</span>
-                            <select id="configCategory6Input">
-                                <option value="00">00</option>
-                                <option value="01">01</option>
-                                <option value="10">10</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>sfsy</span>
-                            <input id="configActiveInput" type="text">
-                        </label>
-                        <label>
-                            <span>sfsy06</span>
-                            <input id="configActive2006Input" type="text">
-                        </label>
-                        <label>
-                            <span>sequence</span>
-                            <input id="configSequenceInput" type="number" min="0" max="9999">
-                        </label>
-                    </div>
-                    <div class="editor-actions">
-                        <button id="saveConfigButton" type="submit">&#20445;&#23384;&#37197;&#32622;</button>
-                    </div>
-                    <div class="config-audit">
-                        <strong>&#26368;&#36817;&#21464;&#26356;</strong>
-                        <div id="configAuditList" class="config-audit-list"></div>
-                    </div>
-                </form>
-            </section>
 
             <div id="detailContent" class="detail-content hidden">
                 <div id="maintenanceReturnBar" class="maintenance-return-bar hidden"></div>

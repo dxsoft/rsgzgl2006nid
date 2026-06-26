@@ -102,7 +102,7 @@ public class SystemMenuService {
                         menu("SYSTEM_ROLE", "\u89d2\u8272\u6743\u9650", "role", "system", 20),
                         menu("SYSTEM_USER", "\u7528\u6237\u7ba1\u7406", "user", "system", 30),
                         menu("SYSTEM_AUDIT", "\u64cd\u4f5c\u5ba1\u8ba1", "audit", "system", 40),
-                        menu("SALARY_CONFIG", "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e", "config", "salary", 50)
+                        menu("SALARY_CONFIG", "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e", "config", "system", 50)
                 ))
         );
     }

@@ -371,6 +371,7 @@ const els = {
     systemViewTitle: document.querySelector("#systemViewTitle"),
     systemViewHint: document.querySelector("#systemViewHint"),
     systemContent: document.querySelector("#systemContent"),
+    salaryConfigPanel: document.querySelector("#salaryConfigPanel"),
     systemRefreshButton: document.querySelector("#systemRefreshButton"),
     workbenchRefreshButton: document.querySelector("#workbenchRefreshButton"),
     workbenchFilterForm: document.querySelector("#workbenchFilterForm"),
@@ -576,8 +577,6 @@ const Permissions = {
         const canTrial = Permissions.has("SALARY_TRIAL");
         const canReconcile = Permissions.has("SALARY_RECONCILE");
         const canExport = Permissions.has("SALARY_EXPORT");
-        const canConfig = Permissions.has("SALARY_CONFIG");
-
         Permissions.show(els.normalGradeBatchButton, canTrial);
         Permissions.show(els.generateNormalGradeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
         Permissions.show(els.generateEntrySalaryTodoButton, canTrial && Permissions.has("SALARY_TODO"));
@@ -592,13 +591,6 @@ const Permissions = {
         Permissions.show(els.exportBatchReconcileButton, canExport);
         Permissions.show(els.exportNormalGradeButton, canExport);
         Permissions.show(els.exportGeneratedTimelineButton, canExport);
-
-        const configBand = els.fieldConfigList?.closest(".config-band");
-        Permissions.show(configBand, canConfig);
-        if (!canConfig) {
-            ConfigPanel.hideEditor();
-            els.fieldConfigList.innerHTML = "";
-        }
     },
     applyWorkbench() {
         const canTodo = Permissions.has("SALARY_TODO") || Permissions.has("APPLICATION_TODO");
@@ -14021,16 +14013,34 @@ const SystemPanel = {
     },
     async load(menuCode = state.activeMenuCode) {
         setStatus(TEXT.loadingSystem);
+        SystemPanel.hideSalaryConfig();
         if (menuCode === "SYSTEM_AUDIT") {
             await SystemPanel.loadAudits();
         } else if (menuCode === "SYSTEM_ROLE") {
             await SystemPanel.loadRoles();
         } else if (menuCode === "SYSTEM_USER") {
             await SystemPanel.loadUsers();
+        } else if (menuCode === "SALARY_CONFIG") {
+            await SystemPanel.loadSalaryConfig();
         } else {
             await SystemPanel.loadMenus();
         }
         setStatus(TEXT.systemReady);
+    },
+    hideSalaryConfig() {
+        if (els.salaryConfigPanel) {
+            els.salaryConfigPanel.classList.add("hidden");
+        }
+        ConfigPanel.hideEditor();
+    },
+    async loadSalaryConfig() {
+        els.systemViewTitle.textContent = "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e";
+        els.systemViewHint.textContent = "\u7ef4\u62a4\u5de5\u8d44\u9879\u76ee\u5728\u516c\u52a1\u5458\u3001\u4e8b\u4e1a\u4eba\u5458\u53e3\u5f84\u4e0b\u7684\u663e\u793a\u548c\u542f\u7528\u89c4\u5219\u3002";
+        els.systemContent.innerHTML = "";
+        if (els.salaryConfigPanel) {
+            els.salaryConfigPanel.classList.remove("hidden");
+        }
+        await ConfigPanel.loadEffective();
     },
     async loadMenus() {
         els.systemViewTitle.textContent = "\u83dc\u5355\u7ba1\u7406";
@@ -14647,9 +14657,6 @@ const SystemShell = {
             if (!state.orgs.length) {
                 await OrgPanel.load();
                 await PeoplePanel.load();
-                if (Permissions.has("SALARY_CONFIG")) {
-                    await ConfigPanel.loadEffective();
-                }
             }
             if (!options.silent) {
                 setStatus(TEXT.salaryWorkspaceReady);

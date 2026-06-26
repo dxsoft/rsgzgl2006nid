@@ -172,6 +172,18 @@ Invoke-ReadinessStep "Required launch documents" {
     Assert-Contains $readmeText "production history-write preparation" "Backend README does not link the launch checklist."
 }
 
+if ($StartBackend) {
+    Invoke-ReadinessStep "Start managed backend" {
+        $args = @(
+            "-ExecutionPolicy", "Bypass",
+            "-File", (Join-Path $PSScriptRoot "start-backend-dev.ps1"),
+            "-DbPassword", $DbPassword,
+            "-TimeoutSec", "120"
+        )
+        Invoke-NativeCommand "powershell" $args 180
+    }
+}
+
 Invoke-ReadinessStep "Local service probe" {
     $response = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -TimeoutSec $TimeoutSec
     "HTTP status: $($response.StatusCode)"
@@ -257,12 +269,6 @@ if (-not $SkipOnlineBusinessClosure) {
             "-Password", $Password,
             "-DbPassword", $DbPassword
         )
-        if ($StartBackend) {
-            $args += "-StartBackend"
-        }
-        if ($StopBackendAfter) {
-            $args += "-StopBackendAfter"
-        }
         Invoke-NativeCommand "powershell" $args ($MavenTimeoutSec * 10)
     }
 }
@@ -276,6 +282,16 @@ if (-not $SkipPackage) {
         } finally {
             Pop-Location
         }
+    }
+}
+
+if ($StopBackendAfter) {
+    Invoke-ReadinessStep "Stop managed backend" {
+        $args = @(
+            "-ExecutionPolicy", "Bypass",
+            "-File", (Join-Path $PSScriptRoot "stop-backend-dev.ps1")
+        )
+        Invoke-NativeCommand "powershell" $args 60
     }
 }
 

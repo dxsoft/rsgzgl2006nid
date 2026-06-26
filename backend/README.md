@@ -114,6 +114,8 @@ $env:DB_PASSWORD='your-local-password'
 powershell -ExecutionPolicy Bypass -File scripts\verify-launch-readiness.ps1 -StartBackend -StopBackendAfter
 ```
 
+With `-StartBackend`, the readiness script starts the managed backend before service probing and permission checks; with `-StopBackendAfter`, it stops the managed backend after the final gate.
+
 Additional launch artifacts can be produced from the repository root:
 
 ```powershell

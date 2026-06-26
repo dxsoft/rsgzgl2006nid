@@ -140,6 +140,17 @@ function Assert-Contains([string]$Value, [string]$Expected, [string]$Message) {
     }
 }
 
+function Resolve-BaseUrlPort([string]$Url) {
+    try {
+        $uri = [System.Uri]$Url
+        if ($uri.Port -gt 0) {
+            return $uri.Port
+        }
+    } catch {
+    }
+    return 18080
+}
+
 $gitCommit = (& git -C $root rev-parse --short HEAD 2>$null)
 $gitStatus = (& git -C $root status --short 2>$null)
 
@@ -178,6 +189,7 @@ if ($StartBackend) {
             "-ExecutionPolicy", "Bypass",
             "-File", (Join-Path $PSScriptRoot "start-backend-dev.ps1"),
             "-DbPassword", $DbPassword,
+            "-Port", "" + (Resolve-BaseUrlPort $BaseUrl),
             "-TimeoutSec", "120"
         )
         Invoke-NativeCommand "powershell" $args 180

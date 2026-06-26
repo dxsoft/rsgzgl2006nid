@@ -70,6 +70,17 @@ function Invoke-VerifyScript([string]$Path, [hashtable]$Arguments) {
     & $Path @Arguments
 }
 
+function Resolve-BaseUrlPort([string]$Url) {
+    try {
+        $uri = [System.Uri]$Url
+        if ($uri.Port -gt 0) {
+            return $uri.Port
+        }
+    } catch {
+    }
+    return 18080
+}
+
 Add-Report "# Online Business Closure Verification"
 Add-Report ("GeneratedAt: {0}" -f $startedAt.ToString("yyyy-MM-dd HH:mm:ss"))
 Add-Report ("BaseUrl: {0}" -f $BaseUrl)
@@ -81,7 +92,7 @@ try {
             if ([string]::IsNullOrWhiteSpace($DbPassword)) {
                 throw "DB_PASSWORD is required for -StartBackend. Set `$env:DB_PASSWORD or pass -DbPassword."
             }
-            & (Join-Path $PSScriptRoot "start-backend-dev.ps1") -DbPassword $DbPassword -TimeoutSec 120
+            & (Join-Path $PSScriptRoot "start-backend-dev.ps1") -DbPassword $DbPassword -Port (Resolve-BaseUrlPort $BaseUrl) -TimeoutSec 120
         }
     }
 

@@ -14031,12 +14031,16 @@ const SystemPanel = {
         if (els.salaryConfigPanel) {
             els.salaryConfigPanel.classList.add("hidden");
         }
+        if (els.systemContent) {
+            els.systemContent.classList.remove("hidden");
+        }
         ConfigPanel.hideEditor();
     },
     async loadSalaryConfig() {
         els.systemViewTitle.textContent = "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e";
         els.systemViewHint.textContent = "\u7ef4\u62a4\u5de5\u8d44\u9879\u76ee\u5728\u516c\u52a1\u5458\u3001\u4e8b\u4e1a\u4eba\u5458\u53e3\u5f84\u4e0b\u7684\u663e\u793a\u548c\u542f\u7528\u89c4\u5219\u3002";
         els.systemContent.innerHTML = "";
+        els.systemContent.classList.add("hidden");
         if (els.salaryConfigPanel) {
             els.salaryConfigPanel.classList.remove("hidden");
         }

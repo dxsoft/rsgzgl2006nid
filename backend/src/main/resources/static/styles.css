@@ -1,9 +1,10 @@
 :root {
     color-scheme: light;
-    --bg: #f6f7f9;
+    --bg: #f4f6f8;
     --panel: #ffffff;
-    --panel-strong: #f0f4f3;
-    --border: #d9dee3;
+    --panel-strong: #f3f7f6;
+    --border: #d7dde3;
+    --border-soft: #e8edf1;
     --text: #1d252c;
     --muted: #65717d;
     --accent: #1b6b5f;
@@ -12,10 +13,11 @@
     --warning: #8a5a12;
     --danger: #b91c1c;
     --row: #fbfcfd;
-    --selected: #e5f2ef;
-    --shadow: 0 10px 28px rgba(20, 35, 44, 0.08);
-    --chrome: #edf1f3;
-    --chrome-strong: #dfe6e9;
+    --selected: #e4f1ee;
+    --selected-strong: #cfe6e1;
+    --shadow: 0 8px 18px rgba(20, 35, 44, 0.06);
+    --chrome: #edf1f4;
+    --chrome-strong: #dce4e8;
 }
 
 * {
@@ -25,6 +27,8 @@
 body {
     margin: 0;
     min-width: 320px;
+    height: 100vh;
+    overflow: hidden;
     background: var(--bg);
     color: var(--text);
     font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
@@ -75,9 +79,10 @@ button:disabled {
 }
 
 .app-shell {
-    min-height: 100vh;
+    height: 100vh;
     display: grid;
     grid-template-rows: auto 1fr auto;
+    overflow: hidden;
 }
 
 .login-view {
@@ -138,7 +143,7 @@ button:disabled {
     min-height: 54px;
     padding: 8px 14px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(#ffffff, var(--chrome));
+    background: linear-gradient(#ffffff, #f5f8fa);
 }
 
 .topbar-status {
@@ -169,7 +174,7 @@ button:disabled {
 
 .desktop-body {
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: 228px minmax(0, 1fr);
     min-height: 0;
 }
 
@@ -202,15 +207,15 @@ button:disabled {
     min-height: 0;
     overflow: auto;
     border-right: 1px solid var(--border);
-    background: #eef2f1;
+    background: #edf2f4;
 }
 
 .desktop-user {
     display: grid;
     gap: 3px;
-    padding: 14px;
+    padding: 14px 12px;
     border-bottom: 1px solid var(--border);
-    background: var(--panel);
+    background: linear-gradient(#ffffff, #f7fafb);
 }
 
 .user-actions {
@@ -264,33 +269,35 @@ button:disabled {
 }
 
 .menu-tree {
-    padding: 8px;
+    padding: 8px 8px 14px;
 }
 
 .menu-group {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .menu-children {
     display: grid;
-    gap: 2px;
-    margin: 3px 0 4px 12px;
-    padding-left: 7px;
-    border-left: 1px solid var(--border);
+    gap: 1px;
+    margin: 2px 0 6px 15px;
+    padding-left: 8px;
+    border-left: 1px solid #d4dde2;
 }
 
 .menu-button {
+    position: relative;
     width: 100%;
     display: grid;
-    grid-template-columns: 22px 1fr;
+    grid-template-columns: 24px 1fr;
     align-items: center;
     gap: 8px;
-    min-height: 32px;
-    padding: 5px 8px;
+    min-height: 34px;
+    padding: 5px 9px;
     border: 0;
-    border-radius: 4px;
+    border-radius: 5px;
     background: transparent;
     text-align: left;
+    color: #34424d;
 }
 
 .menu-button:hover,
@@ -299,9 +306,45 @@ button:disabled {
     color: var(--accent-strong);
 }
 
+.menu-button.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
+}
+
+.menu-tree > .menu-group > .menu-button {
+    font-weight: 700;
+}
+
+.menu-tree > .menu-group > .menu-children .menu-button {
+    min-height: 31px;
+    font-weight: 500;
+}
+
 .menu-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid #d7e0e5;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.72);
     color: var(--muted);
     text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.menu-button.active .menu-icon,
+.menu-button:hover .menu-icon {
+    border-color: var(--selected-strong);
+    background: #ffffff;
+    color: var(--accent-strong);
 }
 
 .desktop-main {
@@ -4831,9 +4874,10 @@ button:disabled {
 
 .workspace {
     display: grid;
-    grid-template-columns: minmax(220px, 280px) minmax(320px, 430px) minmax(420px, 1fr);
+    grid-template-columns: minmax(230px, 292px) minmax(330px, 420px) minmax(420px, 1fr);
     min-height: 0;
     height: 100%;
+    background: var(--chrome);
 }
 
 .org-pane,
@@ -4848,7 +4892,7 @@ button:disabled {
 
 .detail-pane {
     border-right: 0;
-    background: var(--bg);
+    background: #f3f5f7;
 }
 
 .pane-title,
@@ -4857,8 +4901,16 @@ button:disabled {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 14px;
+    min-height: 52px;
+    padding: 11px 14px;
     border-bottom: 1px solid var(--border);
+    background: linear-gradient(#ffffff, #f8fafb);
+}
+
+.pane-title {
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .pane-title h2,
@@ -4874,7 +4926,7 @@ button:disabled {
 }
 
 .org-tree {
-    padding: 8px 8px 18px;
+    padding: 9px 9px 18px;
 }
 
 .org-node {
@@ -4882,13 +4934,15 @@ button:disabled {
 }
 
 .org-node button {
+    position: relative;
     width: 100%;
     display: grid;
     grid-template-columns: 54px 1fr;
     gap: 8px;
-    min-height: 30px;
-    padding: 5px 8px;
+    min-height: 32px;
+    padding: 5px 8px 5px 10px;
     border: 0;
+    border-radius: 4px;
     background: transparent;
     text-align: left;
 }
@@ -4896,6 +4950,18 @@ button:disabled {
 .org-node button:hover,
 .org-node button.active {
     background: var(--selected);
+    color: var(--accent-strong);
+}
+
+.org-node button.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
 }
 
 .org-code {
@@ -4919,8 +4985,9 @@ button:disabled {
     display: grid;
     grid-template-columns: 1fr 72px;
     gap: 8px;
-    padding: 12px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border);
+    background: #fbfcfd;
 }
 
 .searchbar input {
@@ -4933,19 +5000,21 @@ button:disabled {
 
 .people-list {
     min-height: 360px;
+    background: #fbfcfd;
 }
 
 .person-row,
 .history-row,
 .salary-row {
+    position: relative;
     display: grid;
     gap: 4px;
     width: 100%;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: var(--panel);
-    padding: 10px 12px;
+    padding: 10px 12px 10px 14px;
     text-align: left;
 }
 
@@ -4954,6 +5023,17 @@ button:disabled {
 .history-row:hover,
 .history-row.active {
     background: var(--selected);
+}
+
+.person-row.active::before,
+.history-row.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
 }
 
 .person-main,
@@ -4994,7 +5074,7 @@ button:disabled {
     gap: 8px;
     padding: 10px 12px;
     border-top: 1px solid var(--border);
-    background: var(--panel);
+    background: linear-gradient(#ffffff, #f8fafb);
 }
 
 .empty-state {
@@ -5013,8 +5093,8 @@ button:disabled {
 
 .detail-content {
     display: grid;
-    gap: 12px;
-    padding: 12px;
+    gap: 10px;
+    padding: 10px;
 }
 
 .detail-pane > .config-band {
@@ -5032,7 +5112,7 @@ button:disabled {
 .config-band {
     background: var(--panel);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .profile-grid {
@@ -5044,7 +5124,7 @@ button:disabled {
 
 .profile-grid div {
     min-width: 0;
-    padding: 10px 12px;
+    padding: 9px 12px;
     border-top: 1px solid var(--border);
 }
 
@@ -5116,10 +5196,11 @@ button:disabled {
 .person-base-info-form {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(180px, 2fr) 64px;
-    gap: 8px;
+    gap: 7px;
     padding: 10px 12px;
     border-top: 1px solid var(--border);
     align-items: center;
+    background: #fbfcfd;
 }
 
 .person-base-info-form input {
@@ -5134,9 +5215,10 @@ button:disabled {
 .base-status-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(72px, 0.8fr)) repeat(2, minmax(160px, 1.5fr));
-    gap: 8px;
+    gap: 7px;
     padding: 10px 12px;
     border-top: 1px solid var(--border);
+    background: #fbfcfd;
 }
 
 .base-status-item {
@@ -5145,7 +5227,7 @@ button:disabled {
     gap: 2px;
     padding: 8px 10px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     background: #f8fafc;
 }
 

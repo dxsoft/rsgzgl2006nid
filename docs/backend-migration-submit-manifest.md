@@ -4,9 +4,9 @@
 
 ## 目的
 
-这份清单用于把当前 Spring Boot + MySQL 迁移成果纳入 Git 管理前做最后审阅。当前 Git 只跟踪了少量工作台文件，完整迁移工程中的源码、数据库脚本、静态页面、回归脚本和文档大多仍是未跟踪状态。提交前必须先确认纳管范围，否则干净检出后无法复现当前系统。
+这份清单用于对当前 Spring Boot + MySQL 迁移成果做提交审阅。集成分支已经纳管后端源码、数据库脚本、静态页面、回归脚本、上线预检脚本和迁移文档；后续审阅重点是确认范围完整、没有构建产物或本地敏感信息混入，并且干净检出后可以按同一套命令复现验证。
 
-## 建议首批纳管范围
+## 首批纳管范围
 
 - 后端工程骨架：`backend/pom.xml`、`backend/README.md`、`backend/src/main/java/com/dx/rsgzgl/RsgzglBackendApplication.java`
 - 公共能力：`backend/src/main/java/com/dx/rsgzgl/common/`、`backend/src/main/java/com/dx/rsgzgl/config/`
@@ -17,8 +17,12 @@
 - 桌面软件风格 UI：`backend/src/main/resources/static/index.html`、`backend/src/main/resources/static/app.js`、`backend/src/main/resources/static/styles.css`
 - 后端回归测试：`backend/src/test/java/com/dx/rsgzgl/`
 - 后端业务校验脚本和样本：`backend/scripts/`
-- 迁移版本管理核查：`scripts/check-backend-version-control.ps1`、`scripts/build-backend-submit-review.ps1`、`scripts/prepare-backend-first-batch-stage.ps1`
+- 迁移版本管理核查：`scripts/backend-first-batch-paths.txt`、`scripts/check-backend-version-control.ps1`、`scripts/build-backend-submit-review.ps1`、`scripts/prepare-backend-first-batch-stage.ps1`
+- 上线预检与业务闭环：`scripts/start-backend-dev.ps1`、`scripts/stop-backend-dev.ps1`、`scripts/verify-launch-readiness.ps1`、`scripts/verify-online-business-closure.ps1`
+- 根目录回归入口：工资样本、业务验收、时间线、报表打印、历史队列、归档台账等 `scripts/verify-*.ps1`
 - 迁移版本管理说明：`docs/backend-migration-version-control-checklist.md`、`docs/backend-migration-submit-manifest.md`
+
+首批纳管路径以 `scripts/backend-first-batch-paths.txt` 为单一清单来源。版本控制检查、提交审查报告和首批暂存预览都读取该文件。
 
 ## 暂不建议混入首批提交的范围
 
@@ -38,10 +42,10 @@
 - `backend/src/main/resources`：16 个资源/迁移文件
 - `backend/src/test/java`：7 个测试文件
 - `backend/scripts`：24 个后端业务校验脚本/样本
-- `scripts`：39 个根目录运维/核查脚本
-- `docs`：16 个迁移文档或政策依据文件
+- `scripts`：45 个根目录运维/核查脚本
+- `docs`：17 个迁移文档或政策依据文件
 
-首批提交不必一次纳入全部根目录 `scripts` 和 `docs`，但至少要纳入版本管理核查脚本和本清单引用的迁移说明。其余生产预检、上线回滚、数据治理脚本建议作为第二批“上线支撑资产”统一审阅。
+根目录上线预检、在线业务闭环和核心回归入口已纳入首批路径清单；生产试点、真实写入候选扫描、数据治理和权限快照脚本也已随迁移支撑资产纳管，但真实写入类脚本只能在完成清单复核、权限确认和备份策略后执行。
 
 ## 提交前复核命令
 
@@ -54,7 +58,7 @@ git status --short -- backend docs scripts .gitignore
 git diff --check -- .gitignore docs scripts backend
 ```
 
-严格模式 `-FailOnUntracked` 在首批必需路径全部纳管前会失败，这是预期行为。失败前会生成报告：
+严格模式 `-FailOnUntracked` 应在集成分支上通过；失败时会生成报告：
 
 ```text
 backend/target/backend-version-control-check.md
@@ -72,12 +76,13 @@ backend/target/backend-submit-review.md
 backend/target/backend-first-batch-stage-files.txt
 ```
 
-确认清单无误后，才使用 `-Apply` 执行首批 `git add`。
+当前集成分支已完成首批纳管，`prepare-backend-first-batch-stage.ps1` 主要用于后续分支复核或重新生成 manifest。需要重新暂存时，确认清单无误后再使用 `-Apply` 执行 `git add`。
 
 ## 建议提交节奏
 
-1. 首批提交迁移工程闭环：`backend/src`、`backend/pom.xml`、`backend/README.md`、数据库迁移、静态 UI、后端测试、`backend/scripts`、版本管理核查文档和脚本。
-2. 第二批提交上线支撑资产：根目录生产预检脚本、上线回滚方案、冻结归档清单、数据治理和权限快照脚本。
-3. 第三批提交政策依据和验收资料：`docs` 下的政策文件、阶段性交付说明、验收清单、抽查样本。
+1. 当前集成分支作为迁移工程闭环提交：`backend/src`、数据库迁移、静态 UI、后端测试、业务校验脚本、上线预检和版本管理工具链。
+2. 合并前运行离线闸口：版本控制检查、提交审查报告、首批暂存预览、后端编译和前端脚本语法检查。
+3. 设置本地 `DB_PASSWORD` 后运行在线闸口：`scripts/verify-launch-readiness.ps1 -StartBackend -StopBackendAfter`。
+4. 真实历史写入、生产候选扫描和回滚演练只在数据备份、权限确认、业务复核通过后执行。
 
 如果需要合并成一次提交，必须先确认 `git status --short` 中没有构建产物、日志、PID、临时 Office 文件。

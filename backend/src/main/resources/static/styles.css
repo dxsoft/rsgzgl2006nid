@@ -1086,8 +1086,8 @@ button:disabled {
 }
 
 .migration-acceptance-progress-steps button:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+    border-color: var(--accent);
+    color: var(--accent-strong);
 }
 
 .migration-acceptance-archive-state {
@@ -1312,8 +1312,8 @@ button:disabled {
 }
 
 .migration-quality-gate:hover {
-    border-color: var(--primary);
-    background: #f8fbff;
+    border-color: var(--accent);
+    background: var(--selected);
 }
 
 .migration-quality-gate.pass {
@@ -2033,8 +2033,8 @@ button:disabled {
 }
 
 .migration-regression-run-row:hover {
-    border-color: var(--primary);
-    background: #f8fbff;
+    border-color: var(--accent);
+    background: var(--selected);
 }
 
 .migration-regression-run-row span,
@@ -2124,8 +2124,8 @@ button:disabled {
 
 .migration-regression-review-summary button.active,
 .migration-regression-review-summary button:hover {
-    border-color: var(--primary);
-    background: #f8fbff;
+    border-color: var(--accent);
+    background: var(--selected);
 }
 
 .migration-regression-review-summary strong {
@@ -5454,7 +5454,7 @@ button:disabled {
     min-height: 50px;
     border: 1px solid var(--accent);
     border-radius: 6px;
-    background: #eff6ff;
+    background: color-mix(in srgb, var(--accent) 8%, var(--panel));
     color: var(--accent);
     font-weight: 600;
     cursor: pointer;

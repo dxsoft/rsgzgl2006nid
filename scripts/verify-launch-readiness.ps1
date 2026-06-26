@@ -31,8 +31,9 @@ $startedAt = Get-Date
 if ([string]::IsNullOrWhiteSpace($DbPassword)) {
     $DbPassword = $env:DB_PASSWORD
 }
-if ([string]::IsNullOrWhiteSpace($DbPassword)) {
-    throw "DB_PASSWORD is required. Set `$env:DB_PASSWORD or pass -DbPassword."
+$requiresDbPassword = $StartBackend -or -not $SkipMavenRegression -or -not $SkipCoreMigration -or -not $SkipPackage
+if ($requiresDbPassword -and [string]::IsNullOrWhiteSpace($DbPassword)) {
+    throw "DB_PASSWORD is required for backend start, Maven regression, core migration, or packaging. Set `$env:DB_PASSWORD or pass -DbPassword."
 }
 
 function Add-Report([string]$Line = "") {

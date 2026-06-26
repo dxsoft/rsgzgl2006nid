@@ -9,6 +9,8 @@
     [switch]$FullCoreMigration,
     [switch]$SkipMavenRegression,
     [switch]$SkipCoreMigration,
+    [switch]$StartBackend,
+    [switch]$StopBackendAfter,
     [switch]$SkipOnlineBusinessClosure,
     [switch]$SkipPackage
 )
@@ -252,8 +254,15 @@ if (-not $SkipOnlineBusinessClosure) {
             "-BaseUrl", $BaseUrl,
             "-TimeoutSec", "$TimeoutSec",
             "-Username", $Username,
-            "-Password", $Password
+            "-Password", $Password,
+            "-DbPassword", $DbPassword
         )
+        if ($StartBackend) {
+            $args += "-StartBackend"
+        }
+        if ($StopBackendAfter) {
+            $args += "-StopBackendAfter"
+        }
         Invoke-NativeCommand "powershell" $args ($MavenTimeoutSec * 10)
     }
 }

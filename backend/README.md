@@ -107,6 +107,12 @@ powershell -ExecutionPolicy Bypass -File ..\scripts\verify-launch-readiness.ps1
 ```
 
 The report is written to `target\launch-readiness-report.txt`. The gate checks launch documents, online service access, history-write permissions, Maven regression tests, the core migration gate, the online business closure gate, and package creation. Use `-SkipOnlineBusinessClosure` only for a fast local precheck when the full online report/history/sample gates will be run separately.
+From the repository root, it can manage the local backend lifecycle for a full local run:
+
+```powershell
+$env:DB_PASSWORD='your-local-password'
+powershell -ExecutionPolicy Bypass -File scripts\verify-launch-readiness.ps1 -StartBackend -StopBackendAfter
+```
 
 Additional launch artifacts can be produced from the repository root:
 

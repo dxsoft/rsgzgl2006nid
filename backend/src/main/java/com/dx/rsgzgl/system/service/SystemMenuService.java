@@ -89,7 +89,6 @@ public class SystemMenuService {
                         menu("SALARY_REPORT", "\u62a5\u8868\u6253\u5370", "print", "workbench", 70),
                         menu("SALARY_HISTORY_WRITE", "\u5386\u53f2\u5199\u5165", "write", "workbench", 80),
                         menu("SALARY_HISTORY_ROLLBACK", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90),
-                        menu("SALARY_CONFIG", "\u5de5\u8d44\u9879\u914d\u7f6e", "config", "salary", 100),
                         menu("SALARY_GOVERNANCE", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 110),
                         menu("SALARY_ACCEPTANCE", "\u8fc1\u79fb\u9a8c\u6536", "acceptance", "workbench", 120),
                         menu("SALARY_DELIVERY_ARCHIVE", "\u4ea4\u4ed8\u5f52\u6863", "archive", "workbench", 130)
@@ -102,7 +101,8 @@ public class SystemMenuService {
                         menu("SYSTEM_MENU", "\u83dc\u5355\u7ba1\u7406", "menu", "system", 10),
                         menu("SYSTEM_ROLE", "\u89d2\u8272\u6743\u9650", "role", "system", 20),
                         menu("SYSTEM_USER", "\u7528\u6237\u7ba1\u7406", "user", "system", 30),
-                        menu("SYSTEM_AUDIT", "\u64cd\u4f5c\u5ba1\u8ba1", "audit", "system", 40)
+                        menu("SYSTEM_AUDIT", "\u64cd\u4f5c\u5ba1\u8ba1", "audit", "system", 40),
+                        menu("SALARY_CONFIG", "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e", "config", "salary", 50)
                 ))
         );
     }

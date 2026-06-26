@@ -168,7 +168,6 @@ public class SystemBootstrapService {
                 new MenuSeed("SALARY_REPORT", "SALARY", "\u62a5\u8868\u6253\u5370", "print", "workbench", 70),
                 new MenuSeed("SALARY_HISTORY_WRITE", "SALARY", "\u5386\u53f2\u5199\u5165", "write", "workbench", 80),
                 new MenuSeed("SALARY_HISTORY_ROLLBACK", "SALARY", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90),
-                new MenuSeed("SALARY_CONFIG", "SALARY", "\u5de5\u8d44\u9879\u914d\u7f6e", "config", "salary", 100),
                 new MenuSeed("SALARY_GOVERNANCE", "SALARY", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 110),
                 new MenuSeed("SALARY_ACCEPTANCE", "SALARY", "\u8fc1\u79fb\u9a8c\u6536", "acceptance", "workbench", 120),
                 new MenuSeed("SALARY_DELIVERY_ARCHIVE", "SALARY", "\u4ea4\u4ed8\u5f52\u6863", "archive", "workbench", 130),
@@ -179,7 +178,8 @@ public class SystemBootstrapService {
                 new MenuSeed("SYSTEM_MENU", "SYSTEM", "\u83dc\u5355\u7ba1\u7406", "menu", "system", 10),
                 new MenuSeed("SYSTEM_ROLE", "SYSTEM", "\u89d2\u8272\u6743\u9650", "role", "system", 20),
                 new MenuSeed("SYSTEM_USER", "SYSTEM", "\u7528\u6237\u7ba1\u7406", "user", "system", 30),
-                new MenuSeed("SYSTEM_AUDIT", "SYSTEM", "\u64cd\u4f5c\u5ba1\u8ba1", "audit", "system", 40)
+                new MenuSeed("SYSTEM_AUDIT", "SYSTEM", "\u64cd\u4f5c\u5ba1\u8ba1", "audit", "system", 40),
+                new MenuSeed("SALARY_CONFIG", "SYSTEM", "\u5de5\u8d44\u9879\u76ee\u914d\u7f6e", "config", "salary", 50)
         );
         for (MenuSeed menu : menus) {
             jdbcTemplate.update("""

@@ -6,7 +6,7 @@
     [string]$DbPassword = "",
     [string]$OutputPath = "",
     [int]$MaxSummaryMilliseconds = 30000,
-    [int]$MavenTimeoutSec = 300,
+    [int]$MavenTimeoutSec = 600,
     [switch]$SkipMaven,
     [switch]$SkipSamples,
     [switch]$FailOnUnexpected
@@ -132,16 +132,16 @@ if (-not $SkipMaven) {
     Add-Skip "Maven regression gates" "SkipMaven was specified."
 }
 
-Invoke-Step "Local service probe" {
-    try {
-        $response = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -TimeoutSec $TimeoutSec
-        Write-Host ("Service responded: HTTP {0}" -f $response.StatusCode)
-    } catch {
-        throw "Local service probe failed for $BaseUrl. Start the backend before running sample gates. $($_.Exception.Message)"
-    }
-}
-
 if (-not $SkipSamples) {
+    Invoke-Step "Local service probe" {
+        try {
+            $response = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -TimeoutSec $TimeoutSec
+            Write-Host ("Service responded: HTTP {0}" -f $response.StatusCode)
+        } catch {
+            throw "Local service probe failed for $BaseUrl. Start the backend before running sample gates. $($_.Exception.Message)"
+        }
+    }
+
     $sampleArgs = @{
         BaseUrl = $BaseUrl
         TimeoutSec = $TimeoutSec

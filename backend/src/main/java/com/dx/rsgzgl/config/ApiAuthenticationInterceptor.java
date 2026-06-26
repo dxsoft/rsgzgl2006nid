@@ -26,6 +26,9 @@ public class ApiAuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if (request.getRequestURI().startsWith("/api/")) {
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        }
         if (!requiresAuthentication(request)) {
             return true;
         }

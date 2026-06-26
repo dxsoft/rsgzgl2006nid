@@ -7018,8 +7018,16 @@ public class WorkbenchService {
                         END,
                         executed_by = CASE WHEN plan_status = 'EXECUTED' THEN executed_by ELSE NULL END,
                         executed_at = CASE WHEN plan_status = 'EXECUTED' THEN executed_at ELSE NULL END,
-                        execution_result = CASE WHEN plan_status = 'EXECUTED' THEN execution_result ELSE NULL END,
-                        execution_message = CASE WHEN plan_status = 'EXECUTED' THEN execution_message ELSE NULL END,
+                        execution_result = CASE
+                            WHEN plan_status = 'EXECUTED' THEN execution_result
+                            WHEN VALUES(plan_status) = 'BLOCKED' THEN 'BLOCKED'
+                            ELSE NULL
+                        END,
+                        execution_message = CASE
+                            WHEN plan_status = 'EXECUTED' THEN execution_message
+                            WHEN VALUES(plan_status) = 'BLOCKED' AND execution_result = 'BLOCKED' THEN execution_message
+                            ELSE NULL
+                        END,
                         inserted_history_id = CASE WHEN plan_status = 'EXECUTED' THEN inserted_history_id ELSE NULL END,
                         previous_history_id = CASE WHEN plan_status = 'EXECUTED' THEN previous_history_id ELSE NULL END,
                         next_history_id = CASE WHEN plan_status = 'EXECUTED' THEN next_history_id ELSE NULL END,

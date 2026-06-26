@@ -15,47 +15,13 @@ try {
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check-backend-version-control.ps1 | Out-Host
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-backend-submit-review.ps1 | Out-Host
 
-    $firstBatchPaths = @(
-        "backend/pom.xml",
-        "backend/README.md",
-        "backend/src/main/java/com/dx/rsgzgl/RsgzglBackendApplication.java",
-        "backend/src/main/java/com/dx/rsgzgl/common",
-        "backend/src/main/java/com/dx/rsgzgl/config",
-        "backend/src/main/java/com/dx/rsgzgl/org",
-        "backend/src/main/java/com/dx/rsgzgl/person",
-        "backend/src/main/java/com/dx/rsgzgl/salary",
-        "backend/src/main/java/com/dx/rsgzgl/system",
-        "backend/scripts",
-        "backend/src/main/resources/application.yml",
-        "backend/src/main/resources/db",
-        "backend/src/main/resources/static/index.html",
-        "backend/src/main/resources/static/app.js",
-        "backend/src/main/resources/static/styles.css",
-        "backend/src/test/java/com/dx/rsgzgl",
-        "docs/backend-migration-version-control-checklist.md",
-        "docs/backend-migration-submit-manifest.md",
-        "scripts/build-backend-submit-review.ps1",
-        "scripts/check-backend-version-control.ps1",
-        "scripts/prepare-backend-first-batch-stage.ps1",
-        "scripts/start-backend-dev.ps1",
-        "scripts/stop-backend-dev.ps1",
-        "scripts/verify-auto-regression-samples.ps1",
-        "scripts/verify-business-acceptance-samples.ps1",
-        "scripts/verify-case-report-ui-contract.ps1",
-        "scripts/verify-core-migration.ps1",
-        "scripts/verify-generated-timeline-level-contract.ps1",
-        "scripts/verify-generated-timeline-samples.ps1",
-        "scripts/verify-history-write-rehearsal.ps1",
-        "scripts/verify-launch-readiness.ps1",
-        "scripts/verify-online-business-closure.ps1",
-        "scripts/verify-report-csv-exports.ps1",
-        "scripts/verify-report-history-queue-closure.ps1",
-        "scripts/verify-report-print-archive-ledger.ps1",
-        "scripts/verify-report-print-archive-samples.ps1",
-        "scripts/verify-report-print-pages.ps1",
-        "scripts/verify-salary-samples.ps1",
-        ".gitignore"
-    )
+    $firstBatchManifest = Join-Path "scripts" "backend-first-batch-paths.txt"
+    if (-not (Test-Path -LiteralPath $firstBatchManifest)) {
+        throw "First batch path manifest is missing: $firstBatchManifest"
+    }
+    $firstBatchPaths = @(Get-Content -LiteralPath $firstBatchManifest | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_) -and -not $_.TrimStart().StartsWith("#")
+    })
 
     $statusLines = @(git -c core.quotePath=false status --porcelain=v1 --untracked-files=all -- backend docs scripts .gitignore)
     $trackedFiles = @(git -c core.quotePath=false ls-files -- backend docs scripts .gitignore)

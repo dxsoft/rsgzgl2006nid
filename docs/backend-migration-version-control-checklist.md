@@ -27,6 +27,7 @@
 - `docs/backend-migration-version-control-checklist.md`
 - `docs/backend-migration-submit-manifest.md`
 - `scripts/build-backend-submit-review.ps1`
+- `scripts/backend-first-batch-paths.txt`
 - `scripts/check-backend-version-control.ps1`
 - `scripts/prepare-backend-first-batch-stage.ps1`
 - `scripts/start-backend-dev.ps1`
@@ -46,6 +47,8 @@
 - `scripts/verify-report-print-archive-samples.ps1`
 - `scripts/verify-report-print-pages.ps1`
 - `scripts/verify-salary-samples.ps1`
+
+`scripts/backend-first-batch-paths.txt` 是首批纳管路径的单一清单来源，版本控制检查、提交审查和首批暂存脚本都从该文件读取路径。
 
 ## 不应纳入版本管理的范围
 

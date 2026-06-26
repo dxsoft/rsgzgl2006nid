@@ -62,15 +62,25 @@ select {
 button {
     min-height: 34px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     background: var(--panel);
     color: var(--text);
     cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
 
 button:hover {
     border-color: var(--accent);
     color: var(--accent-strong);
+    background: #fbfdfc;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    outline-offset: 1px;
 }
 
 button:disabled {
@@ -90,7 +100,9 @@ button:disabled {
     display: grid;
     place-items: center;
     padding: 18px;
-    background: var(--bg);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(244, 246, 248, 0.96)),
+        var(--bg);
 }
 
 .login-view.hidden {
@@ -101,15 +113,16 @@ button:disabled {
     width: min(380px, 100%);
     display: grid;
     gap: 14px;
-    padding: 22px;
+    padding: 24px;
     border: 1px solid var(--border);
+    border-radius: 6px;
     background: var(--panel);
-    box-shadow: var(--shadow);
+    box-shadow: 0 18px 44px rgba(20, 35, 44, 0.12);
 }
 
 .login-panel h1 {
     margin: 0;
-    font-size: 22px;
+    font-size: 21px;
 }
 
 .login-panel p {
@@ -130,9 +143,22 @@ button:disabled {
     width: 100%;
     min-height: 36px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 0 9px;
     background: var(--panel);
+}
+
+.login-panel button[type="submit"] {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.login-panel button[type="submit"]:hover {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+    color: #ffffff;
 }
 
 .topbar {
@@ -140,25 +166,35 @@ button:disabled {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    min-height: 54px;
-    padding: 8px 14px;
+    min-height: 56px;
+    padding: 8px 14px 8px 16px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f5f8fa);
+    background: linear-gradient(#ffffff, #f6f9fa);
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .topbar-status {
-    min-width: 220px;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(160px, 1fr);
+    align-items: baseline;
+    gap: 14px;
 }
 
 .topbar h1 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .topbar p {
-    margin: 4px 0 0;
+    min-width: 0;
+    margin: 0;
     color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .topbar-actions {
@@ -170,6 +206,8 @@ button:disabled {
 
 .topbar-actions button {
     min-width: 72px;
+    min-height: 30px;
+    border-radius: 4px;
 }
 
 .desktop-body {
@@ -182,9 +220,9 @@ button:disabled {
     display: grid;
     grid-template-columns: minmax(160px, 220px) minmax(180px, 260px) minmax(0, 1fr);
     align-items: center;
-    min-height: 28px;
+    min-height: 27px;
     border-top: 1px solid var(--border);
-    background: var(--chrome);
+    background: linear-gradient(#f8fafb, var(--chrome));
     color: var(--muted);
     font-size: 12px;
 }
@@ -213,24 +251,32 @@ button:disabled {
 .desktop-user {
     display: grid;
     gap: 3px;
-    padding: 14px 12px;
+    padding: 13px 12px;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(#ffffff, #f7fafb);
+}
+
+.desktop-user strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .user-actions {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    margin-top: 6px;
+    margin-top: 7px;
 }
 
 #logoutButton,
 #changePasswordToggleButton {
     justify-self: start;
-    min-height: 28px;
-    padding: 0 10px;
+    min-height: 26px;
+    padding: 0 9px;
     border-radius: 4px;
+    font-size: 12px;
 }
 
 .password-form {
@@ -266,6 +312,9 @@ button:disabled {
 .desktop-user span {
     color: var(--muted);
     font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .menu-tree {

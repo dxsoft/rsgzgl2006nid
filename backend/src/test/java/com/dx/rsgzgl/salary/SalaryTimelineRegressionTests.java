@@ -2,11 +2,16 @@ package com.dx.rsgzgl.salary;
 
 import com.dx.rsgzgl.salary.dto.SalaryGeneratedTimelineResult;
 import com.dx.rsgzgl.salary.dto.SalaryTimelineResult;
+import com.dx.rsgzgl.salary.mapper.LegacySalaryMapper;
 import com.dx.rsgzgl.salary.service.SalaryGeneratedTimelineService;
 import com.dx.rsgzgl.salary.service.SalaryTimelineService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -19,6 +24,12 @@ class SalaryTimelineRegressionTests {
 
     @Autowired
     private SalaryGeneratedTimelineService salaryGeneratedTimelineService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private LegacySalaryMapper legacySalaryMapper;
 
     @Test
     void replayReturnsStepByStepComparisonForPerson() {
@@ -266,6 +277,19 @@ class SalaryTimelineRegressionTests {
     }
 
     @Test
+    void generatedTimelineDoesNotReportHighestLevelGradeTurnoverAsMissingNormalLevel() {
+        SalaryGeneratedTimelineResult result = salaryGeneratedTimelineService.generateAndCompare("001-00263", 260);
+
+        assertThat(result.items())
+                .filteredOn(item -> "dndkh".equals(item.source()) && item.sourceId().endsWith(":level-base"))
+                .allSatisfy(item -> {
+                    assertThat(item.changeType()).isEqualTo("姝ｅ父绾у埆");
+                    assertThat(item.status()).isNotEqualTo("MISSING_HISTORY");
+                });
+        assertThat(result.missingHistoryCount()).isZero();
+    }
+
+    @Test
     void generatedTimelineSkipsPostEventWhenSameMonthPunishmentReducesSalary() {
         SalaryGeneratedTimelineResult result = salaryGeneratedTimelineService.generateAndCompare("02602-00167", 260);
 
@@ -304,5 +328,82 @@ class SalaryTimelineRegressionTests {
                     assertThat(item.historyId()).isEqualTo("747DBF5E-0339-4E6D-927A-C81C3140EE4D");
                     assertThat(item.status()).isEqualTo("MATCH");
                 });
+    }
+
+    @Test
+    void generatedTimelineCreatesJudicialConversionWhenPostEntersJudicialPrefix() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CONCAT(TRIM(dwbm), '-', TRIM(grbm)) AS personCode
+                FROM (
+                    SELECT z.*,
+                           LAG(LEFT(TRIM(zwbm), 2)) OVER (PARTITION BY dwbm, grbm ORDER BY srny, id) AS previousPrefix
+                    FROM dryzwbh z
+                    WHERE TRIM(COALESCE(zwbm, '')) <> ''
+                      AND TRIM(COALESCE(srny, '')) <> ''
+                      AND CAST(REPLACE(TRIM(srny), '.', '') AS UNSIGNED) >= 200607
+                ) posts
+                WHERE LEFT(TRIM(zwbm), 2) = '03'
+                  AND COALESCE(previousPrefix, '') <> '03'
+                ORDER BY srny, id
+                LIMIT 200
+                """);
+        assumeTrue(!rows.isEmpty(), "No judicial-prefix entrance sample in the current legacy database.");
+
+        boolean found = false;
+        for (Map<String, Object> row : rows) {
+            String personCode = String.valueOf(row.get("personCode"));
+            String[] parts = personCode.split("-", 2);
+            if (parts.length != 2) {
+                continue;
+            }
+            found = legacySalaryMapper.findExpectedEventsFromBaseInfo(parts[0], parts[1]).stream()
+                    .anyMatch(item -> "dryzwbh".equals(item.source())
+                            && "\u6cd5\u68c0\u5957\u6539".equals(item.changeType()));
+            if (found) {
+                break;
+            }
+        }
+        assumeTrue(found, "No generated judicial conversion candidate in the current legacy database sample.");
+    }
+
+    @Test
+    void generatedTimelineCreatesRankAllowanceEventFromRankTable() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CONCAT(TRIM(dwbm), '-', TRIM(grbm)) AS personCode
+                FROM hisbase
+                WHERE TRIM(jslb) IN (
+                    '\u8b66\u8854\u53d8\u5316', '\u8b66\u8854\u6d25\u8d34',
+                    '\u6cd5\u5b98\u7b49\u7ea7', '\u5ba1\u5224\u6d25\u8d34',
+                    '\u68c0\u5bdf\u7b49\u7ea7', '\u68c0\u5bdf\u6d25\u8d34',
+                    '\u76d1\u5bdf\u5b98\u7b49\u7ea7', '\u76d1\u5bdf\u7b49\u7ea7', '\u76d1\u5bdf\u6d25\u8d34'
+                )
+                ORDER BY jsnf DESC, jsyf DESC, dwbm, grbm
+                LIMIT 200
+                """);
+        assumeTrue(!rows.isEmpty(), "No rank or allowance history sample in the current legacy database.");
+
+        boolean found = false;
+        for (Map<String, Object> row : rows) {
+            String personCode = String.valueOf(row.get("personCode"));
+            SalaryGeneratedTimelineResult result = salaryGeneratedTimelineService.generateAndCompare(personCode, 1000);
+            found = result.items().stream()
+                    .anyMatch(item -> "jx".equals(item.source())
+                            && item.sourceId().endsWith(":rank")
+                            && isRankAllowanceChangeType(item.changeType())
+                            && "MATCH".equals(item.status()));
+            if (found) {
+                break;
+            }
+        }
+        assumeTrue(found, "No generated rank or allowance candidate in the current legacy database sample.");
+    }
+
+    private boolean isRankAllowanceChangeType(String changeType) {
+        return List.of(
+                "\u8b66\u8854\u53d8\u5316", "\u8b66\u8854\u6d25\u8d34",
+                "\u6cd5\u5b98\u7b49\u7ea7", "\u5ba1\u5224\u6d25\u8d34",
+                "\u68c0\u5bdf\u7b49\u7ea7", "\u68c0\u5bdf\u6d25\u8d34",
+                "\u76d1\u5bdf\u5b98\u7b49\u7ea7", "\u76d1\u5bdf\u7b49\u7ea7", "\u76d1\u5bdf\u6d25\u8d34"
+        ).contains(changeType);
     }
 }

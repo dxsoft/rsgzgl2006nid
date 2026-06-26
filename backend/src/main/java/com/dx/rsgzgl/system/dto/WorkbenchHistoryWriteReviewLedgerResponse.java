@@ -14,6 +14,8 @@ public record WorkbenchHistoryWriteReviewLedgerResponse(
         Integer suggestedReviewed,
         Integer retestReviewed,
         Integer manualReviewed,
+        Integer specialReviewed,
+        Integer blockedReviewed,
         Integer pendingRetestFirst,
         Integer pendingMaintainAndRetest,
         Integer highPriority,

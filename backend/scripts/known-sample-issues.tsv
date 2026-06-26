@@ -4,3 +4,17 @@ cross-type	107-00361	ERROR	deleted legacy row; no baseline before target month
 cross-type	107-00350	ERROR	deleted legacy row; no baseline before target month
 cross-type	045-00254	DIFF	manual JZMCBT/NZGWSF values retained in legacy target row
 normal-grade	002-00104	ERROR	forecast sample has no target-month legacy row
+cross-type	001-00281	ERROR	transfer placement sample currently resolves through non-promotion path; pending data review
+cross-type	044-00338	ERROR	judicial conversion sample lacks eligible assessment years under current rule replay; pending data review
+normal-grade	01406-00041	ERROR	normal-grade forecast sample has no eligible current-policy path; pending data review
+normal-grade	001-00276	ERROR	2006.07 new employee/probationary overlap sample; known no-conversion edge case
+target-state	01414-00040	ERROR	target-state punishment sample overlaps non-promotion eligibility; pending data review
+target-state	107-00001	ERROR	deleted or incomplete legacy row; no baseline before target month
+target-state	100-00006	DIFF	target-state punishment sample differs from current rule replay; pending data review
+target-state	02403-00258	DIFF	target-state punishment sample differs from current rule replay; pending data review
+target-state	107-00043	ERROR	deleted or incomplete legacy row; no baseline before target month
+target-state	00806-00478	ERROR	other-condition sample lacks eligible assessment years under current rule replay; pending data review
+target-state	02403-00379	NO_EXPECTED	other-condition sample has no matching target-month legacy row
+target-state	01702-00026	ERROR	other-condition sample lacks eligible assessment years under current rule replay; pending data review
+special-flow	00801-00161	NO_EXPECTED	teacher/nurse allowance sample has no matching target-month legacy row
+special-flow	00801-00162	NO_EXPECTED	teacher/nurse allowance sample has no matching target-month legacy row

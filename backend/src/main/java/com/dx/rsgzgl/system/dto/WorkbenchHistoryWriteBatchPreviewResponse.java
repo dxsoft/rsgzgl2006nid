@@ -7,6 +7,10 @@ public record WorkbenchHistoryWriteBatchPreviewResponse(
         Integer ready,
         Integer blocked,
         Integer warning,
+        Integer executable,
+        String safetyToken,
+        String safetyExpiresAt,
+        String safetySummary,
         List<WorkbenchHistoryWritePreviewResponse> items
 ) {
 }

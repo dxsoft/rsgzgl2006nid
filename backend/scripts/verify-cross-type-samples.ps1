@@ -3,10 +3,24 @@ param(
     [string]$OutputPath = "target/cross-type-results-current.tsv",
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [int]$TimeoutSec = 20,
+    [string]$Username = "admin",
+    [string]$Password = "admin",
     [switch]$IgnoreSampleChangeType
 )
 
 $ErrorActionPreference = "Stop"
+
+$webSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+if (-not [string]::IsNullOrWhiteSpace($Username)) {
+    $loginBody = @{ username = $Username; password = $Password } | ConvertTo-Json -Compress
+    Invoke-RestMethod `
+        -Uri "$BaseUrl/api/auth/login" `
+        -Method Post `
+        -Body $loginBody `
+        -ContentType "application/json; charset=utf-8" `
+        -WebSession $webSession `
+        -TimeoutSec $TimeoutSec | Out-Null
+}
 
 function Decode-EscapedUnicode([string]$Value) {
     if ([string]::IsNullOrWhiteSpace($Value)) {
@@ -100,6 +114,7 @@ foreach ($row in $rows) {
             -Method Post `
             -Body $body `
             -ContentType "application/json; charset=utf-8" `
+            -WebSession $webSession `
             -TimeoutSec $TimeoutSec
 
         $data = $response.data

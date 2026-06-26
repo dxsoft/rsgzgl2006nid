@@ -36,7 +36,7 @@
     workItemCompleted: "\u5de5\u8d44\u4e1a\u52a1\u5df2\u6807\u8bb0\u529e\u7406",
     historyWriteExecuteConfirm: "\u786e\u5b9a\u5c06\u5199\u5165\u8ba1\u5212 {caseNo} \u5199\u5165 hisbase \u5417\uff1f",
     historyWriteRollbackConfirm: "\u786e\u5b9a\u64a4\u9500\u5199\u5165\u8ba1\u5212 {caseNo} \u5417\uff1f",
-    historyWriteBatchExecuteConfirm: "\u5f53\u524d\u7b5b\u9009\u5171 {total} \u6761\uff0c\u9884\u68c0\u53ef\u5199 {ready} \u6761\uff0c\u963b\u65ad {blocked} \u6761\uff0c\u8b66\u544a {warning} \u6761\u3002\u786e\u5b9a\u6279\u91cf\u5199\u5165\u53ef\u5199\u8ba1\u5212\u5417\uff1f",
+    historyWriteBatchExecuteConfirm: "\u5f53\u524d\u7b5b\u9009\u5171 {total} \u6761\uff0c\u76f4\u63a5\u53ef\u5199 {ready} \u6761\uff0c\u8b66\u544a\u4f46\u53ef\u5199 {warning} \u6761\uff0c\u963b\u65ad {blocked} \u6761\u3002\u53ef\u5199\u9879\u5c06\u7ee7\u7eed\u5199\u5165\uff0c\u963b\u65ad\u9879\u5c06\u8df3\u8fc7\u5e76\u5217\u51fa\u539f\u56e0\u3002\u786e\u5b9a\u6267\u884c\u5417\uff1f",
     historyWriteBatchRollbackConfirm: "\u5f53\u524d\u7b5b\u9009\u5171 {total} \u6761\uff0c\u53ef\u64a4\u9500 {eligible} \u6761\u3002\u786e\u5b9a\u6279\u91cf\u64a4\u9500\u5df2\u6210\u529f\u5199\u5165\u7684\u8ba1\u5212\u5417\uff1f",
     refreshingTodoCache: "\u6b63\u5728\u5237\u65b0\u5de5\u8d44\u5f85\u529e\u7f13\u5b58...",
     todoCacheRefreshed: "\u5de5\u8d44\u5f85\u529e\u7f13\u5b58\u5df2\u5237\u65b0",
@@ -71,10 +71,13 @@
     batchReconcileSummary: "\u68c0\u67e5 {checked} \u4eba | \u901a\u8fc7 {passed} | \u5dee\u5f02 {failed} | \u8df3\u8fc7 {skipped} | \u5dee\u989d {diff}",
     normalGradeBatch: "\u6279\u91cf\u664b\u6863\u8bd5\u7b97",
     normalGradeBatchSummary: "\u68c0\u67e5 {checked} \u4eba | \u5339\u914d {matched} | \u5dee\u5f02 {different} | \u65e0\u8bb0\u5f55 {noExpected} | \u8df3\u8fc7 {skipped} | \u7ea7\u522b\u664b\u5347 {levelPromotion} | \u4e0d\u7b26\u5408\u6761\u4ef6 {notEligible} | \u5012\u6863\u5dee {reverseStep} | \u5dee\u989d {diff}",
+    generatedTimelineBatch: "\u6279\u91cf\u5e94\u53d1\u7ebf\u6838\u67e5",
+    generatedTimelineBatchSummary: "\u68c0\u67e5 {checked} \u4eba | \u6b63\u5e38 {ok} | \u95ee\u9898 {issue} | \u5dee\u5f02 {different} | \u7f3a\u5386\u53f2 {missing} | \u9519\u8bef {errors}",
     chooseOrgForBatch: "\u8bf7\u5148\u9009\u62e9\u5355\u4f4d\u518d\u6279\u91cf\u5bf9\u8d26\u3002",
     loadingNormalGradeBatch: "\u6b63\u5728\u6279\u91cf\u8bd5\u7b97\u6b63\u5e38\u664b\u6863...",
     exportStarted: "\u6b63\u5728\u5bfc\u51fa\u5bf9\u8d26\u7ed3\u679c...",
     exportNormalGradeStarted: "\u6b63\u5728\u5bfc\u51fa\u6b63\u5e38\u664b\u6863\u8bd5\u7b97...",
+    exportGeneratedTimelineStarted: "\u6b63\u5728\u5bfc\u51fa\u5e94\u53d1\u7ebf\u6838\u67e5...",
     periodLoaded: "\u5df2\u9009\u7528\u6700\u65b0\u53ef\u5bf9\u8d26\u5e74\u6708 {year}-{month}",
     noPeriods: "\u5f53\u524d\u5355\u4f4d\u6682\u65e0\u5de5\u8d44\u5386\u53f2\u5e74\u6708\u3002",
     chooseHistoryForReconcile: "\u8bf7\u5148\u9009\u62e9\u4e00\u6761\u5de5\u8d44\u5386\u53f2\u518d\u5bf9\u8d26\u3002",
@@ -181,6 +184,7 @@ const state = {
     historyPlanRetestStatus: "",
     historyPlanLocate: null,
     historyPlanQueueFilter: null,
+    historyPlanBlockedIssueCategory: "",
     historyPlanSelected: new Map(),
     historyPlanCurrentItems: [],
     maintenanceReturn: null,
@@ -199,11 +203,19 @@ const state = {
     auditFilters: {
         module: "",
         operator: "",
+        action: "",
         targetCode: "",
+        auditId: "",
         start: "",
         end: "",
         limit: 100
     },
+    densityMode: "compact",
+    reportPrintRefreshCaseNo: "",
+    reportPrintRefreshAt: 0,
+    reportBatchPrintRefreshPending: false,
+    reportBatchPrintRefreshAt: 0,
+    reportBatchReturnContext: null,
     page: 1,
     size: 20,
     keyword: ""
@@ -211,6 +223,8 @@ const state = {
 
 const HISTORY_PLAN_QUEUE_STORAGE_KEY = "rsgzgl.historyPlanQueue.v1";
 const HISTORY_PLAN_QUEUE_STATE_KEY = "history-plan-queue";
+const DESKTOP_DENSITY_STORAGE_KEY = "rsgzgl.desktopDensity.v1";
+const REPORT_CENTER_PREF_STORAGE_KEY = "rsgzgl.reportCenterPrefs.v1";
 let historyPlanQueuePersistTimer = null;
 
 function historyPlanQueuePayload() {
@@ -228,8 +242,14 @@ function applyHistoryPlanQueuePayload(payload = {}) {
     const caseNos = Array.isArray(payload?.queueFilter?.caseNos)
         ? payload.queueFilter.caseNos.filter(Boolean)
         : [];
-    state.historyPlanQueueFilter = caseNos.length
-        ? { ...payload.queueFilter, caseNos, autoSelect: Boolean(payload.queueFilter?.autoSelect) }
+    const readyOnly = Boolean(payload?.queueFilter?.readyOnly);
+    const printQueue = payload?.queueFilter?.printQueue || "";
+    const statusQueue = payload?.queueFilter?.statusQueue || "";
+    const label = payload?.queueFilter?.label || "";
+    const queueActionCode = payload?.queueFilter?.queueActionCode || "";
+    const sourceBatchNo = payload?.queueFilter?.sourceBatchNo || "";
+    state.historyPlanQueueFilter = caseNos.length || readyOnly || printQueue || statusQueue
+        ? { ...payload.queueFilter, caseNos, readyOnly, printQueue, statusQueue, label, queueActionCode, sourceBatchNo, autoSelect: Boolean(payload.queueFilter?.autoSelect) }
         : null;
     const selected = Array.isArray(payload?.selected) ? payload.selected : [];
     state.historyPlanSelected = new Map(selected
@@ -335,6 +355,9 @@ const els = {
     statusText: document.querySelector("#statusText"),
     currentUserName: document.querySelector("#currentUserName"),
     currentUserMeta: document.querySelector("#currentUserMeta"),
+    desktopStatusModule: document.querySelector("#desktopStatusModule"),
+    desktopStatusUser: document.querySelector("#desktopStatusUser"),
+    desktopStatusMessage: document.querySelector("#desktopStatusMessage"),
     changePasswordToggleButton: document.querySelector("#changePasswordToggleButton"),
     changePasswordForm: document.querySelector("#changePasswordForm"),
     oldPasswordInput: document.querySelector("#oldPasswordInput"),
@@ -353,13 +376,37 @@ const els = {
     workbenchFilterForm: document.querySelector("#workbenchFilterForm"),
     workbenchKeywordInput: document.querySelector("#workbenchKeywordInput"),
     workbenchChangeTypeSelect: document.querySelector("#workbenchChangeTypeSelect"),
+    workbenchSourceSelect: document.querySelector("#workbenchSourceSelect"),
     workbenchCaseStatusSelect: document.querySelector("#workbenchCaseStatusSelect"),
     workbenchTrialStatusSelect: document.querySelector("#workbenchTrialStatusSelect"),
     workbenchReviewStatusSelect: document.querySelector("#workbenchReviewStatusSelect"),
+    workbenchWorkflowStatusSelect: document.querySelector("#workbenchWorkflowStatusSelect"),
+    workbenchClosureStatusSelect: document.querySelector("#workbenchClosureStatusSelect"),
+    workbenchNextActionSelect: document.querySelector("#workbenchNextActionSelect"),
     workbenchFilterSummary: document.querySelector("#workbenchFilterSummary"),
+    migrationToolResult: document.querySelector("#migrationToolResult"),
     refreshTodoCacheButton: document.querySelector("#refreshTodoCacheButton"),
     exportTodoButton: document.querySelector("#exportTodoButton"),
     exportDoneButton: document.querySelector("#exportDoneButton"),
+    refreshGeneratedIssuesButton: document.querySelector("#refreshGeneratedIssuesButton"),
+    dataGovernanceScanButton: document.querySelector("#dataGovernanceScanButton"),
+    dataGovernanceTasksButton: document.querySelector("#dataGovernanceTasksButton"),
+    exportDataGovernanceButton: document.querySelector("#exportDataGovernanceButton"),
+    salaryFormsButton: document.querySelector("#salaryFormsButton"),
+    salaryFlowsButton: document.querySelector("#salaryFlowsButton"),
+    reportPrintButton: document.querySelector("#reportPrintButton"),
+    migrationAcceptanceButton: document.querySelector("#migrationAcceptanceButton"),
+    migrationAcceptanceHistoryButton: document.querySelector("#migrationAcceptanceHistoryButton"),
+    exportMigrationAcceptanceButton: document.querySelector("#exportMigrationAcceptanceButton"),
+    migrationRegressionButton: document.querySelector("#migrationRegressionButton"),
+    migrationRegressionLibraryButton: document.querySelector("#migrationRegressionLibraryButton"),
+    migrationRegressionDashboardButton: document.querySelector("#migrationRegressionDashboardButton"),
+    migrationQualityOverviewButton: document.querySelector("#migrationQualityOverviewButton"),
+    migrationPreflightButton: document.querySelector("#migrationPreflightButton"),
+    migrationReadinessButton: document.querySelector("#migrationReadinessButton"),
+    historyDeliveryOverviewButton: document.querySelector("#historyDeliveryOverviewButton"),
+    historyClosureAcceptanceButton: document.querySelector("#historyClosureAcceptanceButton"),
+    workspaceTabs: document.querySelector(".workspace-tabs"),
     workbenchMetrics: document.querySelector("#workbenchMetrics"),
     todoWorkItems: document.querySelector("#todoWorkItems"),
     doneWorkItems: document.querySelector("#doneWorkItems"),
@@ -378,8 +425,12 @@ const els = {
     historyPlanBatchPreviewButton: document.querySelector("#historyPlanBatchPreviewButton"),
     historyPlanBatchRetestButton: document.querySelector("#historyPlanBatchRetestButton"),
     historyPlanBatchRetestApproveButton: document.querySelector("#historyPlanBatchRetestApproveButton"),
+    historyPlanBatchReviewButton: document.querySelector("#historyPlanBatchReviewButton"),
+    historyPlanBatchSpecialButton: document.querySelector("#historyPlanBatchSpecialButton"),
     historyPlanBatchExecuteButton: document.querySelector("#historyPlanBatchExecuteButton"),
     historyPlanBatchRollbackButton: document.querySelector("#historyPlanBatchRollbackButton"),
+    historyPendingQueuesButton: document.querySelector("#historyPendingQueuesButton"),
+    historyBatchLedgerButton: document.querySelector("#historyBatchLedgerButton"),
     historyPlanExportButton: document.querySelector("#historyPlanExportButton"),
     loadMoreTodoButton: document.querySelector("#loadMoreTodoButton"),
     loadMoreDoneButton: document.querySelector("#loadMoreDoneButton"),
@@ -394,8 +445,16 @@ const els = {
     loadAcceptanceSampleButton: document.querySelector("#loadAcceptanceSampleButton"),
     batchReconcileButton: document.querySelector("#batchReconcileButton"),
     normalGradeBatchButton: document.querySelector("#normalGradeBatchButton"),
+    generateNormalGradeTodoButton: document.querySelector("#generateNormalGradeTodoButton"),
+    generateEntrySalaryTodoButton: document.querySelector("#generateEntrySalaryTodoButton"),
+    generatePostChangeTodoButton: document.querySelector("#generatePostChangeTodoButton"),
+    generateAllowanceChangeTodoButton: document.querySelector("#generateAllowanceChangeTodoButton"),
+    generateTransferSalaryTodoButton: document.querySelector("#generateTransferSalaryTodoButton"),
+    generatePunishmentReductionTodoButton: document.querySelector("#generatePunishmentReductionTodoButton"),
+    generatedTimelineBatchButton: document.querySelector("#generatedTimelineBatchButton"),
     exportBatchReconcileButton: document.querySelector("#exportBatchReconcileButton"),
     exportNormalGradeButton: document.querySelector("#exportNormalGradeButton"),
+    exportGeneratedTimelineButton: document.querySelector("#exportGeneratedTimelineButton"),
     orgTree: document.querySelector("#orgTree"),
     orgCount: document.querySelector("#orgCount"),
     peopleList: document.querySelector("#peopleList"),
@@ -520,11 +579,19 @@ const Permissions = {
         const canConfig = Permissions.has("SALARY_CONFIG");
 
         Permissions.show(els.normalGradeBatchButton, canTrial);
+        Permissions.show(els.generateNormalGradeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generateEntrySalaryTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generatePostChangeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generateAllowanceChangeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generateTransferSalaryTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generatePunishmentReductionTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generatedTimelineBatchButton, canTrial);
         Permissions.show(els.trialCalcButton, canTrial);
         Permissions.show(els.batchReconcileButton, canReconcile);
         Permissions.show(els.reconcileButton, canReconcile);
         Permissions.show(els.exportBatchReconcileButton, canExport);
         Permissions.show(els.exportNormalGradeButton, canExport);
+        Permissions.show(els.exportGeneratedTimelineButton, canExport);
 
         const configBand = els.fieldConfigList?.closest(".config-band");
         Permissions.show(configBand, canConfig);
@@ -537,6 +604,10 @@ const Permissions = {
         const canTodo = Permissions.has("SALARY_TODO") || Permissions.has("APPLICATION_TODO");
         const canDone = Permissions.has("SALARY_DONE") || Permissions.has("APPLICATION_DONE");
         const canExport = Permissions.has("SALARY_EXPORT");
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
+        const canGovernance = Permissions.has("SALARY_GOVERNANCE");
+        const canAcceptance = Permissions.has("SALARY_ACCEPTANCE");
 
         Permissions.show(els.todoWorkItems?.closest(".workbench-panel"), canTodo);
         Permissions.show(els.doneWorkItems?.closest(".workbench-panel"), canDone);
@@ -544,11 +615,33 @@ const Permissions = {
         Permissions.show(els.refreshTodoCacheButton, Permissions.has("SALARY_TODO"));
         Permissions.show(els.exportTodoButton, canExport && canTodo);
         Permissions.show(els.exportDoneButton, canExport && canDone);
+        Permissions.show(els.refreshGeneratedIssuesButton, Permissions.has("SALARY_TODO") && Permissions.has("SALARY_TRIAL"));
+        Permissions.show(els.dataGovernanceScanButton, canGovernance);
+        Permissions.show(els.dataGovernanceTasksButton, canGovernance && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.exportDataGovernanceButton, canGovernance && canExport);
+        Permissions.show(els.salaryFormsButton, Permissions.has("WORKBENCH"));
+        Permissions.show(els.salaryFlowsButton, Permissions.has("WORKBENCH"));
+        Permissions.show(els.reportPrintButton, Permissions.has("SALARY_REPORT") || canExport);
+        Permissions.show(els.migrationAcceptanceButton, canAcceptance);
+        Permissions.show(els.migrationAcceptanceHistoryButton, canAcceptance);
+        Permissions.show(els.exportMigrationAcceptanceButton, canAcceptance && canExport);
+        Permissions.show(els.migrationRegressionButton, canAcceptance);
+        Permissions.show(els.migrationRegressionLibraryButton, canAcceptance);
+        Permissions.show(els.migrationRegressionDashboardButton, canAcceptance);
+        Permissions.show(els.migrationQualityOverviewButton, canAcceptance);
+        Permissions.show(els.migrationPreflightButton, canAcceptance);
+        Permissions.show(els.migrationReadinessButton, canAcceptance);
+        Permissions.show(els.historyDeliveryOverviewButton, Permissions.has("SALARY_DONE"));
+        Permissions.show(els.historyClosureAcceptanceButton, Permissions.has("SALARY_DONE"));
         Permissions.show(els.historyPlanBatchPreviewButton, Permissions.has("SALARY_DONE"));
         Permissions.show(els.historyPlanBatchRetestButton, Permissions.has("SALARY_DONE"));
         Permissions.show(els.historyPlanBatchRetestApproveButton, Permissions.has("SALARY_DONE"));
-        Permissions.show(els.historyPlanBatchExecuteButton, Permissions.has("SALARY_DONE"));
-        Permissions.show(els.historyPlanBatchRollbackButton, Permissions.has("SALARY_DONE"));
+        Permissions.show(els.historyPlanBatchReviewButton, Permissions.has("SALARY_DONE"));
+        Permissions.show(els.historyPlanBatchSpecialButton, Permissions.has("SALARY_DONE"));
+        Permissions.show(els.historyPlanBatchExecuteButton, canHistoryWrite);
+        Permissions.show(els.historyPlanBatchRollbackButton, canHistoryRollback);
+        Permissions.show(els.historyPendingQueuesButton, Permissions.has("SALARY_DONE"));
+        Permissions.show(els.historyBatchLedgerButton, Permissions.has("SALARY_DONE"));
         Permissions.show(els.historyPlanExportButton, canExport && Permissions.has("SALARY_DONE"));
         WorkbenchPanel.updateHistoryPlanActionState();
         if (!canTodo) {
@@ -708,13 +801,37 @@ const Format = {
     reviewStatusText(status) {
         return {
             PENDING: "\u5f85\u590d\u6838",
-            REVIEWED: "\u5df2\u590d\u6838"
+            REVIEWED: "\u5df2\u590d\u6838",
+            IGNORED: "\u5df2\u5ffd\u7565",
+            PENDING_LEGACY: "\u5f85\u65e7\u7cfb\u7edf\u6838\u5bf9",
+            MATCHED: "\u5df2\u4e00\u81f4",
+            SPECIAL: "\u7279\u6b8a\u60c5\u51b5"
         }[status] || status || "-"
     },
     reviewStatusClass(status) {
         return {
             PENDING: "pending",
-            REVIEWED: "reviewed"
+            REVIEWED: "reviewed",
+            IGNORED: "ignored",
+            PENDING_LEGACY: "pending",
+            MATCHED: "reviewed",
+            SPECIAL: "warning"
+        }[status] || ""
+    },
+    acceptanceStatusText(status) {
+        return {
+            PASS: "\u901a\u8fc7",
+            WARN: "\u9884\u8b66",
+            RUNNING: "\u8fd0\u884c\u4e2d",
+            ERROR: "\u5f02\u5e38"
+        }[status] || status || "-"
+    },
+    acceptanceStatusClass(status) {
+        return {
+            PASS: "match",
+            WARN: "different",
+            RUNNING: "pending",
+            ERROR: "error"
         }[status] || ""
     },
     historyWriteReviewCategoryText(category) {
@@ -723,7 +840,7 @@ const Format = {
             BASE_CHANGED: "\u57fa\u7840\u4fe1\u606f\u5df2\u53d8\u66f4",
             POLICY_DIFF: "\u653f\u7b56\u53d6\u503c\u5dee\u5f02",
             MANUAL_INPUT: "\u624b\u5de5\u5f55\u5165",
-            HISTORY_SPECIAL: "\u5386\u53f2\u7279\u6b8a\u5904\u7406",
+            HISTORY_SPECIAL: "\u7279\u6b8a\u60c5\u51b5/\u540e\u671f\u6838\u67e5",
             OTHER: "\u5176\u4ed6"
         }[category] || category || "-"
     },
@@ -769,6 +886,11 @@ const Format = {
             RETEST_FIRST: "\u6309\u5f53\u524d\u57fa\u7840\u590d\u6d4b",
             MAINTAIN_AND_RETEST: "\u7ef4\u62a4\u540e\u590d\u6d4b",
             APPROVE_RETEST: "\u6807\u8bb0\u590d\u6d4b\u901a\u8fc7",
+            COMPARE_RETEST: "\u5b57\u6bb5\u5bf9\u7167\u590d\u6d4b",
+            WRITE_HISTORY: "\u5199\u5165\u5386\u53f2",
+            VIEW_PLAN: "\u67e5\u770b\u5199\u5165\u8ba1\u5212",
+            REPREVIEW_HISTORY: "\u91cd\u65b0\u9884\u68c0",
+            ROLLBACK_HISTORY: "\u64a4\u9500\u5199\u5165",
             REVIEWED: "\u5df2\u6838\u67e5",
             NOT_REQUIRED: "\u65e0\u9700\u6838\u67e5"
         }[actionCode] || fallback || actionCode || "-"
@@ -792,6 +914,81 @@ const Format = {
             FAILED: "\u5199\u5165\u5931\u8d25",
             SUCCESS: "\u6210\u529f"
         }[status] || status || "-"
+    },
+    workflowStatusText(status) {
+        return {
+            CASE_DONE: "\u5df2\u529e",
+            REVIEW_PENDING: "\u5f85\u590d\u6838",
+            HISTORY_READY: "\u53ef\u5199\u5165\u5386\u53f2",
+            HISTORY_PREPARED: "\u5f85\u5199\u5165",
+            HISTORY_WRITTEN: "\u5df2\u5199\u5165",
+            HISTORY_REVIEW_PENDING: "\u5199\u5165\u540e\u5f85\u6838\u67e5",
+            HISTORY_CLOSED: "\u5df2\u95ed\u73af",
+            HISTORY_EXECUTED: "\u5df2\u6267\u884c",
+            HISTORY_ROLLED_BACK: "\u5199\u5165\u5df2\u64a4\u9500",
+            HISTORY_BLOCKED: "\u5199\u5165\u963b\u65ad",
+            DATA_GOVERNANCE_REVIEWED: "\u6570\u636e\u6cbb\u7406\u5df2\u6838\u67e5",
+            DATA_GOVERNANCE_IGNORED: "\u6570\u636e\u6cbb\u7406\u5df2\u5ffd\u7565",
+            CASE_CANCELLED: "\u5df2\u64a4\u56de"
+        }[status] || status || ""
+    },
+    sourceText(source) {
+        return {
+            SALARY_EVENT: "\u5de5\u8d44\u53d8\u52a8",
+            SALARY_CASE: "\u5de5\u8d44\u7533\u529e",
+            SALARY_CLOSURE: "\u5de5\u8d44\u95ed\u73af",
+            DATA_GOVERNANCE: "\u6570\u636e\u6cbb\u7406",
+            REPORT_SAMPLE_COMPARISON: "\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            GENERATED_TIMELINE: "\u81ea\u52a8\u6f14\u7b97\u7f3a\u53e3",
+            APPLICATION_TODO: "\u7533\u529e\u5f85\u529e",
+            APPLICATION_DONE: "\u7533\u529e\u5df2\u529e",
+            dryzwbh: "\u4efb\u804c\u4fe1\u606f",
+            dndkh: "\u5e74\u5ea6\u8003\u6838",
+            dxl: "\u5b66\u5386\u4fe1\u606f",
+            hjxx: "\u5956\u60e9\u5904\u5206"
+        }[source] || source || ""
+    },
+    workflowStatusClass(status) {
+        return {
+            CASE_DONE: "reviewed",
+            REVIEW_PENDING: "pending",
+            HISTORY_READY: "reviewed",
+            HISTORY_PREPARED: "pending",
+            HISTORY_WRITTEN: "reviewed",
+            HISTORY_REVIEW_PENDING: "pending",
+            HISTORY_CLOSED: "reviewed",
+            HISTORY_EXECUTED: "reviewed",
+            HISTORY_ROLLED_BACK: "skipped",
+            HISTORY_BLOCKED: "error",
+            DATA_GOVERNANCE_REVIEWED: "reviewed",
+            DATA_GOVERNANCE_IGNORED: "skipped",
+            CASE_CANCELLED: "skipped"
+        }[status] || "pending"
+    },
+    closureStatusText(status) {
+        return {
+            CLOSED: "\u5df2\u95ed\u73af",
+            PENDING: "\u5f85\u95ed\u73af",
+            BLOCKED: "\u95ed\u73af\u963b\u65ad",
+            CANCELLED: "\u5df2\u64a4\u56de"
+        }[status] || status || ""
+    },
+    nextActionText(code) {
+        return {
+            REVIEW_TRIAL: "\u590d\u6838\u8bd5\u7b97",
+            PRINT_OR_CREATE_HISTORY_PLAN: "\u6253\u5370/\u5199\u5165\u9884\u68c0",
+            VIEW_HISTORY_PLAN: "\u67e5\u770b\u5199\u5165\u8ba1\u5212",
+            EXECUTE_HISTORY_WRITE: "\u5199\u5165\u5386\u53f2",
+            REVIEW_DIFFERENCE: "\u6838\u67e5\u5199\u5165\u5dee\u5f02"
+        }[code] || code || ""
+    },
+    closureStatusClass(status) {
+        return {
+            CLOSED: "reviewed",
+            PENDING: "pending",
+            BLOCKED: "error",
+            CANCELLED: "skipped"
+        }[status] || "pending"
     },
     historyWriteComparisonText(status) {
         return {
@@ -821,11 +1018,102 @@ const Format = {
             "history-write-execute": "\u5199\u5165\u5386\u53f2",
             "history-write-rollback": "\u64a4\u9500\u5199\u5165",
             "history-write-batch-execute": "\u6279\u91cf\u5199\u5165\u5386\u53f2",
+            "history-write-selected-execute": "\u9009\u4e2d\u5199\u5165\u5386\u53f2",
+            "history-write-batch-safety-preview": "\u6279\u91cf\u5199\u5165\u5b89\u5168\u9884\u68c0",
+            "history-write-batch-safety-consume": "\u6279\u91cf\u5199\u5165\u5b89\u5168\u786e\u8ba4",
+            "history-write-batch-rollback-safety-preview": "\u6279\u91cf\u64a4\u9500\u5b89\u5168\u9884\u68c0",
+            "history-write-batch-rollback-safety-consume": "\u6279\u91cf\u64a4\u9500\u5b89\u5168\u786e\u8ba4",
+            "history-write-batch-retest-preview": "\u6279\u91cf\u590d\u6d4b\u9884\u68c0",
+            "history-write-selected-retest-preview": "\u9009\u4e2d\u590d\u6d4b\u9884\u68c0",
+            "history-write-batch-retest-approve": "\u6279\u91cf\u590d\u6d4b\u901a\u8fc7",
+            "history-write-selected-retest-approve": "\u9009\u4e2d\u590d\u6d4b\u901a\u8fc7",
+            "history-write-batch-review": "\u6279\u91cf\u6838\u67e5\u5199\u5165\u5dee\u5f02",
+            "history-write-selected-review": "\u9009\u4e2d\u6838\u67e5\u5199\u5165\u5dee\u5f02",
+            "history-write-batch-special-review": "\u6279\u91cf\u6807\u8bb0\u7279\u6b8a\u60c5\u51b5",
+            "history-write-selected-special-review": "\u9009\u4e2d\u6807\u8bb0\u7279\u6b8a\u60c5\u51b5",
             "history-write-batch-rollback": "\u6279\u91cf\u64a4\u9500\u5199\u5165",
+            "history-write-selected-rollback": "\u9009\u4e2d\u64a4\u9500\u5199\u5165",
+            "history-write-blocked-review": "\u963b\u65ad\u9879\u540e\u671f\u6838\u67e5",
             "history-write-comparison-review": "\u6838\u67e5\u5199\u5165\u5dee\u5f02",
             "history-write-comparison-retest": "\u590d\u6d4b\u5199\u5165\u5dee\u5f02",
-            "history-write-comparison-retest-approve": "\u590d\u6d4b\u901a\u8fc7"
+            "history-write-comparison-retest-approve": "\u590d\u6d4b\u901a\u8fc7",
+            "history-write-plans-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u8ba1\u5212",
+            "history-write-batch-ledger-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u6279\u6b21\u53f0\u8d26",
+            "history-write-batch-audits-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u6279\u6b21\u6d41\u6c34",
+            "history-write-report-batch-queue": "\u6253\u5370\u6279\u6b21\u9001\u5165\u5386\u53f2\u5199\u5165\u961f\u5217",
+            "history-write-rollback-preview-csv": "\u5bfc\u51fa\u64a4\u9500\u9884\u68c0",
+            "history-write-closure-acceptance-package": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536\u5305",
+            "history-write-delivery-overview-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8",
+            "salary-migration-closure-checklist-csv": "\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u95ed\u73af\u603b\u6e05\u5355",
+            "salary-migration-delivery-package": "\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305",
+            "history-write-delivery-acceptance-index-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u5f52\u6863\u7d22\u5f15",
+            "history-write-delivery-acceptance-detail-csv": "\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u8be6\u60c5",
+            "history-write-delivery-acceptance-print": "\u6253\u5370\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u786e\u8ba4\u5355",
+            "history-write-delivery-acceptance-batch-print": "\u6279\u91cf\u6253\u5370\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u786e\u8ba4\u5355",
+            "salary-case-approval-print": "\u6253\u5370\u5ba1\u6279\u8868",
+            "salary-case-approvals-print": "\u6279\u91cf\u6253\u5370\u5ba1\u6279\u8868",
+            "salary-case-approvals-reprint": "\u91cd\u6253\u6279\u91cf\u5ba1\u6279\u8868",
+            "report-print-batch-csv": "\u5bfc\u51fa\u6253\u5370\u6279\u6b21\u660e\u7ec6",
+            "report-print-batch-acceptance-package": "\u5bfc\u51fa\u6253\u5370\u6279\u6b21\u9a8c\u6536\u5305",
+            "report-print-batch-acceptance-package-bulk": "\u6279\u91cf\u5bfc\u51fa\u6253\u5370\u6279\u6b21\u9a8c\u6536\u5305",
+            "report-print-self-check-csv": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u81ea\u68c0\u9a8c\u6536\u5355",
+            "report-migration-matrix-csv": "\u5bfc\u51fa\u62a5\u8868\u8fc1\u79fb\u77e9\u9635",
+            "report-migration-acceptance-checklist-csv": "\u5bfc\u51fa\u62a5\u8868\u9a8c\u6536\u6e05\u5355",
+            "report-migration-sample-evidence-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e",
+            "report-migration-sample-comparison-csv": "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            "report-migration-sample-comparison-review": "\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            "report-migration-sample-comparison-batch-review": "\u6279\u91cf\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            "report-migration-guide-csv": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e",
+            "report-migration-delivery-package": "\u5bfc\u51fa\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305",
+            "salary-case-approval-roster-print": "\u6253\u5370\u5ba1\u6279\u6e05\u518c",
+            "salary-case-approval-roster-csv": "\u5bfc\u51fa\u5ba1\u6279\u6e05\u518c",
+            "salary-history-print": "\u6253\u5370\u5386\u53f2\u660e\u7ec6",
+            "salary-history-csv": "\u5bfc\u51fa\u5386\u53f2\u660e\u7ec6",
+            "salary-change-ledger-print": "\u6253\u5370\u53d8\u52a8\u53f0\u8d26",
+            "salary-change-ledger-csv": "\u5bfc\u51fa\u53d8\u52a8\u53f0\u8d26",
+            "report-print-archive-csv": "\u5bfc\u51fa\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26",
+            "report-print-batch-csv": "\u5bfc\u51fa\u6253\u5370\u6279\u6b21\u660e\u7ec6",
+            "salary-roster-print": "\u6253\u5370\u5de5\u8d44\u8868",
+            "salary-roster-csv": "\u5bfc\u51fa\u5de5\u8d44\u8868",
+            "report-audits-csv": "\u5bfc\u51fa\u62a5\u8868\u64cd\u4f5c\u5ba1\u8ba1"
         }[action] || action || "-"
+    },
+    auditModuleText(module) {
+        return {
+            system: "\u7cfb\u7edf\u7ba1\u7406",
+            workbench: "\u5de5\u8d44\u4e1a\u52a1",
+            "salary-config": "\u5de5\u8d44\u9879\u914d\u7f6e",
+            "\u8d26\u6237\u5b89\u5168": "\u8d26\u6237\u5b89\u5168"
+        }[module] || module || "-"
+    },
+    auditTargetText(item = {}) {
+        const type = item.targetType || "";
+        const code = item.targetCode || "";
+        if (type === "HISTORY_WRITE_BATCH_SAFETY") {
+            return `\u6279\u91cf\u5b89\u5168\u786e\u8ba4:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_PLAN") {
+            return `\u5386\u53f2\u5199\u5165\u8ba1\u5212:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_BATCH_LEDGER") {
+            return `\u5386\u53f2\u5199\u5165\u6279\u6b21\u53f0\u8d26:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_BATCH") {
+            return `\u5386\u53f2\u5199\u5165\u6279\u6b21:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_ACCEPTANCE") {
+            return `\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_DELIVERY") {
+            return `\u5386\u53f2\u5199\u5165\u4ea4\u4ed8:${code || "-"}`;
+        }
+        if (type === "HISTORY_WRITE_DELIVERY_ACCEPTANCE") {
+            return `\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u9a8c\u6536:${code || "-"}`;
+        }
+        if (type === "SALARY_CASE") {
+            return `\u5de5\u8d44\u4e1a\u52a1:${code || "-"}`;
+        }
+        return [type, code].filter(Boolean).join(":") || "-";
     },
     businessStatusText(status) {
         return {
@@ -839,6 +1127,40 @@ const Format = {
 
 function setStatus(text) {
     els.statusText.textContent = text;
+    if (els.desktopStatusMessage) {
+        els.desktopStatusMessage.textContent = text || "\u5c31\u7eea";
+    }
+}
+
+function applyDesktopDensity(mode, persist = true) {
+    const nextMode = mode === "comfortable" ? "comfortable" : "compact";
+    state.densityMode = nextMode;
+    els.appShell?.classList.toggle("density-comfortable", nextMode === "comfortable");
+    els.appShell?.classList.toggle("density-compact", nextMode === "compact");
+    els.workspaceTabs?.querySelectorAll("button[data-density-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.densityMode === nextMode);
+    });
+    if (persist) {
+        try {
+            window.localStorage.setItem(DESKTOP_DENSITY_STORAGE_KEY, nextMode);
+        } catch (error) {
+            // Local storage can be unavailable in restricted browser contexts.
+        }
+    }
+}
+
+function restoreDesktopDensity() {
+    let savedMode = "compact";
+    try {
+        savedMode = window.localStorage.getItem(DESKTOP_DENSITY_STORAGE_KEY) || "compact";
+    } catch (error) {
+        savedMode = "compact";
+    }
+    applyDesktopDensity(savedMode, false);
+}
+
+function delay(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function batchChangeType() {
@@ -856,9 +1178,67 @@ function baseChangeTypeLabel(value) {
 
 const WorkbenchPanel = {
     riskMetricCodes: ["SALARY_REVIEW_PENDING", "SALARY_TRIAL_DIFFERENT", "SALARY_TRIAL_ERROR"],
-    historyPlanMetricCodes: ["HISTORY_PLAN_PREPARED", "HISTORY_PLAN_EXECUTED", "HISTORY_PLAN_ROLLED_BACK", "HISTORY_PLAN_BLOCKED", "HISTORY_PLAN_REVIEW_PENDING"],
+    closureMetricCodes: ["SALARY_CLOSURE_PENDING", "SALARY_CLOSURE_BLOCKED", "SALARY_CLOSURE_CLOSED"],
+    nextActionMetricCodes: ["SALARY_NEXT_REVIEW_TRIAL", "SALARY_NEXT_PRINT_OR_PLAN", "SALARY_NEXT_EXECUTE_WRITE", "SALARY_NEXT_REVIEW_DIFFERENCE"],
+    historyPlanMetricCodes: ["HISTORY_PLAN_READY", "HISTORY_PLAN_PREPARED", "HISTORY_PLAN_EXECUTED", "HISTORY_PLAN_ROLLED_BACK", "HISTORY_PLAN_BLOCKED", "HISTORY_PLAN_REVIEW_PENDING"],
+    historyQueueMetricPrefix: "HISTORY_QUEUE_",
+    jumpTargets: {
+        metrics: { selector: "#workbenchMetrics", label: "\u6307\u6807" },
+        todo: { selector: "#todoPanel", label: "\u5f85\u529e" },
+        done: { selector: "#donePanel", label: "\u5df2\u529e" },
+        history: { selector: "#historyPanel", label: "\u5386\u53f2\u5199\u5165" }
+    },
+    jumpToWorkspace(targetCode) {
+        const target = WorkbenchPanel.jumpTargets[targetCode || ""];
+        if (!target) {
+            return;
+        }
+        const node = document.querySelector(target.selector);
+        if (node) {
+            node.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        els.workspaceTabs?.querySelectorAll("button[data-workbench-jump]").forEach((button) => {
+            button.classList.toggle("active", button.dataset.workbenchJump === targetCode);
+        });
+        setStatus(`\u5df2\u5b9a\u4f4d\u5230${target.label}`);
+    },
     metricCountText(metric) {
         return Number(metric.count) < 0 ? "..." : metric.count;
+    },
+    metricRisk(metric = {}) {
+        const code = metric.code || "";
+        return WorkbenchPanel.riskMetricCodes.includes(code)
+            || WorkbenchPanel.nextActionMetricCodes.includes(code)
+            || code === "SALARY_CLOSURE_PENDING"
+            || code === "SALARY_CLOSURE_BLOCKED"
+            || code === "HISTORY_QUEUE_BLOCKED"
+            || code === "HISTORY_QUEUE_REVIEW"
+            || code === "HISTORY_QUEUE_RETEST";
+    },
+    metricClass(metric = {}) {
+        const classes = [];
+        if (WorkbenchPanel.metricRisk(metric)) {
+            classes.push("risk");
+        }
+        if (WorkbenchPanel.nextActionMetricCodes.includes(metric.code || "")) {
+            classes.push("next-action");
+        }
+        if (String(metric.hint || "").includes("\u9700\u5237\u65b0")) {
+            classes.push("dirty");
+        }
+        return classes.join(" ");
+    },
+    metricCanView(code) {
+        return WorkbenchPanel.riskMetricCodes.includes(code)
+            || WorkbenchPanel.closureMetricCodes.includes(code)
+            || WorkbenchPanel.nextActionMetricCodes.includes(code)
+            || WorkbenchPanel.historyPlanMetricCodes.includes(code)
+            || String(code || "").startsWith(WorkbenchPanel.historyQueueMetricPrefix);
+    },
+    metricCanExport(code) {
+        return WorkbenchPanel.riskMetricCodes.includes(code)
+            || WorkbenchPanel.closureMetricCodes.includes(code)
+            || WorkbenchPanel.nextActionMetricCodes.includes(code);
     },
     renderMetrics(metrics) {
         if (!metrics.length) {
@@ -866,19 +1246,871 @@ const WorkbenchPanel = {
             return;
         }
         const canExport = Permissions.has("SALARY_EXPORT");
-        els.workbenchMetrics.innerHTML = metrics.map((metric) => `
-            <div class="metric-card ${WorkbenchPanel.riskMetricCodes.includes(metric.code) ? "risk" : ""} ${String(metric.hint || "").includes("\u9700\u5237\u65b0") ? "dirty" : ""}" data-metric-code="${Format.html(metric.code || "")}">
+        els.workbenchMetrics.innerHTML = `
+            ${WorkbenchPanel.closureQueueStripHtml(metrics)}
+            ${metrics.map((metric) => `
+            <div class="metric-card ${WorkbenchPanel.metricClass(metric)}" data-metric-code="${Format.html(metric.code || "")}">
                 <span>${Format.html(metric.title)}</span>
                 <strong>${Format.html(WorkbenchPanel.metricCountText(metric))}</strong>
                 <small>${Format.html(metric.hint || "")}</small>
-                ${WorkbenchPanel.riskMetricCodes.includes(metric.code) || WorkbenchPanel.historyPlanMetricCodes.includes(metric.code) ? `
+                ${WorkbenchPanel.metricCanView(metric.code) ? `
                     <div class="metric-actions">
                         <button type="button" data-metric-view="${Format.html(metric.code)}">\u67e5\u770b</button>
-                        ${canExport && WorkbenchPanel.riskMetricCodes.includes(metric.code) ? `<button type="button" data-metric-export="${Format.html(metric.code)}">\u5bfc\u51fa</button>` : ""}
+                        ${canExport && WorkbenchPanel.metricCanExport(metric.code) ? `<button type="button" data-metric-export="${Format.html(metric.code)}">\u5bfc\u51fa</button>` : ""}
                     </div>
                 ` : ""}
             </div>
-        `).join("");
+        `).join("")}`;
+    },
+    closureQueueStripHtml(metrics = []) {
+        const counts = new Map((metrics || []).map((metric) => [metric.code, Number(metric.count || 0)]));
+        const groups = [
+            { code: "SALARY_NEXT_PRINT_OR_PLAN", label: "\u5f85\u6253\u5370/\u9884\u68c0", count: counts.get("SALARY_NEXT_PRINT_OR_PLAN") || 0, action: "SALARY_NEXT_PRINT_OR_PLAN", tone: "pending" },
+            { code: "HISTORY_PLAN_PREPARED", label: "\u5f85\u9884\u68c0\u5904\u7406", count: counts.get("HISTORY_PLAN_PREPARED") || 0, action: "HISTORY_PLAN_PREPARED", tone: "pending" },
+            { code: "SALARY_NEXT_EXECUTE_WRITE", label: "\u53ef\u5199\u5165", count: counts.get("SALARY_NEXT_EXECUTE_WRITE") || counts.get("HISTORY_PLAN_READY") || 0, action: "SALARY_NEXT_EXECUTE_WRITE", tone: "ready" },
+            { code: "SALARY_NEXT_REVIEW_DIFFERENCE", label: "\u5f85\u6838\u67e5", count: counts.get("SALARY_NEXT_REVIEW_DIFFERENCE") || counts.get("HISTORY_PLAN_REVIEW_PENDING") || 0, action: "SALARY_NEXT_REVIEW_DIFFERENCE", tone: "warning" },
+            { code: "SALARY_CLOSURE_CLOSED", label: "\u5df2\u95ed\u73af", count: counts.get("SALARY_CLOSURE_CLOSED") || 0, action: "SALARY_CLOSURE_CLOSED", tone: "closed" },
+            { code: "HISTORY_PLAN_ROLLED_BACK", label: "\u5df2\u56de\u6eda", count: counts.get("HISTORY_PLAN_ROLLED_BACK") || 0, action: "HISTORY_PLAN_ROLLED_BACK", tone: "blocked" }
+        ];
+        return `<div class="closure-queue-strip">
+            <span>\u5de5\u8d44\u95ed\u73af\u961f\u5217</span>
+            ${groups.map((group) => `
+                <div class="closure-queue-item ${Format.html(group.tone)}">
+                    <button type="button" class="closure-queue-main" data-closure-queue-open="${Format.html(group.action)}" title="${Format.html(group.label)}">
+                        <b>${Format.html(group.count)}</b>
+                        <small>${Format.html(group.label)}</small>
+                    </button>
+                    <span class="closure-queue-actions">
+                        <button type="button" data-closure-queue-export="${Format.html(group.action)}">\u5bfc\u51fa</button>
+                        <button type="button" data-closure-queue-ledger="${Format.html(group.action)}">\u53f0\u8d26</button>
+                    </span>
+                </div>
+            `).join("")}
+        </div>`;
+    },
+    historyClosureAcceptanceRows(metrics = []) {
+        const counts = new Map((metrics || []).map((metric) => [metric.code, Number(metric.count || 0)]));
+        return [
+            {
+                code: "SALARY_NEXT_PRINT_OR_PLAN",
+                title: "\u5f85\u6253\u5370/\u9884\u68c0",
+                count: counts.get("SALARY_NEXT_PRINT_OR_PLAN") || 0,
+                result: "PENDING",
+                hint: "\u5df2\u529e\u4e1a\u52a1\u5c1a\u672a\u5f62\u6210\u53ef\u5199\u5165\u5386\u53f2\u8ba1\u5212\uff0c\u9700\u6253\u5370\u5ba1\u6279\u8868\u6216\u751f\u6210\u5199\u5165\u9884\u68c0\u3002"
+            },
+            {
+                code: "SALARY_NEXT_EXECUTE_WRITE",
+                title: "\u5f85\u5199\u5165\u5386\u53f2",
+                count: counts.get("SALARY_NEXT_EXECUTE_WRITE") || counts.get("HISTORY_PLAN_READY") || 0,
+                result: "READY",
+                hint: "\u5df2\u901a\u8fc7\u5199\u5165\u9884\u68c0\u4e14\u5177\u5907\u5199\u5165\u6761\u4ef6\uff0c\u9700\u6267\u884c\u5199\u5165\u5e76\u5b8c\u6210\u5bf9\u7167\u3002"
+            },
+            {
+                code: "SALARY_NEXT_REVIEW_DIFFERENCE",
+                title: "\u5199\u5165\u540e\u5f85\u6838\u67e5",
+                count: counts.get("SALARY_NEXT_REVIEW_DIFFERENCE") || counts.get("HISTORY_PLAN_REVIEW_PENDING") || 0,
+                result: "REVIEW",
+                hint: "\u5df2\u5199\u5165\u4f46\u5feb\u7167\u4e0e hisbase \u5bf9\u7167\u4ecd\u6709\u5dee\u5f02\uff0c\u9700\u590d\u6d4b\u6216\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba\u3002"
+            },
+            {
+                code: "HISTORY_PLAN_ROLLED_BACK",
+                title: "\u5df2\u56de\u6eda\u5f85\u91cd\u65b0\u5904\u7406",
+                count: counts.get("HISTORY_PLAN_ROLLED_BACK") || 0,
+                result: "ROLLED_BACK",
+                hint: "\u5386\u53f2\u5199\u5165\u5df2\u64a4\u9500\u5e76\u6062\u590d sid \u94fe\uff0c\u9700\u6839\u636e\u5f53\u524d\u57fa\u7840\u4fe1\u606f\u91cd\u65b0\u9884\u68c0\u6216\u7559\u5b58\u64a4\u9500\u4f9d\u636e\u3002"
+            },
+            {
+                code: "SALARY_CLOSURE_CLOSED",
+                title: "\u5df2\u95ed\u73af",
+                count: counts.get("SALARY_CLOSURE_CLOSED") || 0,
+                result: "CLOSED",
+                hint: "\u5df2\u5b8c\u6210\u6253\u5370\u3001\u5199\u5165\u3001\u5bf9\u7167\u548c\u6838\u67e5\u8981\u6c42\uff0c\u53ef\u4f5c\u4e3a\u4ea4\u4ed8\u5df2\u529e\u53f0\u8d26\u3002"
+            }
+        ];
+    },
+    historyClosureAcceptanceCsvRows(rows = []) {
+        const exportedAt = new Date().toLocaleString("zh-CN", { hour12: false });
+        const pendingCount = rows
+            .filter((row) => row.result !== "CLOSED")
+            .reduce((sum, row) => sum + Number(row.count || 0), 0);
+        const closedCount = rows.find((row) => row.result === "CLOSED")?.count || 0;
+        const csvRows = [
+            ["验收时间", exportedAt],
+            ["待处理合计", pendingCount],
+            ["已闭环合计", closedCount],
+            [],
+            ["队列编码", "队列名称", "数量", "验收结论", "处理说明"]
+        ];
+        for (const row of rows) {
+            csvRows.push([
+                row.code,
+                row.title,
+                row.count,
+                row.result === "CLOSED" ? "已闭环" : (Number(row.count || 0) > 0 ? "待处理" : "无待处理"),
+                row.hint
+            ]);
+        }
+        return csvRows;
+    },
+    historyClosureAcceptancePackageFiles(rows = []) {
+        const counts = new Map((rows || []).map((row) => [row.code, Number(row.count || 0)]));
+        return [
+            {
+                file: "README.txt",
+                title: "\u9a8c\u6536\u8bf4\u660e",
+                count: "-",
+                scope: "\u751f\u6210\u65f6\u95f4\u3001\u5f85\u5904\u7406/\u5df2\u95ed\u73af\u5408\u8ba1\u3001\u5305\u5185\u6587\u4ef6\u548c\u9a8c\u6536\u53e3\u5f84"
+            },
+            {
+                file: "history-write-closure-acceptance-summary.csv",
+                title: "\u95ed\u73af\u9a8c\u6536\u6c47\u603b",
+                count: rows.length,
+                scope: "\u6309\u961f\u5217\u6c47\u603b\u5f85\u5904\u7406\u3001\u5df2\u95ed\u73af\u548c\u5904\u7406\u8bf4\u660e"
+            },
+            {
+                file: "salary-migration-closure-checklist.csv",
+                title: "\u8fc1\u79fb\u95ed\u73af\u603b\u6e05\u5355",
+                count: "\u603b\u89c8",
+                scope: "\u4e32\u8054\u5f85\u529e\u751f\u6210\u3001\u8bd5\u7b97\u9884\u89c8\u3001\u62a5\u8868\u5f52\u6863\u3001\u5386\u53f2\u5199\u5165\u3001\u5dee\u5f02\u6838\u67e5\u3001\u6743\u9650\u5ba1\u8ba1\u548c\u95ed\u73af\u9a8c\u6536"
+            },
+            {
+                file: "history-write-safety-policy.csv",
+                title: "\u6279\u91cf\u5b89\u5168\u673a\u5236",
+                count: "\u89c4\u5219",
+                scope: "\u6279\u91cf\u5199\u5165/\u56de\u6eda\u5fc5\u987b\u7ecf\u8fc7\u9884\u68c0 token\u3001\u786e\u8ba4\u6d88\u8d39\u3001\u963b\u65ad\u8df3\u8fc7\u548c\u6279\u6b21\u5ba1\u8ba1"
+            },
+            {
+                file: "history-write-plans-unprinted-or-plan.csv",
+                title: "\u5f85\u6253\u5370/\u9884\u68c0\u6e05\u5355",
+                count: counts.get("SALARY_NEXT_PRINT_OR_PLAN") || 0,
+                scope: "\u5199\u5165\u8ba1\u5212\u4e3a PREPARED\uff0c\u4f46\u5ba1\u6279\u8868\u672a\u5f52\u6863\u6216\u5c1a\u9700\u91cd\u65b0\u9884\u68c0"
+            },
+            {
+                file: "history-write-plans-ready-to-write.csv",
+                title: "\u5f85\u5199\u5165\u5386\u53f2\u6e05\u5355",
+                count: counts.get("SALARY_NEXT_EXECUTE_WRITE") || 0,
+                scope: "\u5df2\u6253\u5370\u5f52\u6863\u4e14\u5199\u5165\u9884\u68c0\u53ef\u6267\u884c\uff0c\u5f85\u8fdb\u884c\u5b89\u5168\u786e\u8ba4\u548c\u5199\u5165"
+            },
+            {
+                file: "history-write-plans-review-difference.csv",
+                title: "\u5199\u5165\u540e\u5f85\u6838\u67e5\u6e05\u5355",
+                count: counts.get("SALARY_NEXT_REVIEW_DIFFERENCE") || 0,
+                scope: "\u5df2\u5199\u5165\u5386\u53f2\uff0c\u4f46\u5feb\u7167\u4e0e hisbase \u5bf9\u7167\u4ecd\u9700\u590d\u6d4b\u6216\u6838\u67e5"
+            },
+            {
+                file: "history-write-plans-rolled-back.csv",
+                title: "\u5df2\u56de\u6eda\u5f85\u91cd\u65b0\u5904\u7406\u6e05\u5355",
+                count: counts.get("HISTORY_PLAN_ROLLED_BACK") || 0,
+                scope: "\u5df2\u64a4\u9500\u5199\u5165\u5e76\u6062\u590d sid \u94fe\uff0c\u9700\u91cd\u65b0\u9884\u68c0\u6216\u7559\u5b58\u64a4\u9500\u4f9d\u636e"
+            },
+            {
+                file: "history-write-batch-ledger-write.csv",
+                title: "\u5199\u5165\u6279\u6b21\u53f0\u8d26",
+                count: "\u6279\u6b21",
+                scope: "\u6279\u91cf\u5199\u5165\u548c\u9009\u4e2d\u5199\u5165\u7684\u6267\u884c\u6279\u6b21\u4f9d\u636e"
+            },
+            {
+                file: "history-write-batch-ledger-review.csv",
+                title: "\u6838\u67e5/\u590d\u6d4b\u6279\u6b21\u53f0\u8d26",
+                count: "\u6279\u6b21",
+                scope: "\u5dee\u5f02\u590d\u6d4b\u3001\u6838\u67e5\u767b\u8bb0\u548c\u7279\u6b8a\u60c5\u51b5\u5904\u7406\u4f9d\u636e"
+            },
+            {
+                file: "history-write-batch-ledger-rolled-back.csv",
+                title: "\u56de\u6eda\u6279\u6b21\u53f0\u8d26",
+                count: "\u6279\u6b21",
+                scope: "\u64a4\u9500\u5199\u5165\u3001sid \u94fe\u6062\u590d\u548c\u56de\u6eda\u5904\u7406\u4f9d\u636e"
+            }
+        ];
+    },
+    showHistoryDeliveryOverview() {
+        const metrics = state.workbench?.metrics || [];
+        const rows = WorkbenchPanel.historyClosureAcceptanceRows(metrics);
+        const packageFiles = WorkbenchPanel.historyClosureAcceptancePackageFiles(rows);
+        const pendingRows = rows.filter((row) => row.result !== "CLOSED" && Number(row.count || 0) > 0);
+        const pendingCount = rows
+            .filter((row) => row.result !== "CLOSED")
+            .reduce((sum, row) => sum + Number(row.count || 0), 0);
+        const closedCount = rows.find((row) => row.result === "CLOSED")?.count || 0;
+        const conclusion = pendingCount > 0
+            ? `\u5c1a\u6709 ${pendingCount} \u9879\u5f85\u5904\u7406\uff0c\u9700\u6309\u961f\u5217\u7ee7\u7eed\u63a8\u8fdb`
+            : "\u5f53\u524d\u5386\u53f2\u5199\u5165\u961f\u5217\u65e0\u5f85\u5904\u7406\u9879\uff0c\u53ef\u8fdb\u884c\u9a8c\u6536\u5305\u4ea4\u4ed8";
+        const canExport = Permissions.has("SALARY_EXPORT");
+        const canExportAcceptancePackage = canExport && Permissions.has("SALARY_ACCEPTANCE");
+        const overlay = document.createElement("div");
+        document.querySelector(".case-detail-overlay")?.remove();
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <section class="case-detail-dialog history-delivery-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8</strong>
+                        <span>${Format.html(conclusion)}</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <div class="history-delivery-metrics">
+                    <span class="${pendingCount > 0 ? "blocked" : "ready"}"><b>${Format.html(pendingCount)}</b><small>\u5f85\u5904\u7406</small></span>
+                    <span class="ready"><b>${Format.html(closedCount)}</b><small>\u5df2\u95ed\u73af</small></span>
+                    <span><b>${Format.html(packageFiles.length)}</b><small>\u9a8c\u6536\u5305\u6587\u4ef6</small></span>
+                    <span><b>${Format.html(pendingRows.length)}</b><small>\u6709\u6570\u636e\u961f\u5217</small></span>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u4ea4\u4ed8\u961f\u5217</span>
+                    <div class="history-delivery-queue">
+                        ${rows.map((row) => `
+                            <div class="history-delivery-row ${row.result === "CLOSED" ? "ready" : Number(row.count || 0) > 0 ? "blocked" : ""}">
+                                <strong>${Format.html(row.title)}</strong>
+                                <b>${Format.html(row.count)}</b>
+                                <small>${Format.html(row.hint)}</small>
+                                <div class="case-detail-actions inline-actions">
+                                    <button type="button" class="case-snapshot-button" data-history-delivery-open="${Format.html(row.code)}">\u8fdb\u5165\u961f\u5217</button>
+                                    <button type="button" class="case-snapshot-button" data-history-delivery-export="${Format.html(row.code)}">\u5bfc\u51fa\u6e05\u5355</button>
+                                    <button type="button" class="case-snapshot-button" data-history-delivery-ledger="${Format.html(row.code)}">\u67e5\u770b\u53f0\u8d26</button>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u4ea4\u4ed8\u8bc1\u636e</span>
+                    <div class="history-closure-package-files">
+                        ${packageFiles.map((file) => `
+                            <span>
+                                <b>${Format.html(file.title)} <em>${Format.html(file.count)}</em></b>
+                                <small>${Format.html(file.file)}</small>
+                                <small>${Format.html(file.scope)}</small>
+                            </span>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u6700\u8fd1\u4ea4\u4ed8\u8bb0\u5f55</span>
+                    <div class="history-delivery-acceptance-filter">
+                        <input type="search" placeholder="\u9a8c\u6536\u53f7/\u5bfc\u51fa\u4eba/\u7ed3\u8bba" data-history-delivery-acceptance-keyword>
+                        <select data-history-delivery-acceptance-export-type>
+                            <option value="">\u5168\u90e8\u7c7b\u578b</option>
+                            <option value="PACKAGE">\u9a8c\u6536\u5305</option>
+                            <option value="OVERVIEW">\u4ea4\u4ed8\u603b\u89c8</option>
+                        </select>
+                        <input type="date" data-history-delivery-acceptance-exported-from aria-label="\u5bfc\u51fa\u5f00\u59cb\u65e5\u671f">
+                        <input type="date" data-history-delivery-acceptance-exported-to aria-label="\u5bfc\u51fa\u7ed3\u675f\u65e5\u671f">
+                        <span class="history-delivery-date-presets">
+                            <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="current-month">\u672c\u6708</button>
+                            <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="previous-month">\u4e0a\u6708</button>
+                            <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="last-30-days">\u8fd130\u5929</button>
+                            <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="clear">\u6e05\u9664\u65e5\u671f</button>
+                        </span>
+                        <button type="button" class="case-snapshot-button" data-history-delivery-acceptance-search>\u5237\u65b0</button>
+                        ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-index-export>\u5bfc\u51fa\u7d22\u5f15CSV</button>` : ""}
+                        ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-batch-print>\u6279\u91cf\u6253\u5370</button>` : ""}
+                        ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-batch-audits>\u6279\u91cf\u6253\u5370\u5ba1\u8ba1</button>` : ""}
+                    </div>
+                    <div class="history-delivery-acceptances" data-history-delivery-acceptances>
+                        <span>\u6b63\u5728\u8bfb\u53d6...</span>
+                    </div>
+                </div>
+                ${Permissions.has("SYSTEM_AUDIT") ? `
+                <div class="case-detail-section">
+                    <span>\u6700\u8fd1\u603b\u4ea4\u4ed8\u5305</span>
+                    <div class="history-delivery-acceptances" data-salary-migration-delivery-audit-list>
+                        <span>\u6b63\u5728\u8bfb\u53d6...</span>
+                    </div>
+                </div>` : ""}
+                <div class="case-error hidden" data-case-error></div>
+                <footer class="case-detail-actions">
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-export-summary>\u5bfc\u51fa\u603b\u89c8CSV</button>` : ""}
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-salary-migration-closure-checklist>\u5bfc\u51fa\u8fc1\u79fb\u95ed\u73af\u603b\u6e05\u5355</button>` : ""}
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-salary-migration-delivery-ledger>\u5bfc\u51fa\u4ea4\u4ed8\u95ed\u73af\u53f0\u8d26</button>` : ""}
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-salary-migration-delivery-self-check>\u5bfc\u51fa\u4ea4\u4ed8\u81ea\u68c0</button>` : ""}
+                    ${canExportAcceptancePackage ? `<button type="button" class="case-snapshot-button" data-salary-migration-delivery-package>\u5bfc\u51fa\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-history-delivery-acceptance>\u6253\u5f00\u95ed\u73af\u9a8c\u6536</button>
+                    ${canExportAcceptancePackage ? `<button type="button" class="case-snapshot-button" data-history-delivery-package>\u5bfc\u51fa\u9a8c\u6536\u5305</button>` : ""}
+                    ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-history-delivery-audits>\u67e5\u770b\u5bfc\u51fa\u5ba1\u8ba1</button>` : ""}
+                    ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-salary-migration-delivery-audits>\u67e5\u770b\u603b\u4ea4\u4ed8\u5ba1\u8ba1</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-history-delivery-refresh>\u5237\u65b0\u6307\u6807</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            const openButton = event.target.closest("button[data-history-delivery-open]");
+            if (openButton) {
+                overlay.remove();
+                await WorkbenchPanel.openMetric(openButton.dataset.historyDeliveryOpen || "");
+                return;
+            }
+            const exportButton = event.target.closest("button[data-history-delivery-export]");
+            if (exportButton) {
+                try {
+                    await WorkbenchPanel.exportClosureQueue(exportButton.dataset.historyDeliveryExport || "");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const ledgerButton = event.target.closest("button[data-history-delivery-ledger]");
+            if (ledgerButton) {
+                overlay.remove();
+                await WorkbenchPanel.openClosureQueueLedger(ledgerButton.dataset.historyDeliveryLedger || "");
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance]")) {
+                overlay.remove();
+                WorkbenchPanel.showHistoryClosureAcceptance();
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-export-summary]")) {
+                window.location.href = "/api/workbench/history-write-delivery-overview.csv";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8CSV");
+                return;
+            }
+            if (event.target.closest("button[data-salary-migration-closure-checklist]")) {
+                window.location.href = "/api/workbench/salary-migration-closure-checklist.csv";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u95ed\u73af\u603b\u6e05\u5355");
+                return;
+            }
+            if (event.target.closest("button[data-salary-migration-delivery-ledger]")) {
+                window.location.href = "/api/workbench/salary-migration-delivery-ledger.csv";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u8fc1\u79fb\u4ea4\u4ed8\u95ed\u73af\u53f0\u8d26");
+                return;
+            }
+            if (event.target.closest("button[data-salary-migration-delivery-self-check]")) {
+                window.location.href = "/api/workbench/salary-migration-delivery-self-check.csv";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u8fc1\u79fb\u4ea4\u4ed8\u81ea\u68c0");
+                return;
+            }
+            if (event.target.closest("button[data-salary-migration-delivery-package]")) {
+                window.location.href = "/api/workbench/salary-migration-delivery-package.zip";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305");
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-package]")) {
+                window.location.href = "/api/workbench/history-write-closure-acceptance-package.zip";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536\u5305");
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openHistoryDeliveryOverviewAudits();
+                return;
+            }
+            if (event.target.closest("button[data-salary-migration-delivery-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openSalaryMigrationDeliveryAudits();
+                return;
+            }
+            const datePresetButton = event.target.closest("button[data-history-delivery-date-preset]");
+            if (datePresetButton) {
+                WorkbenchPanel.applyHistoryDeliveryDatePreset(overlay, datePresetButton.dataset.historyDeliveryDatePreset || "");
+                await WorkbenchPanel.loadHistoryDeliveryAcceptances(overlay, { reset: true });
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance-search]")) {
+                await WorkbenchPanel.loadHistoryDeliveryAcceptances(overlay, { reset: true });
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance-more]")) {
+                await WorkbenchPanel.loadMoreHistoryDeliveryAcceptances(overlay);
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance-index-export]")) {
+                const query = WorkbenchPanel.historyDeliveryAcceptanceQuery(overlay, 200);
+                window.location.href = `/api/workbench/history-write-delivery-acceptances/index.csv?${query.toString()}`;
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u5f52\u6863\u7d22\u5f15CSV");
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance-batch-print]")) {
+                const query = WorkbenchPanel.historyDeliveryAcceptanceQuery(overlay, 20);
+                window.open(`/api/workbench/history-write-delivery-acceptances/print-batch?${query.toString()}`, "_blank", "noopener");
+                setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u786e\u8ba4\u5355\u6279\u91cf\u6253\u5370");
+                return;
+            }
+            if (event.target.closest("button[data-history-delivery-acceptance-batch-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openHistoryDeliveryAcceptanceBatchAudits();
+                return;
+            }
+            const refreshButton = event.target.closest("button[data-history-delivery-refresh]");
+            if (refreshButton) {
+                refreshButton.disabled = true;
+                try {
+                    await WorkbenchPanel.refreshAfterClosureAction();
+                    overlay.remove();
+                    WorkbenchPanel.showHistoryDeliveryOverview();
+                } finally {
+                    refreshButton.disabled = false;
+                }
+                return;
+            }
+            const acceptanceExportButton = event.target.closest("button[data-history-delivery-acceptance-export]");
+            if (acceptanceExportButton) {
+                const acceptanceNo = acceptanceExportButton.dataset.historyDeliveryAcceptanceExport || "";
+                window.location.href = `/api/workbench/history-write-delivery-acceptances/${encodeURIComponent(acceptanceNo)}.csv`;
+                setStatus(`\u5df2\u5f00\u59cb\u5bfc\u51fa ${acceptanceNo} \u4ea4\u4ed8\u8be6\u60c5CSV`);
+                return;
+            }
+            const acceptancePrintButton = event.target.closest("button[data-history-delivery-acceptance-print]");
+            if (acceptancePrintButton) {
+                const acceptanceNo = acceptancePrintButton.dataset.historyDeliveryAcceptancePrint || "";
+                window.open(`/api/workbench/history-write-delivery-acceptances/${encodeURIComponent(acceptanceNo)}/print`, "_blank", "noopener");
+                setStatus(`\u5df2\u6253\u5f00 ${acceptanceNo} \u4ea4\u4ed8\u786e\u8ba4\u5355`);
+                return;
+            }
+            const acceptanceAuditButton = event.target.closest("button[data-history-delivery-acceptance-audits]");
+            if (acceptanceAuditButton) {
+                overlay.remove();
+                await WorkbenchPanel.openHistoryDeliveryAcceptanceAudits(acceptanceAuditButton.dataset.historyDeliveryAcceptanceAudits || "");
+                return;
+            }
+            const acceptanceButton = event.target.closest("button[data-history-delivery-acceptance-no]");
+            if (acceptanceButton) {
+                await WorkbenchPanel.loadHistoryDeliveryAcceptanceDetail(overlay, acceptanceButton.dataset.historyDeliveryAcceptanceNo || "");
+                return;
+            }
+            const salaryMigrationDeliveryAuditButton = event.target.closest("button[data-salary-migration-delivery-audit-id]");
+            if (salaryMigrationDeliveryAuditButton) {
+                if (event.target.closest("[data-salary-migration-delivery-history-audits]")) {
+                    overlay.remove();
+                    await WorkbenchPanel.openHistoryClosureAcceptanceAudits();
+                    return;
+                }
+                if (event.target.closest("[data-salary-migration-delivery-report-audits]")) {
+                    overlay.remove();
+                    await WorkbenchPanel.openReportMigrationDeliveryAudits();
+                    return;
+                }
+                overlay.remove();
+                await WorkbenchPanel.openReportAuditById(salaryMigrationDeliveryAuditButton.dataset.salaryMigrationDeliveryAuditId || "");
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+        setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8");
+        WorkbenchPanel.loadHistoryDeliveryAcceptances(overlay, { reset: true });
+        WorkbenchPanel.loadSalaryMigrationDeliveryPackageAudits(overlay);
+    },
+    async loadSalaryMigrationDeliveryPackageAudits(overlay) {
+        const container = overlay.querySelector("[data-salary-migration-delivery-audit-list]");
+        if (!container || !Permissions.has("SYSTEM_AUDIT")) {
+            return;
+        }
+        try {
+            const rows = await Api.request("/api/system/audits?module=workbench&action=salary-migration-delivery-package&targetCode=SALARY_MIGRATION_DELIVERY&limit=5");
+            if (!rows.length) {
+                container.innerHTML = `<span>\u5c1a\u65e0\u603b\u4ea4\u4ed8\u5305\u8bb0\u5f55</span>`;
+                return;
+            }
+            container.innerHTML = rows.map((audit) => {
+                const scope = SystemPanel.auditScopeValues(audit.summary || "");
+                const historyStatus = String(scope.historyStatus || "").toUpperCase();
+                const reportStatus = String(scope.reportStatus || "").toUpperCase();
+                const hasError = historyStatus === "ERROR" || reportStatus === "ERROR";
+                return `
+                    <button type="button" class="history-delivery-acceptance-row salary-migration-delivery-row ${hasError ? "blocked" : "ready"}" data-salary-migration-delivery-audit-id="${Format.html(audit.id || "")}">
+                        <strong>${Format.html(audit.id || "-")}</strong>
+                        <span>${Format.html(Format.auditActionText(audit.action || "salary-migration-delivery-package"))}</span>
+                        <small>${Format.html(audit.createdAt || "-")} | ${Format.html(audit.operator || "-")} | ${Format.html(audit.targetCode || "-")}</small>
+                        <small class="history-delivery-acceptance-tags">
+                            <b class="${historyStatus === "ERROR" ? "blocked" : "ready"}">history ${Format.html(scope.historyStatus || "-")}</b>
+                            <b class="${reportStatus === "ERROR" ? "blocked" : "ready"}">report ${Format.html(scope.reportStatus || "-")}</b>
+                            <b>\u5f85\u5904\u7406 ${Format.html(scope.pending || "-")}</b>
+                            <b>\u5df2\u95ed\u73af ${Format.html(scope.closed || "-")}</b>
+                        </small>
+                        ${hasError ? `
+                            <small class="salary-migration-delivery-actions">
+                                ${historyStatus === "ERROR" ? `<span data-salary-migration-delivery-history-audits>\u5386\u53f2\u9a8c\u6536\u5ba1\u8ba1</span>` : ""}
+                                ${reportStatus === "ERROR" ? `<span data-salary-migration-delivery-report-audits>\u62a5\u8868\u4ea4\u4ed8\u5ba1\u8ba1</span>` : ""}
+                            </small>
+                        ` : ""}
+                        <em>${Format.html(audit.summary || "")}</em>
+                    </button>
+                `;
+            }).join("");
+        } catch (error) {
+            container.innerHTML = `<span>${Format.html(error.message || TEXT.requestFail)}</span>`;
+        }
+    },
+    async showHistoryDeliveryArchive() {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const canExport = Permissions.has("SALARY_EXPORT");
+        els.migrationToolResult.innerHTML = `
+            <section class="history-delivery-archive" data-history-delivery-archive>
+                <div class="history-delivery-archive-head">
+                    <div>
+                        <strong>\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u5f52\u6863</strong>
+                        <span>\u6309\u9a8c\u6536\u53f7\u3001\u5bfc\u51fa\u4eba\u3001\u4ea4\u4ed8\u7ed3\u8bba\u68c0\u7d22 HWD \u786e\u8ba4\u5355\uff0c\u652f\u6301\u5355\u5f20\u548c\u6279\u91cf\u6253\u5370\u3002</span>
+                    </div>
+                    <button type="button" class="case-snapshot-button" data-history-delivery-archive-overview>\u4ea4\u4ed8\u603b\u89c8</button>
+                </div>
+                <div class="history-delivery-closure-panel">
+                    <section>
+                        <strong>\u5f52\u6863\u6536\u53e3</strong>
+                        <small>\u5148\u786e\u8ba4\u7b5b\u9009\u8303\u56f4\uff0c\u518d\u5bfc\u51fa\u7d22\u5f15\u3001\u6279\u91cf\u6253\u5370\uff0c\u6700\u540e\u6309 SYS \u5ba1\u8ba1\u53f7\u53cd\u67e5\u7559\u75d5\u3002</small>
+                    </section>
+                    <section>
+                        <strong>\u4ea4\u4ed8\u8bb0\u5f55</strong>
+                        <small>\u5217\u8868\u5c55\u793a HWD \u786e\u8ba4\u5355\uff0c\u70b9\u51fb\u884c\u53ef\u67e5\u8bc1\u636e\u6587\u4ef6\u548c\u961f\u5217\u5feb\u7167\u3002</small>
+                    </section>
+                    <section>
+                        <strong>\u5bfc\u51fa\u4e0e\u6253\u5370</strong>
+                        <small>\u7d22\u5f15CSV\u548c\u6279\u91cf\u6253\u5370\u5747\u6cbf\u7528\u5f53\u524d\u7b5b\u9009\u8303\u56f4\u3002</small>
+                    </section>
+                    <section class="history-delivery-audit-lookup">
+                        <strong>\u5ba1\u8ba1\u53cd\u67e5</strong>
+                        <span>
+                            <input type="search" placeholder="SYS-\u5ba1\u8ba1\u53f7" data-history-delivery-audit-id>
+                            <button type="button" class="case-snapshot-button" data-history-delivery-audit-lookup>\u53cd\u67e5</button>
+                        </span>
+                    </section>
+                </div>
+                <div class="history-delivery-acceptance-filter">
+                    <input type="search" placeholder="\u9a8c\u6536\u53f7/\u5bfc\u51fa\u4eba/\u7ed3\u8bba" data-history-delivery-acceptance-keyword>
+                    <select data-history-delivery-acceptance-export-type>
+                        <option value="">\u5168\u90e8\u7c7b\u578b</option>
+                        <option value="PACKAGE">\u9a8c\u6536\u5305</option>
+                        <option value="OVERVIEW">\u4ea4\u4ed8\u603b\u89c8</option>
+                    </select>
+                    <input type="date" data-history-delivery-acceptance-exported-from aria-label="\u5bfc\u51fa\u5f00\u59cb\u65e5\u671f">
+                    <input type="date" data-history-delivery-acceptance-exported-to aria-label="\u5bfc\u51fa\u7ed3\u675f\u65e5\u671f">
+                    <span class="history-delivery-date-presets">
+                        <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="current-month">\u672c\u6708</button>
+                        <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="previous-month">\u4e0a\u6708</button>
+                        <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="last-30-days">\u8fd130\u5929</button>
+                        <button type="button" class="case-snapshot-button" data-history-delivery-date-preset="clear">\u6e05\u9664\u65e5\u671f</button>
+                    </span>
+                    <button type="button" class="case-snapshot-button" data-history-delivery-acceptance-search>\u67e5\u8be2</button>
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-index-export>\u5bfc\u51fa\u7d22\u5f15CSV</button>` : ""}
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-batch-print>\u6279\u91cf\u6253\u5370</button>` : ""}
+                    ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-batch-audits>\u6279\u91cf\u6253\u5370\u5ba1\u8ba1</button>` : ""}
+                </div>
+                <div class="history-delivery-acceptances" data-history-delivery-acceptances>
+                    <span>\u6b63\u5728\u8bfb\u53d6...</span>
+                </div>
+            </section>
+        `;
+        els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
+        await WorkbenchPanel.loadHistoryDeliveryAcceptances(els.migrationToolResult, { reset: true });
+    },
+    async loadHistoryDeliveryAcceptances(overlay, options = {}) {
+        const container = overlay.querySelector("[data-history-delivery-acceptances]");
+        if (!container) {
+            return;
+        }
+        if (options.reset || !overlay.dataset.historyDeliveryAcceptanceLimit) {
+            overlay.dataset.historyDeliveryAcceptanceLimit = "8";
+        }
+        const limit = Math.max(8, Math.min(Number(overlay.dataset.historyDeliveryAcceptanceLimit || 8), 100));
+        try {
+            const requestLimit = Math.min(limit + 1, 100);
+            const rows = await Api.request(`/api/workbench/history-write-delivery-acceptances?${WorkbenchPanel.historyDeliveryAcceptanceQuery(overlay, requestLimit).toString()}`);
+            const visibleRows = rows.slice(0, limit);
+            const hasMore = rows.length > visibleRows.length;
+            const filterSummary = WorkbenchPanel.historyDeliveryAcceptanceFilterSummary(overlay);
+            if (!visibleRows.length) {
+                container.innerHTML = `
+                    <div class="history-delivery-acceptance-scope">
+                        <span>${Format.html(filterSummary)}</span>
+                    </div>
+                    <span>\u5c1a\u65e0\u4ea4\u4ed8\u8bb0\u5f55</span>`;
+                return;
+            }
+            container.innerHTML = `
+                <div class="history-delivery-acceptance-scope">
+                    <span>${Format.html(filterSummary)}</span>
+                    <small>\u672c\u6b21\u5217\u8868\u6309\u5f53\u524d\u6761\u4ef6\u751f\u6210\uff0c\u7d22\u5f15CSV\u548c\u6279\u91cf\u6253\u5370\u5c06\u6cbf\u7528\u8be5\u8303\u56f4\u3002</small>
+                </div>
+            ` + visibleRows.map((row) => `
+                <button type="button" class="history-delivery-acceptance-row" data-history-delivery-acceptance-no="${Format.html(row.acceptanceNo || "")}">
+                    <strong>${Format.html(row.acceptanceNo || "-")}</strong>
+                    <span>${Format.html(row.exportType === "PACKAGE" ? "\u9a8c\u6536\u5305" : "\u4ea4\u4ed8\u603b\u89c8")}</span>
+                    <small>${Format.html(row.exportedAt || "-")} | ${Format.html(row.exportedBy || "-")}</small>
+                    <small class="history-delivery-acceptance-tags">
+                        <b>\u5f85\u5904\u7406 ${Format.html(row.pendingCount || 0)}</b>
+                        <b>\u5df2\u95ed\u73af ${Format.html(row.closedCount || 0)}</b>
+                        <b>\u6587\u4ef6 ${Format.html(row.evidenceFileCount || 0)}</b>
+                    </small>
+                    <em>${Format.html(row.conclusion || "")}</em>
+                </button>
+            `).join("") + `
+                <div class="history-delivery-acceptance-more">
+                    <span>\u5df2\u663e\u793a ${Format.html(visibleRows.length)} \u6761${hasMore ? "\uff0c\u8fd8\u6709\u66f4\u591a" : ""}</span>
+                    ${hasMore && limit < 100 ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-more>\u52a0\u8f7d\u66f4\u591a</button>` : ""}
+                </div>
+                <div class="history-delivery-acceptance-detail" data-history-delivery-acceptance-detail></div>`;
+        } catch (error) {
+            container.innerHTML = `<span>${Format.html(error.message || TEXT.requestFail)}</span>`;
+        }
+    },
+    async loadMoreHistoryDeliveryAcceptances(overlay) {
+        const current = Math.max(8, Number(overlay.dataset.historyDeliveryAcceptanceLimit || 8));
+        overlay.dataset.historyDeliveryAcceptanceLimit = String(Math.min(current + 8, 100));
+        await WorkbenchPanel.loadHistoryDeliveryAcceptances(overlay);
+    },
+    historyDeliveryAcceptanceFilterSummary(overlay) {
+        const keyword = overlay.querySelector("[data-history-delivery-acceptance-keyword]")?.value?.trim() || "\u5168\u90e8\u5173\u952e\u5b57";
+        const exportType = overlay.querySelector("[data-history-delivery-acceptance-export-type]")?.value || "";
+        const exportedFrom = overlay.querySelector("[data-history-delivery-acceptance-exported-from]")?.value || "";
+        const exportedTo = overlay.querySelector("[data-history-delivery-acceptance-exported-to]")?.value || "";
+        const exportTypeText = exportType === "PACKAGE" ? "\u9a8c\u6536\u5305" : exportType === "OVERVIEW" ? "\u4ea4\u4ed8\u603b\u89c8" : "\u5168\u90e8\u7c7b\u578b";
+        const dateText = exportedFrom || exportedTo
+            ? `${exportedFrom || "\u6700\u65e9"} \u81f3 ${exportedTo || "\u4eca\u65e5"}`
+            : "\u5168\u90e8\u65e5\u671f";
+        return `\u5f53\u524d\u8303\u56f4\uff1a${keyword} / ${exportTypeText} / ${dateText}`;
+    },
+    historyDeliveryDateText(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    },
+    applyHistoryDeliveryDatePreset(overlay, preset) {
+        const fromInput = overlay.querySelector("[data-history-delivery-acceptance-exported-from]");
+        const toInput = overlay.querySelector("[data-history-delivery-acceptance-exported-to]");
+        if (!fromInput || !toInput) {
+            return;
+        }
+        if (preset === "clear") {
+            fromInput.value = "";
+            toInput.value = "";
+            return;
+        }
+        const today = new Date();
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        let from = null;
+        let to = end;
+        if (preset === "current-month") {
+            from = new Date(end.getFullYear(), end.getMonth(), 1);
+        } else if (preset === "previous-month") {
+            from = new Date(end.getFullYear(), end.getMonth() - 1, 1);
+            to = new Date(end.getFullYear(), end.getMonth(), 0);
+        } else if (preset === "last-30-days") {
+            from = new Date(end);
+            from.setDate(from.getDate() - 29);
+        } else {
+            return;
+        }
+        fromInput.value = WorkbenchPanel.historyDeliveryDateText(from);
+        toInput.value = WorkbenchPanel.historyDeliveryDateText(to);
+    },
+    historyDeliveryAcceptanceQuery(overlay, limit) {
+        const keyword = overlay.querySelector("[data-history-delivery-acceptance-keyword]")?.value?.trim() || "";
+        const exportType = overlay.querySelector("[data-history-delivery-acceptance-export-type]")?.value || "";
+        const exportedFrom = overlay.querySelector("[data-history-delivery-acceptance-exported-from]")?.value || "";
+        const exportedTo = overlay.querySelector("[data-history-delivery-acceptance-exported-to]")?.value || "";
+        const params = new URLSearchParams();
+        params.set("limit", String(limit));
+        if (keyword) {
+            params.set("keyword", keyword);
+        }
+        if (exportType) {
+            params.set("exportType", exportType);
+        }
+        if (exportedFrom) {
+            params.set("exportedFrom", exportedFrom);
+        }
+        if (exportedTo) {
+            params.set("exportedTo", exportedTo);
+        }
+        return params;
+    },
+    async loadHistoryDeliveryAcceptanceDetail(overlay, acceptanceNo) {
+        const detail = overlay.querySelector("[data-history-delivery-acceptance-detail]");
+        if (!detail || !acceptanceNo) {
+            return;
+        }
+        detail.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6 ${Format.html(acceptanceNo)}...</span>`;
+        try {
+            const data = await Api.request(`/api/workbench/history-write-delivery-acceptances/${encodeURIComponent(acceptanceNo)}`);
+            const rows = Array.isArray(data.rows) ? data.rows : [];
+            const evidence = Array.isArray(data.evidence) ? data.evidence : [];
+            const selectedAcceptanceNo = data.acceptanceNo || acceptanceNo;
+            const canExport = Permissions.has("SALARY_EXPORT");
+            const canAudit = Permissions.has("SYSTEM_AUDIT");
+            detail.innerHTML = `
+                <div class="history-delivery-acceptance-detail-head">
+                    <strong>${Format.html(selectedAcceptanceNo)}</strong>
+                    <span>${Format.html(data.exportType === "PACKAGE" ? "\u9a8c\u6536\u5305" : "\u4ea4\u4ed8\u603b\u89c8")}</span>
+                    <small>${Format.html(data.exportedAt || "-")} | ${Format.html(data.exportedBy || "-")}</small>
+                    <small>${Format.html(data.conclusion || "")}</small>
+                    <div class="history-delivery-acceptance-detail-metrics">
+                        <span><b>${Format.html(rows.length)}</b><small>\u961f\u5217\u5feb\u7167</small></span>
+                        <span><b>${Format.html(evidence.length)}</b><small>\u8bc1\u636e\u6587\u4ef6</small></span>
+                        <span><b>${Format.html(data.pendingCount || 0)}</b><small>\u5f85\u5904\u7406</small></span>
+                        <span><b>${Format.html(data.closedCount || 0)}</b><small>\u5df2\u95ed\u73af</small></span>
+                    </div>
+                </div>
+                <div class="history-delivery-acceptance-proof-actions">
+                    <div>
+                        <strong>\u8bc1\u636e\u94fe\u64cd\u4f5c</strong>
+                        <small>\u4ee5 ${Format.html(selectedAcceptanceNo)} \u4e3a\u5355\u636e\u53f7\uff0c\u5bf9\u5e94\u660e\u7ec6CSV\u3001\u786e\u8ba4\u5355\u6253\u5370\u548c\u5ba1\u8ba1\u7559\u75d5\u3002</small>
+                    </div>
+                    <div class="history-delivery-acceptance-proof-buttons">
+                        ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-export="${Format.html(selectedAcceptanceNo)}">\u5bfc\u51fa\u8be6\u60c5CSV</button>` : ""}
+                        ${canExport ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-print="${Format.html(selectedAcceptanceNo)}">\u6253\u5370\u786e\u8ba4\u5355</button>` : ""}
+                        ${canAudit ? `<button type="button" class="case-snapshot-button" data-history-delivery-acceptance-audits="${Format.html(selectedAcceptanceNo)}">\u67e5\u770b\u5ba1\u8ba1</button>` : ""}
+                    </div>
+                </div>
+                <div class="history-delivery-detail-grid">
+                    <section>
+                        <b>\u961f\u5217\u5feb\u7167</b>
+                        ${rows.map((row) => `
+                            <span>
+                                <strong>${Format.html(row.title || row.code || "-")}</strong>
+                                <em>${Format.html(row.count || 0)}</em>
+                                <small>${Format.html(row.result || "-")} | ${Format.html(row.hint || "")}</small>
+                            </span>
+                        `).join("") || `<span><small>\u65e0\u961f\u5217\u5feb\u7167</small></span>`}
+                    </section>
+                    <section>
+                        <b>\u8bc1\u636e\u6587\u4ef6</b>
+                        ${evidence.map((row) => `
+                            <span>
+                                <strong>${Format.html(row.title || row.file || "-")}</strong>
+                                <em>${Format.html(row.count || "-")}</em>
+                                <small>${Format.html(row.file || "")}</small>
+                                <small>${Format.html(row.scope || "")}</small>
+                            </span>
+                        `).join("") || `<span><small>\u65e0\u8bc1\u636e\u6587\u4ef6</small></span>`}
+                    </section>
+                </div>
+            `;
+        } catch (error) {
+            detail.innerHTML = `<span>${Format.html(error.message || TEXT.requestFail)}</span>`;
+        }
+    },
+    showHistoryClosureAcceptance() {
+        const metrics = state.workbench?.metrics || [];
+        const rows = WorkbenchPanel.historyClosureAcceptanceRows(metrics);
+        const packageFiles = WorkbenchPanel.historyClosureAcceptancePackageFiles(rows);
+        const pendingCount = rows
+            .filter((row) => row.result !== "CLOSED")
+            .reduce((sum, row) => sum + Number(row.count || 0), 0);
+        const closedCount = rows.find((row) => row.result === "CLOSED")?.count || 0;
+        const canExport = Permissions.has("SALARY_EXPORT");
+        const canExportAcceptancePackage = canExport && Permissions.has("SALARY_ACCEPTANCE");
+        const overlay = document.createElement("div");
+        document.querySelector(".case-detail-overlay")?.remove();
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536</strong>
+                        <span>\u5f85\u5904\u7406 ${Format.html(pendingCount)} | \u5df2\u95ed\u73af ${Format.html(closedCount)}</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <div class="history-plan-summary batch-preview-summary">
+                    ${rows.map((row) => `<span>${Format.html(row.title)} ${Format.html(row.count)}</span>`).join("")}
+                </div>
+                <div class="case-detail-section">
+                    <span>\u9a8c\u6536\u5305\u5185\u5bb9</span>
+                    <div class="history-closure-package-files">
+                        ${packageFiles.map((file) => `
+                            <span>
+                                <b>${Format.html(file.title)} <em>${Format.html(file.count)}</em></b>
+                                <small>${Format.html(file.file)}</small>
+                                <small>${Format.html(file.scope)}</small>
+                            </span>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u9a8c\u6536\u961f\u5217</span>
+                    <div class="case-change-list">
+                        ${rows.map((row) => `
+                            <div class="case-change-row ${row.result === "CLOSED" ? "ready" : row.count ? "blocked" : ""}">
+                                <strong>${Format.html(row.title)}</strong>
+                                <span>${Format.html(row.count)}</span>
+                                <small>${Format.html(row.hint)}</small>
+                                <div class="case-detail-actions inline-actions">
+                                    <button type="button" class="case-snapshot-button" data-history-closure-acceptance-open="${Format.html(row.code)}">\u8fdb\u5165</button>
+                                    <button type="button" class="case-snapshot-button" data-history-closure-acceptance-export="${Format.html(row.code)}">\u5bfc\u51fa\u6e05\u5355</button>
+                                    <button type="button" class="case-snapshot-button" data-history-closure-acceptance-ledger="${Format.html(row.code)}">\u67e5\u770b\u53f0\u8d26</button>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="case-error hidden" data-case-error></div>
+                <footer class="case-detail-actions">
+                    ${canExport ? `<button type="button" class="case-snapshot-button" data-history-closure-acceptance-export-summary>\u5bfc\u51fa\u9a8c\u6536CSV</button>` : ""}
+                    ${canExportAcceptancePackage ? `<button type="button" class="case-snapshot-button" data-history-closure-acceptance-package>\u5bfc\u51fa\u9a8c\u6536\u5305</button>` : ""}
+                    ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-history-closure-acceptance-audits>\u67e5\u770b\u5bfc\u51fa\u5ba1\u8ba1</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-history-closure-acceptance-refresh>\u5237\u65b0\u6307\u6807</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            const openButton = event.target.closest("button[data-history-closure-acceptance-open]");
+            if (openButton) {
+                overlay.remove();
+                await WorkbenchPanel.openMetric(openButton.dataset.historyClosureAcceptanceOpen || "");
+                return;
+            }
+            const exportButton = event.target.closest("button[data-history-closure-acceptance-export]");
+            if (exportButton) {
+                try {
+                    await WorkbenchPanel.exportClosureQueue(exportButton.dataset.historyClosureAcceptanceExport || "");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const ledgerButton = event.target.closest("button[data-history-closure-acceptance-ledger]");
+            if (ledgerButton) {
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.openClosureQueueLedger(ledgerButton.dataset.historyClosureAcceptanceLedger || "");
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
+            if (event.target.closest("button[data-history-closure-acceptance-export-summary]")) {
+                WorkbenchPanel.downloadCsv("history-write-closure-acceptance.csv", WorkbenchPanel.historyClosureAcceptanceCsvRows(rows));
+                setStatus("\u5df2\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536CSV");
+                return;
+            }
+            if (event.target.closest("button[data-history-closure-acceptance-package]")) {
+                window.location.href = "/api/workbench/history-write-closure-acceptance-package.zip";
+                setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536\u5305");
+                return;
+            }
+            if (event.target.closest("button[data-history-closure-acceptance-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openHistoryClosureAcceptanceAudits();
+                return;
+            }
+            const refreshButton = event.target.closest("button[data-history-closure-acceptance-refresh]");
+            if (refreshButton) {
+                refreshButton.disabled = true;
+                try {
+                    await WorkbenchPanel.refreshAfterClosureAction();
+                    overlay.remove();
+                    WorkbenchPanel.showHistoryClosureAcceptance();
+                } finally {
+                    refreshButton.disabled = false;
+                }
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+        setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536");
     },
     updateMetric(metric) {
         const metrics = [...(state.workbench?.metrics || [])];
@@ -895,22 +2127,102 @@ const WorkbenchPanel = {
         if (metricCode === "SALARY_REVIEW_PENDING") {
             els.workbenchKeywordInput.value = "";
             els.workbenchChangeTypeSelect.value = "";
+            els.workbenchSourceSelect.value = "";
             els.workbenchCaseStatusSelect.value = "DONE";
             els.workbenchTrialStatusSelect.value = "";
             els.workbenchReviewStatusSelect.value = "PENDING";
+            els.workbenchWorkflowStatusSelect.value = "REVIEW_PENDING";
+            els.workbenchClosureStatusSelect.value = "PENDING";
+            els.workbenchNextActionSelect.value = "REVIEW_TRIAL";
             return true;
         }
         if (metricCode === "SALARY_TRIAL_DIFFERENT" || metricCode === "SALARY_TRIAL_ERROR") {
             els.workbenchKeywordInput.value = "";
             els.workbenchChangeTypeSelect.value = "";
+            els.workbenchSourceSelect.value = "";
             els.workbenchCaseStatusSelect.value = "DONE";
             els.workbenchTrialStatusSelect.value = metricCode === "SALARY_TRIAL_DIFFERENT" ? "DIFFERENT" : "ERROR";
             els.workbenchReviewStatusSelect.value = "";
+            els.workbenchWorkflowStatusSelect.value = "";
+            els.workbenchClosureStatusSelect.value = "PENDING";
+            els.workbenchNextActionSelect.value = "";
             return true;
         }
         return false;
     },
+    applyClosureMetric(metricCode) {
+        const closureStatus = {
+            SALARY_CLOSURE_PENDING: "PENDING",
+            SALARY_CLOSURE_BLOCKED: "BLOCKED",
+            SALARY_CLOSURE_CLOSED: "CLOSED"
+        }[metricCode];
+        if (closureStatus === undefined) {
+            return false;
+        }
+        els.workbenchKeywordInput.value = "";
+        els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
+        els.workbenchCaseStatusSelect.value = "DONE";
+        els.workbenchTrialStatusSelect.value = "";
+        els.workbenchReviewStatusSelect.value = "";
+        els.workbenchWorkflowStatusSelect.value = "";
+        els.workbenchClosureStatusSelect.value = closureStatus;
+        els.workbenchNextActionSelect.value = "";
+        return true;
+    },
+    applyNextActionMetric(metricCode) {
+        const nextAction = {
+            SALARY_NEXT_REVIEW_TRIAL: "REVIEW_TRIAL",
+            SALARY_NEXT_PRINT_OR_PLAN: "PRINT_OR_CREATE_HISTORY_PLAN",
+            SALARY_NEXT_EXECUTE_WRITE: "EXECUTE_HISTORY_WRITE",
+            SALARY_NEXT_REVIEW_DIFFERENCE: "REVIEW_DIFFERENCE"
+        }[metricCode];
+        if (nextAction === undefined) {
+            return false;
+        }
+        els.workbenchKeywordInput.value = "";
+        els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
+        els.workbenchCaseStatusSelect.value = "DONE";
+        els.workbenchTrialStatusSelect.value = "";
+        els.workbenchReviewStatusSelect.value = "";
+        els.workbenchWorkflowStatusSelect.value = "";
+        els.workbenchClosureStatusSelect.value = "PENDING";
+        els.workbenchNextActionSelect.value = nextAction;
+        return true;
+    },
+    applyHistoryWorkflowMetric(metricCode) {
+        const workflowStatus = {
+            HISTORY_PLAN_READY: "HISTORY_READY",
+            HISTORY_PLAN_PREPARED: "HISTORY_PREPARED",
+            HISTORY_PLAN_EXECUTED: "HISTORY_CLOSED",
+            HISTORY_PLAN_ROLLED_BACK: "HISTORY_ROLLED_BACK",
+            HISTORY_PLAN_BLOCKED: "HISTORY_BLOCKED",
+            HISTORY_PLAN_REVIEW_PENDING: "HISTORY_REVIEW_PENDING"
+        }[metricCode];
+        if (workflowStatus === undefined) {
+            return false;
+        }
+        els.workbenchKeywordInput.value = "";
+        els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
+        els.workbenchCaseStatusSelect.value = "DONE";
+        els.workbenchTrialStatusSelect.value = "";
+        els.workbenchReviewStatusSelect.value = "";
+        els.workbenchWorkflowStatusSelect.value = workflowStatus;
+        els.workbenchClosureStatusSelect.value = workflowStatus === "HISTORY_CLOSED" ? "CLOSED" : (workflowStatus === "HISTORY_BLOCKED" || workflowStatus === "HISTORY_ROLLED_BACK" ? "BLOCKED" : "PENDING");
+        els.workbenchNextActionSelect.value = {
+            HISTORY_READY: "EXECUTE_HISTORY_WRITE",
+            HISTORY_PREPARED: "VIEW_HISTORY_PLAN",
+            HISTORY_ROLLED_BACK: "VIEW_HISTORY_PLAN",
+            HISTORY_BLOCKED: "VIEW_HISTORY_PLAN",
+            HISTORY_REVIEW_PENDING: "REVIEW_DIFFERENCE"
+        }[workflowStatus] || "";
+        return true;
+    },
     applyHistoryPlanMetric(metricCode) {
+        state.historyPlanQueueFilter = null;
+        state.historyPlanSelected.clear();
         if (metricCode === "HISTORY_PLAN_REVIEW_PENDING") {
             if (els.historyPlanStatusSelect) {
                 els.historyPlanStatusSelect.value = "EXECUTED";
@@ -921,6 +2233,21 @@ const WorkbenchPanel = {
             if (els.historyPlanReviewSelect) {
                 els.historyPlanReviewSelect.value = "PENDING";
             }
+            persistHistoryPlanQueueState();
+            return true;
+        }
+        if (metricCode === "HISTORY_PLAN_READY") {
+            if (els.historyPlanStatusSelect) {
+                els.historyPlanStatusSelect.value = "PREPARED";
+            }
+            if (els.historyPlanComparisonSelect) {
+                els.historyPlanComparisonSelect.value = "";
+            }
+            if (els.historyPlanReviewSelect) {
+                els.historyPlanReviewSelect.value = "";
+            }
+            state.historyPlanQueueFilter = { readyOnly: true, autoSelect: true };
+            persistHistoryPlanQueueState();
             return true;
         }
         const status = {
@@ -939,10 +2266,51 @@ const WorkbenchPanel = {
         if (els.historyPlanReviewSelect) {
             els.historyPlanReviewSelect.value = "";
         }
+        state.historyPlanQueueFilter = metricCode === "HISTORY_PLAN_ROLLED_BACK"
+            ? { statusQueue: "ROLLED_BACK", label: "\u5df2\u56de\u6eda", autoSelect: true, queueActionCode: "REPREVIEW_HISTORY" }
+            : null;
+        persistHistoryPlanQueueState();
         return true;
     },
     async openMetric(metricCode) {
+        if (String(metricCode || "").startsWith(WorkbenchPanel.historyQueueMetricPrefix)) {
+            await WorkbenchPanel.applyHistoryPendingQueue(String(metricCode || "").substring(WorkbenchPanel.historyQueueMetricPrefix.length).toLowerCase());
+            els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+        if (metricCode === "SALARY_NEXT_EXECUTE_WRITE") {
+            await WorkbenchPanel.applyHistoryPlanPrintQueue("PRINTED_READY");
+            WorkbenchPanel.jumpToWorkspace("history");
+            setStatus("\u5df2\u8fdb\u5165\u53ef\u5199\u5165\u961f\u5217\uff0c\u8bf7\u5148\u6267\u884c\u6279\u91cf\u5199\u5165\u5b89\u5168\u9884\u68c0");
+            return;
+        }
+        if (metricCode === "SALARY_NEXT_PRINT_OR_PLAN") {
+            await WorkbenchPanel.applyHistoryPlanPrintQueue("UNPRINTED_BLOCKED");
+            WorkbenchPanel.jumpToWorkspace("history");
+            setStatus("\u5df2\u8fdb\u5165\u5f85\u6253\u5370/\u9884\u68c0\u961f\u5217\uff0c\u53ef\u5148\u6279\u91cf\u6253\u5370\u5ba1\u6279\u8868");
+            return;
+        }
+        if (metricCode === "SALARY_NEXT_REVIEW_DIFFERENCE") {
+            await WorkbenchPanel.applyHistoryPendingQueue("review");
+            WorkbenchPanel.jumpToWorkspace("history");
+            setStatus("\u5df2\u8fdb\u5165\u5199\u5165\u540e\u5f85\u6838\u67e5\u961f\u5217\uff0c\u53ef\u5148\u6279\u91cf\u590d\u6d4b\u6216\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba");
+            return;
+        }
         if (WorkbenchPanel.applyRiskMetric(metricCode)) {
+            state.workbenchDoneLoaded = 0;
+            setStatus(TEXT.loadingWorkbench);
+            await WorkbenchPanel.loadPage("DONE", true);
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        if (WorkbenchPanel.applyClosureMetric(metricCode)) {
+            state.workbenchDoneLoaded = 0;
+            setStatus(TEXT.loadingWorkbench);
+            await WorkbenchPanel.loadPage("DONE", true);
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        if (WorkbenchPanel.applyNextActionMetric(metricCode)) {
             state.workbenchDoneLoaded = 0;
             setStatus(TEXT.loadingWorkbench);
             await WorkbenchPanel.loadPage("DONE", true);
@@ -951,14 +2319,216 @@ const WorkbenchPanel = {
         }
         if (WorkbenchPanel.applyHistoryPlanMetric(metricCode)) {
             setStatus(TEXT.loadingWorkbench);
+            if (WorkbenchPanel.applyHistoryWorkflowMetric(metricCode)) {
+                state.workbenchDoneLoaded = 0;
+                await WorkbenchPanel.loadPage("DONE", true);
+            }
             await WorkbenchPanel.loadHistoryWritePlans();
             setStatus(TEXT.workbenchReady);
         }
     },
     exportMetric(metricCode) {
-        if (WorkbenchPanel.applyRiskMetric(metricCode)) {
+        if (WorkbenchPanel.applyRiskMetric(metricCode) || WorkbenchPanel.applyClosureMetric(metricCode) || WorkbenchPanel.applyNextActionMetric(metricCode)) {
             WorkbenchPanel.exportItems("DONE");
         }
+    },
+    async exportClosureQueue(metricCode) {
+        const code = metricCode || "";
+        if (code === "SALARY_CLOSURE_CLOSED") {
+            if (WorkbenchPanel.applyClosureMetric(code)) {
+                WorkbenchPanel.exportItems("DONE");
+            }
+            return;
+        }
+        const filters = WorkbenchPanel.filters();
+        const exportPlans = (params) => {
+            params.set("keyword", filters.keyword);
+            params.set("limit", "5000");
+            window.location.href = `/api/workbench/history-write-plans.csv?${params.toString()}`;
+        };
+        if (code === "SALARY_NEXT_PRINT_OR_PLAN") {
+            exportPlans(new URLSearchParams({
+                status: "PREPARED",
+                actionCode: "WRITE_HISTORY",
+                printQueue: "UNPRINTED_BLOCKED"
+            }));
+            return;
+        }
+        if (code === "SALARY_NEXT_EXECUTE_WRITE") {
+            exportPlans(new URLSearchParams({
+                status: "PREPARED",
+                actionCode: "WRITE_HISTORY",
+                printQueue: "PRINTED_READY"
+            }));
+            return;
+        }
+        if (code === "SALARY_NEXT_REVIEW_DIFFERENCE") {
+            exportPlans(new URLSearchParams({
+                status: "EXECUTED",
+                comparisonStatus: "MISMATCHED",
+                reviewStatus: "PENDING",
+                pendingQueue: "review"
+            }));
+            return;
+        }
+        if (code === "HISTORY_PLAN_ROLLED_BACK") {
+            exportPlans(new URLSearchParams({ statusQueue: "ROLLED_BACK" }));
+            return;
+        }
+        await WorkbenchPanel.openMetric(code);
+    },
+    async openClosureQueueLedger(metricCode) {
+        await WorkbenchPanel.loadHistoryWriteBatchLedger(metricCode);
+    },
+    async openHistoryClosureAcceptanceAudits() {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        state.auditFilters = {
+            module: "workbench",
+            operator: "",
+            action: "history-write-closure-acceptance-package",
+            targetCode: "PACKAGE",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u95ed\u73af\u9a8c\u6536\u5305\u5bfc\u51fa\u5ba1\u8ba1");
+    },
+    async openHistoryDeliveryOverviewAudits() {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        state.auditFilters = {
+            module: "workbench",
+            operator: "",
+            action: "history-write-delivery-overview-csv",
+            targetCode: "OVERVIEW",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u603b\u89c8\u5bfc\u51fa\u5ba1\u8ba1");
+    },
+    async openSalaryMigrationDeliveryAudits() {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        state.auditFilters = {
+            module: "workbench",
+            operator: "",
+            action: "salary-migration-delivery-package",
+            targetCode: "SALARY_MIGRATION_DELIVERY",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus("\u5df2\u6253\u5f00\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305\u5ba1\u8ba1");
+    },
+    async openReportMigrationDeliveryAudits() {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        state.auditFilters = {
+            module: "report",
+            operator: "",
+            action: "report-migration-delivery-package",
+            targetCode: "REPORT_MIGRATION_DELIVERY",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus("\u5df2\u6253\u5f00\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305\u5ba1\u8ba1");
+    },
+    async openHistoryDeliveryAcceptanceAudits(acceptanceNo) {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const safeAcceptanceNo = String(acceptanceNo || "").trim();
+        if (!safeAcceptanceNo) {
+            return;
+        }
+        state.auditFilters = {
+            module: "workbench",
+            operator: "",
+            action: "history-write-delivery-acceptance",
+            targetCode: safeAcceptanceNo,
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus(`\u5df2\u6253\u5f00 ${safeAcceptanceNo} \u4ea4\u4ed8\u9a8c\u6536\u5ba1\u8ba1`);
+    },
+    async openHistoryDeliveryAcceptanceBatchAudits() {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        state.auditFilters = {
+            module: "workbench",
+            operator: "",
+            action: "history-write-delivery-acceptance-batch-print",
+            targetCode: "BATCH",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u6279\u91cf\u6253\u5370\u5ba1\u8ba1");
+    },
+    async openReportAuditById(auditId) {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const safeAuditId = String(auditId || "").trim();
+        if (!safeAuditId) {
+            return;
+        }
+        state.auditFilters = {
+            module: "report",
+            operator: "",
+            action: "",
+            targetCode: "",
+            auditId: safeAuditId,
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus(`\u5df2\u6309\u5ba1\u8ba1\u53f7 ${safeAuditId} \u53cd\u67e5\u62a5\u8868\u6253\u5370\u7559\u75d5`);
+    },
+    async openReportAuditByTarget(targetCode) {
+        if (!Permissions.has("SYSTEM_AUDIT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const safeTargetCode = String(targetCode || "").trim();
+        if (!safeTargetCode) {
+            return;
+        }
+        state.auditFilters = {
+            module: "report",
+            operator: "",
+            action: "",
+            targetCode: safeTargetCode,
+            auditId: "",
+            start: "",
+            end: "",
+            limit: 100
+        };
+        await SystemShell.selectView("system", "SYSTEM_AUDIT");
+        setStatus(`\u5df2\u6309\u5bf9\u8c61 ${safeTargetCode} \u53cd\u67e5\u62a5\u8868\u7559\u75d5`);
     },
     async refreshTodoCache() {
         if (!Permissions.has("SALARY_TODO")) {
@@ -981,17 +2551,3818 @@ const WorkbenchPanel = {
             els.refreshTodoCacheButton.disabled = false;
         }
     },
+    selectedOrgForMigrationTools() {
+        return state.selectedOrgCode || state.orgs?.[0]?.code || "";
+    },
+    renderMigrationToolResult(title, rows = []) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        if (!rows.length) {
+            els.migrationToolResult.textContent = title;
+            return;
+        }
+        els.migrationToolResult.innerHTML = `<strong>${Format.html(title)}</strong> ${rows.map((row) => `<span>${Format.html(row)}</span>`).join(" ")}`;
+    },
+    migrationAcceptanceRows(result, fallbackOrgCode = "") {
+        const summary = result.summary || {};
+        const gateCount = result.gateCount ?? (result.gates || []).length;
+        const warnCount = result.warningCount ?? (result.gates || []).filter((gate) => gate.status === "WARN").length;
+        const issueCount = result.issueCount ?? (result.issues || []).length;
+        return [
+            result.runNo || "-",
+            `\u5355\u4f4d ${result.orgCode || fallbackOrgCode || "-"}`,
+            `\u72b6\u6001 ${Format.acceptanceStatusText(result.overallStatus)}`,
+            `\u68c0\u67e5 ${result.checkedAt || "-"}`,
+            `\u95f8\u53e3 ${gateCount}`,
+            `\u9884\u8b66 ${warnCount}`,
+            `\u5f85\u6838\u95ee\u9898 ${issueCount}`,
+            `\u5f85\u529e ${summary.salaryTodo ?? 0}`,
+            `\u5df2\u529e ${summary.salaryDone ?? 0}`,
+            `\u5199\u5165\u5f85\u6267\u884c ${summary.historyPrepared ?? 0}`,
+            `\u5199\u5165\u963b\u65ad ${summary.historyBlocked ?? 0}`,
+            `\u5f85\u590d\u6838 ${summary.reviewPending ?? 0}`,
+            `\u6cbb\u7406\u95ee\u9898 ${summary.dataGovernanceIssues ?? 0}`
+        ];
+    },
+    async waitMigrationAcceptanceRun(runNo, fallbackOrgCode = "") {
+        if (!runNo) {
+            return;
+        }
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+            await delay(attempt < 2 ? 1500 : 2500);
+            const result = await Api.request(`/api/workbench/migration-acceptance/runs/${encodeURIComponent(runNo)}`);
+            WorkbenchPanel.renderMigrationToolResult("\u8fc1\u79fb\u9a8c\u6536\u6279\u6b21", WorkbenchPanel.migrationAcceptanceRows(result, fallbackOrgCode));
+            if (result.overallStatus !== "RUNNING") {
+                setStatus(`\u8fc1\u79fb\u9a8c\u6536\u5df2\u5b8c\u6210 ${result.overallStatus || "-"}`);
+                return;
+            }
+            setStatus("\u8fc1\u79fb\u9a8c\u6536\u4ecd\u5728\u540e\u53f0\u6267\u884c...");
+        }
+        setStatus("\u8fc1\u79fb\u9a8c\u6536\u4ecd\u5728\u6267\u884c\uff0c\u7a0d\u540e\u53ef\u5728\u9a8c\u6536\u5386\u53f2\u67e5\u770b");
+    },
+    async refreshGeneratedTimelineIssues() {
+        if (!Permissions.has("SALARY_TODO") || !Permissions.has("SALARY_TRIAL")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        els.refreshGeneratedIssuesButton.disabled = true;
+        setStatus("\u6b63\u5728\u6c89\u6dc0\u5e94\u53d1\u7ebf\u95ee\u9898...");
+        try {
+            const keyword = (els.workbenchKeywordInput.value || "").trim();
+            const params = new URLSearchParams({ orgCode, keyword, limit: "100", eventLimit: "160" });
+            const result = await Api.request(`/api/workbench/generated-timeline-issues/refresh?${params.toString()}`, { method: "POST" });
+            WorkbenchPanel.updateMetric(result);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            WorkbenchPanel.renderMigrationToolResult("\u5e94\u53d1\u7ebf\u95ee\u9898\u5df2\u6c89\u6dc0", [
+                `\u5355\u4f4d ${orgCode}`,
+                `\u5f85\u529e ${result?.count ?? 0}`
+            ]);
+            setStatus("\u5e94\u53d1\u7ebf\u95ee\u9898\u5df2\u6c89\u6dc0\u5230\u5de5\u4f5c\u53f0");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.refreshGeneratedIssuesButton.disabled = false;
+        }
+    },
+    async retestGeneratedTimelineIssue(button) {
+        if (!Permissions.has("SALARY_TODO") || !Permissions.has("SALARY_TRIAL")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = button.dataset.generatedIssueRetest || "";
+        if (!workItemId) {
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u590d\u6d4b\u5e94\u53d1\u7ebf\u95ee\u9898...");
+        try {
+            const result = await Api.request(`/api/workbench/generated-timeline-issues/${encodeURIComponent(workItemId)}/retest`, { method: "POST" });
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            WorkbenchPanel.renderMigrationToolResult("\u5e94\u53d1\u7ebf\u590d\u6d4b\u5b8c\u6210", [
+                result.personCode || workItemId,
+                `\u72b6\u6001 ${result.retestStatus || "-"}`
+            ]);
+            setStatus("\u5e94\u53d1\u7ebf\u95ee\u9898\u5df2\u590d\u6d4b");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async reviewGeneratedTimelineIssue(button, reviewStatus) {
+        if (!Permissions.has("SALARY_TODO")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = button.dataset.generatedIssueReview || "";
+        if (!workItemId) {
+            return;
+        }
+        const defaultReason = reviewStatus === "IGNORED" ? "\u786e\u8ba4\u6682\u4e0d\u5904\u7406" : "\u786e\u8ba4\u5df2\u6838\u67e5";
+        const reviewReason = window.prompt("\u8bf7\u586b\u5199\u5e94\u53d1\u7ebf\u6838\u67e5\u8bf4\u660e", defaultReason);
+        if (!reviewReason) {
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u767b\u8bb0\u5e94\u53d1\u7ebf\u6838\u67e5...");
+        try {
+            const result = await Api.request(`/api/workbench/generated-timeline-issues/${encodeURIComponent(workItemId)}/review`, {
+                method: "POST",
+                body: JSON.stringify({ reviewStatus, reviewReason })
+            });
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            WorkbenchPanel.renderMigrationToolResult("\u5e94\u53d1\u7ebf\u6838\u67e5\u5df2\u767b\u8bb0", [
+                result.personCode || workItemId,
+                Format.reviewStatusText(result.reviewStatus || reviewStatus)
+            ]);
+            setStatus("\u5e94\u53d1\u7ebf\u95ee\u9898\u5df2\u5904\u7f6e");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async dataGovernanceScan() {
+        if (!Permissions.has("SALARY_GOVERNANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        els.dataGovernanceScanButton.disabled = true;
+        setStatus("\u6b63\u5728\u626b\u63cf\u6570\u636e\u6cbb\u7406\u95ee\u9898...");
+        try {
+            const result = await Api.request(`/api/workbench/data-governance/scan?${new URLSearchParams({ orgCode, limit: "100" }).toString()}`);
+            WorkbenchPanel.renderMigrationToolResult("\u6570\u636e\u6cbb\u7406\u626b\u63cf", [
+                `\u95ee\u9898 ${result.issueCount ?? 0}`,
+                `\u7f3a\u4efb\u804c ${result.missingPostCount ?? 0}`,
+                `\u5b66\u5386\u65e5\u671f ${result.invalidEducationCount ?? 0}`,
+                `sid ${result.brokenHistoryCount ?? 0}`,
+                `\u963b\u65ad\u540e\u671f\u6838\u67e5 ${result.blockedHistoryReviewCount ?? 0}`,
+                `\u7279\u6b8a\u60c5\u51b5 ${result.specialHistoryReviewCount ?? 0}`
+            ]);
+            setStatus("\u6570\u636e\u6cbb\u7406\u626b\u63cf\u5b8c\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.dataGovernanceScanButton.disabled = false;
+        }
+    },
+    async refreshDataGovernanceTasks() {
+        if (!Permissions.has("SALARY_GOVERNANCE") || !Permissions.has("SALARY_TODO")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        els.dataGovernanceTasksButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u6570\u636e\u6cbb\u7406\u4efb\u52a1...");
+        try {
+            const result = await Api.request(`/api/workbench/data-governance/tasks/refresh?${new URLSearchParams({ orgCode, limit: "200" }).toString()}`, { method: "POST" });
+            WorkbenchPanel.renderMigrationToolResult("\u6570\u636e\u6cbb\u7406\u4efb\u52a1", [
+                result.label || "\u5de5\u8d44\u53d8\u52a8\u5f85\u529e",
+                result.count ?? 0,
+                result.hint || "\u5df2\u751f\u6210\u6570\u636e\u6cbb\u7406\u4efb\u52a1"
+            ]);
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u6570\u636e\u6cbb\u7406\u4efb\u52a1\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.dataGovernanceTasksButton.disabled = false;
+        }
+    },
+    async retestDataGovernanceTask(button) {
+        if (!Permissions.has("SALARY_GOVERNANCE") || !Permissions.has("SALARY_TODO")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = button.dataset.dataGovernanceRetest || "";
+        if (!workItemId) {
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u590d\u6d4b\u6570\u636e\u6cbb\u7406\u4efb\u52a1...");
+        try {
+            const result = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/retest`, { method: "POST" });
+            await WorkbenchPanel.loadPage("TODO", true);
+            WorkbenchPanel.renderMigrationToolResult("\u6570\u636e\u6cbb\u7406\u590d\u6d4b", [
+                result.personCode || workItemId,
+                result.retestStatus || "-",
+                result.retestSummary || ""
+            ]);
+            setStatus("\u6570\u636e\u6cbb\u7406\u4efb\u52a1\u590d\u6d4b\u5b8c\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async reviewDataGovernanceTask(button, reviewStatus) {
+        if (!Permissions.has("SALARY_GOVERNANCE") || !Permissions.has("SALARY_TODO")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = button.dataset.dataGovernanceReview || "";
+        if (!workItemId) {
+            return;
+        }
+        const defaultReason = reviewStatus === "IGNORED" ? "\u786e\u8ba4\u6682\u4e0d\u5904\u7406" : "\u5df2\u5b8c\u6210\u6570\u636e\u6cbb\u7406\u6838\u67e5";
+        const reviewReason = window.prompt("\u8bf7\u586b\u5199\u6570\u636e\u6cbb\u7406\u4efb\u52a1\u6838\u67e5\u8bf4\u660e", defaultReason);
+        if (!reviewReason) {
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u767b\u8bb0\u6570\u636e\u6cbb\u7406\u4efb\u52a1...");
+        try {
+            const result = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/review`, {
+                method: "POST",
+                body: JSON.stringify({ reviewStatus, reviewReason })
+            });
+            await WorkbenchPanel.loadPage("TODO", true);
+            WorkbenchPanel.renderMigrationToolResult("\u6570\u636e\u6cbb\u7406\u6838\u67e5", [
+                result.personCode || workItemId,
+                Format.reviewStatusText(result.reviewStatus || reviewStatus)
+            ]);
+            setStatus("\u6570\u636e\u6cbb\u7406\u4efb\u52a1\u5df2\u5904\u7f6e");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async openMigrationDeliveryGovernanceDetail(item) {
+        const canViewGovernanceTask = Permissions.has("SALARY_DONE") || (Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO"));
+        const canManageGovernanceTask = Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO");
+        if (!canViewGovernanceTask) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = item.dataset.workId || "";
+        const summary = item.dataset.summary || "";
+        let detail = null;
+        try {
+            detail = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/migration-delivery-detail`);
+        } catch (error) {
+            setStatus(error.message);
+            return;
+        }
+        const latest = detail.latestAudit && detail.latestAudit.id ? detail.latestAudit : null;
+        const historyStatus = String(detail.historyStatus || "").toUpperCase();
+        const reportStatus = String(detail.reportStatus || "").toUpperCase();
+        const closeSuggested = Boolean(detail.closeSuggested) || String(detail.retestStatus || "").toUpperCase() === "RESOLVED";
+        const statusTag = (label, value) => {
+            const safeValue = String(value || "-").toUpperCase();
+            const klass = safeValue === "ERROR" ? "blocked" : safeValue === "READY" ? "ready" : "pending";
+            return `<span class="migration-delivery-detail-tag ${klass}"><b>${Format.html(label)}</b>${Format.html(safeValue)}</span>`;
+        };
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <div class="case-detail-panel migration-delivery-governance-detail">
+                <button type="button" class="case-detail-close" aria-label="Close">&times;</button>
+                <div class="case-detail-header">
+                    <div>
+                        <span class="case-detail-kicker">\u6570\u636e\u6cbb\u7406</span>
+                        <h3>\u8fc1\u79fb\u4ea4\u4ed8\u5f02\u5e38</h3>
+                        <p>${Format.html(workItemId || "-")}</p>
+                    </div>
+                    <div class="case-detail-actions">
+                        ${canManageGovernanceTask ? `<button type="button" class="case-snapshot-button primary" data-migration-delivery-governance-retest="${Format.html(workItemId)}">\u590d\u6d4b</button>` : ""}
+                        ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-migration-delivery-governance-audits>\u603b\u4ea4\u4ed8\u5ba1\u8ba1</button>` : ""}
+                    </div>
+                </div>
+                <div class="migration-delivery-detail-status">
+                    ${statusTag("history", historyStatus)}
+                    ${statusTag("report", reportStatus)}
+                    ${detail.pending ? statusTag("\u5f85\u5904\u7406", detail.pending) : ""}
+                    ${detail.closed ? statusTag("\u5df2\u95ed\u73af", detail.closed) : ""}
+                </div>
+                ${closeSuggested ? `
+                    <div class="migration-delivery-close-suggested">
+                        <strong>\u5df2\u6062\u590d</strong>
+                        <span>\u6700\u8fd1\u590d\u6d4b\u672a\u518d\u53d1\u73b0\u4ea4\u4ed8\u5305\u5f02\u5e38\uff0c\u53ef\u786e\u8ba4\u5173\u95ed\u672c\u6cbb\u7406\u4efb\u52a1\u3002</span>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>\u6700\u8fd1\u603b\u4ea4\u4ed8\u5ba1\u8ba1</h4>
+                    ${latest ? `
+                        <div class="migration-delivery-detail-audit">
+                            <strong>${Format.html(latest.id || "-")}</strong>
+                            <span>${Format.html(latest.createdAt || "-")} | ${Format.html(latest.operator || "-")}</span>
+                            ${SystemPanel.auditSummaryHtml(latest.summary || "-")}
+                        </div>
+                    ` : `<div class="loading">\u672a\u627e\u5230\u6700\u8fd1\u603b\u4ea4\u4ed8\u5ba1\u8ba1</div>`}
+                </div>
+                ${(detail.historyError || detail.reportError || detail.retestSummary) ? `
+                    <div class="case-detail-section">
+                        <h4>\u5f02\u5e38\u548c\u590d\u6d4b</h4>
+                        <div class="migration-delivery-detail-audit">
+                            ${detail.historyError ? `<span><b>history</b> ${Format.html(detail.historyError)}</span>` : ""}
+                            ${detail.reportError ? `<span><b>report</b> ${Format.html(detail.reportError)}</span>` : ""}
+                            ${detail.retestStatus ? `<span><b>retest</b> ${Format.html(detail.retestStatus)} ${Format.html(detail.retestedAt || "")}</span>` : ""}
+                            ${detail.retestSummary ? `<span>${Format.html(detail.retestSummary)}</span>` : ""}
+                        </div>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>\u5904\u7406\u5165\u53e3</h4>
+                    <div class="work-item-actions migration-delivery-detail-actions">
+                        ${historyStatus === "ERROR" && Permissions.has("SYSTEM_AUDIT") ? `<button type="button" data-migration-delivery-governance-history-audits>\u5386\u53f2\u9a8c\u6536\u5ba1\u8ba1</button>` : ""}
+                        ${reportStatus === "ERROR" && Permissions.has("SYSTEM_AUDIT") ? `<button type="button" data-migration-delivery-governance-report-audits>\u62a5\u8868\u4ea4\u4ed8\u5ba1\u8ba1</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" class="${closeSuggested ? "primary" : ""}" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="REVIEWED">${closeSuggested ? "\u786e\u8ba4\u5173\u95ed" : "\u786e\u8ba4"}</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="IGNORED">\u5ffd\u7565</button>` : ""}
+                        ${!canManageGovernanceTask && !Permissions.has("SYSTEM_AUDIT") ? `<span>\u5df2\u5904\u7406\u8bb0\u5f55\u53ef\u8ffd\u6eaf</span>` : ""}
+                    </div>
+                    <small class="audit-raw-summary">${Format.html(detail.summary || summary || "")}</small>
+                </div>
+                <div class="case-detail-section" data-migration-delivery-governance-result></div>
+            </div>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+                return;
+            }
+            const retestButton = event.target.closest("button[data-migration-delivery-governance-retest]");
+            if (retestButton) {
+                retestButton.disabled = true;
+                try {
+                    const result = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/retest`, { method: "POST" });
+                    const resultBox = overlay.querySelector("[data-migration-delivery-governance-result]");
+                    resultBox.innerHTML = `
+                        <h4>\u590d\u6d4b\u7ed3\u679c</h4>
+                        ${String(result.retestStatus || "").toUpperCase() === "RESOLVED" ? `
+                            <div class="migration-delivery-close-suggested">
+                                <strong>\u5df2\u6062\u590d</strong>
+                                <span>\u53ef\u70b9\u51fb\u786e\u8ba4\u5173\u95ed\u5b8c\u6210\u672c\u6cbb\u7406\u4efb\u52a1\u3002</span>
+                            </div>
+                        ` : ""}
+                        <div class="migration-delivery-detail-audit">
+                            <strong>${Format.html(result.retestStatus || "-")}</strong>
+                            <span>${Format.html(result.retestSummary || "")}</span>
+                        </div>
+                    `;
+                    await WorkbenchPanel.loadPage("TODO", true);
+                    setStatus("\u8fc1\u79fb\u4ea4\u4ed8\u5f02\u5e38\u5df2\u590d\u6d4b");
+                } catch (error) {
+                    setStatus(error.message);
+                } finally {
+                    retestButton.disabled = false;
+                }
+                return;
+            }
+            if (event.target.closest("button[data-migration-delivery-governance-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openSalaryMigrationDeliveryAudits();
+                return;
+            }
+            if (event.target.closest("button[data-migration-delivery-governance-history-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openHistoryClosureAcceptanceAudits();
+                return;
+            }
+            if (event.target.closest("button[data-migration-delivery-governance-report-audits]")) {
+                overlay.remove();
+                await WorkbenchPanel.openReportMigrationDeliveryAudits();
+                return;
+            }
+            const reviewButton = event.target.closest("button[data-data-governance-review]");
+            if (reviewButton) {
+                await WorkbenchPanel.reviewDataGovernanceTask(reviewButton, reviewButton.dataset.dataGovernanceReviewStatus || "REVIEWED");
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+        setStatus("\u5df2\u6253\u5f00\u8fc1\u79fb\u4ea4\u4ed8\u5f02\u5e38\u8be6\u60c5");
+    },
+    async openDataGovernanceTaskDetail(item) {
+        const canViewGovernanceTask = Permissions.has("SALARY_DONE") || (Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO"));
+        const canManageGovernanceTask = Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO");
+        const canMaintainGovernancePerson = canManageGovernanceTask && Permissions.has("SALARY_PERSON");
+        if (!canViewGovernanceTask) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = item.dataset.workId || "";
+        let detail = null;
+        try {
+            detail = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/detail`);
+        } catch (error) {
+            setStatus(error.message);
+            return;
+        }
+        if (detail.taskType === "MIGRATION_DELIVERY_PACKAGE") {
+            await WorkbenchPanel.openMigrationDeliveryGovernanceDetail(item);
+            return;
+        }
+        const personCode = item.dataset.personCode || detail.personCode || "";
+        const sample = detail.sample || {};
+        const field = (label, value) => `
+            <div class="case-detail-field">
+                <span>${Format.html(label)}</span>
+                <strong>${Format.html(value || "-")}</strong>
+            </div>
+        `;
+        const actionButton = (label, url, action) => url ? `<button type="button" data-report-sample-governance-${action}="${Format.html(url)}">${Format.html(label)}</button>` : "";
+        const isReportSampleComparison = detail.taskType === "REPORT_SAMPLE_COMPARISON";
+        const maintenanceTarget = WorkbenchPanel.governanceMaintenanceTarget(item.dataset.changeType || detail.changeType, item.dataset.summary || detail.summary);
+        const review = detail.review || {};
+        const reviewStatus = sample.reviewStatus || review.reviewStatus || "PENDING";
+        const retestStatus = review.retestStatus || "";
+        const reviewedBy = sample.reviewedBy || review.reviewedBy || "";
+        const reviewedAt = sample.reviewedAt || review.reviewedAt || "";
+        const closeSuggested = retestStatus === "RESOLVED";
+        const governanceStatusClass = (value) => {
+            const safeValue = String(value || "").toUpperCase();
+            if (["REVIEWED", "MATCHED", "RESOLVED"].includes(safeValue)) {
+                return "ready";
+            }
+            if (["SPECIAL", "FOUND"].includes(safeValue)) {
+                return "warning";
+            }
+            if (["IGNORED"].includes(safeValue)) {
+                return "pending";
+            }
+            return "";
+        };
+        const governanceStatusTag = (label, value, display) => value ? `
+            <span class="migration-delivery-detail-tag ${governanceStatusClass(value)}">
+                <b>${Format.html(label)}</b>${Format.html(display || value)}
+            </span>
+        ` : "";
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <div class="case-detail-panel migration-delivery-governance-detail">
+                <button type="button" class="case-detail-close" aria-label="Close">&times;</button>
+                <div class="case-detail-header">
+                    <div>
+                        <span class="case-detail-kicker">\u6570\u636e\u6cbb\u7406</span>
+                        <h3>${isReportSampleComparison ? "\u62a5\u8868\u6837\u672c\u5bf9\u7167" : "\u57fa\u7840\u6570\u636e\u6838\u67e5"}</h3>
+                        <p>${Format.html(workItemId || "-")}</p>
+                    </div>
+                    <div class="case-detail-actions">
+                        ${isReportSampleComparison ? actionButton("\u5bf9\u7167", sample.comparisonUrl, "comparison") : ""}
+                        ${isReportSampleComparison ? actionButton("\u6253\u5370", sample.printUrl, "print") : ""}
+                        ${isReportSampleComparison ? actionButton("CSV", sample.csvUrl, "csv") : ""}
+                        ${!isReportSampleComparison && personCode && canMaintainGovernancePerson ? `<button type="button" class="primary" data-data-governance-maintenance="${Format.html(personCode)}">\u5b9a\u4f4d\u4eba\u5458</button>` : ""}
+                    </div>
+                </div>
+                <div class="migration-delivery-detail-status" data-data-governance-status-summary>
+                    ${governanceStatusTag("\u6838\u67e5", reviewStatus, Format.reviewStatusText(reviewStatus))}
+                    ${governanceStatusTag("\u590d\u6d4b", retestStatus)}
+                    ${reviewedAt ? governanceStatusTag("\u767b\u8bb0", reviewedAt, reviewedBy ? `${reviewedBy} ${reviewedAt}` : reviewedAt) : ""}
+                </div>
+                ${closeSuggested ? `
+                    <div class="migration-delivery-close-suggested">
+                        <strong>\u590d\u6d4b\u901a\u8fc7</strong>
+                        <span>\u57fa\u7840\u6570\u636e\u95ee\u9898\u5df2\u6062\u590d\uff0c\u53ef\u786e\u8ba4\u5173\u95ed\u672c\u6cbb\u7406\u4efb\u52a1\u3002</span>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>${isReportSampleComparison ? "\u6837\u672c\u4fe1\u606f" : "\u5f85\u529e\u4fe1\u606f"}</h4>
+                    <div class="case-detail-grid">
+                        ${isReportSampleComparison ? field("\u62a5\u8868", sample.reportCode) : field("\u7c7b\u578b", detail.changeType)}
+                        ${isReportSampleComparison ? field("\u6837\u672c", sample.sampleKey) : field("\u6765\u6e90", detail.sourceId)}
+                        ${field("\u5355\u4f4d", sample.orgCode || detail.orgCode)}
+                        ${field("\u671f\u95f4", sample.period || `${detail.eventYear || ""}-${detail.eventMonth || ""}`.replace(/-$/, ""))}
+                        ${field("\u4eba\u5458", `${sample.personCode || detail.personCode || ""} ${sample.personName || detail.personName || ""}`.trim())}
+                        ${field("\u72b6\u6001", Format.reviewStatusText(reviewStatus))}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <h4>\u6838\u67e5\u539f\u56e0</h4>
+                    <div class="migration-delivery-detail-audit">
+                        <strong>${Format.html(sample.reviewCategory || reviewStatus || "-")}</strong>
+                        <span>${Format.html(sample.reviewReason || review.reviewReason || detail.summary || "")}</span>
+                        ${reviewedBy || reviewedAt ? `<span>${Format.html(reviewedBy || "-")} ${Format.html(reviewedAt || "")}</span>` : ""}
+                    </div>
+                </div>
+                ${(review.retestStatus || review.retestSummary || review.retestedAt) ? `
+                    <div class="case-detail-section">
+                        <h4>\u590d\u6d4b\u8bb0\u5f55</h4>
+                        <div class="migration-delivery-detail-audit">
+                            <strong>${Format.html(review.retestStatus || "-")}</strong>
+                            <span>${Format.html(review.retestSummary || "")}</span>
+                            ${review.retestedAt ? `<span>${Format.html(review.retestedAt)}</span>` : ""}
+                        </div>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>\u5904\u7406\u5165\u53e3</h4>
+                    <div class="work-item-actions migration-delivery-detail-actions">
+                        ${!isReportSampleComparison && personCode && canMaintainGovernancePerson ? `<button type="button" class="primary" data-data-governance-maintenance="${Format.html(personCode)}">\u5b9a\u4f4d\u5904\u7406</button>` : ""}
+                        ${!isReportSampleComparison && canManageGovernanceTask ? `<button type="button" data-data-governance-retest="${Format.html(workItemId)}">\u590d\u6d4b</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" class="${closeSuggested ? "primary" : ""}" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="REVIEWED">${closeSuggested ? "\u786e\u8ba4\u5173\u95ed" : "\u786e\u8ba4\u5df2\u6838\u67e5"}</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="IGNORED">\u6682\u4e0d\u5904\u7406</button>` : ""}
+                        ${!canManageGovernanceTask && !canMaintainGovernancePerson ? `<span>\u5df2\u5904\u7406\u8bb0\u5f55\u53ef\u8ffd\u6eaf</span>` : ""}
+                    </div>
+                    <small class="audit-raw-summary">${Format.html(detail.summary || "")}</small>
+                </div>
+            </div>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+                return;
+            }
+            const linkButton = event.target.closest("button[data-report-sample-governance-comparison],button[data-report-sample-governance-print],button[data-report-sample-governance-csv]");
+            if (linkButton) {
+                const url = linkButton.dataset.reportSampleGovernanceComparison || linkButton.dataset.reportSampleGovernancePrint || linkButton.dataset.reportSampleGovernanceCsv;
+                if (url) {
+                    window.open(url, "_blank", "noopener");
+                }
+                return;
+            }
+            const maintenanceButton = event.target.closest("button[data-data-governance-maintenance]");
+            if (maintenanceButton) {
+                const maintenancePersonCode = maintenanceButton.dataset.dataGovernanceMaintenance || "";
+                overlay.remove();
+                setStatus(TEXT.openingWorkItem);
+                await WorkbenchPanel.openPersonMaintenance(maintenancePersonCode, maintenanceTarget);
+                return;
+            }
+            const retestButton = event.target.closest("button[data-data-governance-retest]");
+            if (retestButton) {
+                await WorkbenchPanel.retestDataGovernanceTask(retestButton);
+                overlay.remove();
+                return;
+            }
+            const reviewButton = event.target.closest("button[data-data-governance-review]");
+            if (reviewButton) {
+                await WorkbenchPanel.reviewDataGovernanceTask(reviewButton, reviewButton.dataset.dataGovernanceReviewStatus || "REVIEWED");
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+        setStatus(isReportSampleComparison ? "\u5df2\u6253\u5f00\u62a5\u8868\u6837\u672c\u6cbb\u7406\u8be6\u60c5" : "\u5df2\u6253\u5f00\u57fa\u7840\u6570\u636e\u6cbb\u7406\u8be6\u60c5");
+    },
+    exportDataGovernanceScan() {
+        if (!Permissions.has("SALARY_EXPORT") || !Permissions.has("SALARY_GOVERNANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        window.location.href = `/api/workbench/data-governance/scan.csv?${new URLSearchParams({ orgCode, limit: "500" }).toString()}`;
+    },
+    async loadSalaryBusinessForms() {
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u5de5\u8d44\u4e1a\u52a1\u8868\u5355...");
+        try {
+            const forms = await Api.request("/api/workbench/salary-business-forms");
+            WorkbenchPanel.renderMigrationToolResult("\u5de5\u8d44\u4e1a\u52a1\u8868\u5355", (forms || []).map((form) => `${form.name || form.code || "-"}:${(form.fields || []).length}`));
+            setStatus("\u5de5\u8d44\u4e1a\u52a1\u8868\u5355\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async loadSalaryBusinessFlows() {
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b...");
+        try {
+            const flows = await Api.request("/api/workbench/salary-business-flows");
+            WorkbenchPanel.renderMigrationToolResult("\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b", (flows || []).map((flow) => `${flow.code || "-"}:${(flow.steps || []).length}`));
+            setStatus("\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    reportCenterSavedPrefs() {
+        try {
+            const raw = window.localStorage.getItem(REPORT_CENTER_PREF_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            return {};
+        }
+    },
+    saveReportCenterPrefs() {
+        const values = WorkbenchPanel.reportCenterValues();
+        if (!values.orgCode && !values.year && !values.month) {
+            return;
+        }
+        try {
+            window.localStorage.setItem(REPORT_CENTER_PREF_STORAGE_KEY, JSON.stringify(values));
+        } catch (error) {
+            // Local storage can be unavailable in restricted browser contexts.
+        }
+    },
+    clearReportCenterPrefs() {
+        try {
+            window.localStorage.removeItem(REPORT_CENTER_PREF_STORAGE_KEY);
+        } catch (error) {
+            // Ignore local storage cleanup failures.
+        }
+    },
+    refreshReportCenterActionState() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        if (!root) {
+            return;
+        }
+        const hasOrg = Boolean(root.querySelector('[name="orgCode"]')?.value?.trim());
+        root.querySelectorAll("button[data-report-action]").forEach((button) => {
+            if (button.dataset.reportAction !== "standardTable" && button.dataset.reportAction !== "reportAudit") {
+                button.disabled = !hasOrg;
+            }
+        });
+    },
+    applyReportSalaryColumnPreset(preset) {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const input = root?.querySelector('[name="salaryColumns"]');
+        if (!input) {
+            return;
+        }
+        const presets = {
+            default: "ZWGZSE2,JBGZSE2,JCGZ2,JXGZ",
+            allowance: "SDBT,DFBT2,JXJT,JZMCBT,ZWJT",
+            clear: ""
+        };
+        input.value = presets[preset] ?? presets.default;
+        WorkbenchPanel.saveReportCenterPrefs();
+        setStatus("\u5de5\u8d44\u8868\u5217\u9884\u8bbe\u5df2\u5957\u7528");
+    },
+    reportCenterValues() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const value = (name) => root?.querySelector(`[name="${name}"]`)?.value?.trim() || "";
+        return {
+            orgCode: value("orgCode"),
+            year: value("year"),
+            month: value("month"),
+            yearFrom: value("yearFrom"),
+            yearTo: value("yearTo"),
+            businessType: value("businessType"),
+            keyword: value("keyword"),
+            printStatus: value("printStatus") || "ALL",
+            acceptanceStatus: value("acceptanceStatus") || "ALL",
+            sampleReviewStatus: value("sampleReviewStatus") || "ALL",
+            auditAction: value("auditAction"),
+            auditOperator: value("auditOperator"),
+            auditStart: value("auditStart"),
+            auditEnd: value("auditEnd"),
+            personCode: value("personCode"),
+            salaryColumns: value("salaryColumns"),
+            tableName: value("tableName") || "bz06_jbt",
+            limit: value("limit") || "1000"
+        };
+    },
+    reportCenterUrl(kind, mode) {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        const params = (entries) => new URLSearchParams(Object.fromEntries(
+            Object.entries(entries).filter(([, value]) => value !== undefined && value !== null)
+        )).toString();
+        const base = {
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            limit: values.limit
+        };
+        if (kind === "changeLedger") {
+            return `/api/reports/salary-change-ledger${mode === "csv" ? ".csv" : "/print"}?${params(base)}`;
+        }
+        if (kind === "approvalRoster") {
+            return `/api/reports/salary-case-approval-roster${mode === "csv" ? ".csv" : "/print"}?${params(base)}`;
+        }
+        if (kind === "approvalBatch") {
+            return `/api/reports/salary-case-approvals/print?${params({ ...base, limit: Math.min(Number(values.limit || 200), 500) })}`;
+        }
+        if (kind === "assessment") {
+            return `/api/reports/assessment-summary/print?${params({ orgCode: values.orgCode, year: values.yearFrom || values.year, keyword: values.keyword, limit: values.limit })}`;
+        }
+        if (kind === "personRoster") {
+            return `/api/reports/person-roster${mode === "csv" ? ".csv" : "/print"}?${params({ orgCode: values.orgCode, year: values.year, month: values.month, keyword: values.keyword, limit: values.limit })}`;
+        }
+        if (kind === "salaryRoster") {
+            return `/api/reports/salary-roster${mode === "csv" ? ".csv" : "/print"}?${params({ orgCode: values.orgCode, year: values.year, month: values.month, columns: values.salaryColumns, limit: values.limit })}`;
+        }
+        if (kind === "salaryHistory") {
+            return `/api/reports/salary-history${mode === "csv" ? ".csv" : "/print"}?${params({ orgCode: values.orgCode, personCode: values.personCode, yearFrom: values.yearFrom, yearTo: values.yearTo, limit: values.limit })}`;
+        }
+        if (kind === "standardTable") {
+            return `/api/reports/standard-tables/print?${params({ tableName: values.tableName, keyword: values.keyword, limit: values.limit })}`;
+        }
+        if (kind === "reportAudit") {
+            return `/api/reports/audits.csv?${params({
+                targetCode: values.orgCode,
+                action: values.auditAction || values.keyword,
+                operator: values.auditOperator,
+                start: values.auditStart,
+                end: values.auditEnd,
+                limit: values.limit
+            })}`;
+        }
+        return "";
+    },
+    reportCenterPreviewUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/preview?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            tableName: values.tableName,
+            limit: values.limit
+        }).toString()}`;
+    },
+    reportCenterAuditUrl(overrides = {}) {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/audits?${new URLSearchParams({
+            targetCode: overrides.targetCode ?? values.orgCode,
+            action: overrides.action ?? (values.auditAction || values.keyword),
+            operator: overrides.operator ?? values.auditOperator,
+            start: overrides.start ?? values.auditStart,
+            end: overrides.end ?? values.auditEnd,
+            limit: Math.min(Number(overrides.limit ?? values.limit ?? 50), 200)
+        }).toString()}`;
+    },
+    reportCenterBatchApprovalValidateUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/salary-case-approvals/validate?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            limit: Math.min(Number(values.limit || 200), 500)
+        }).toString()}`;
+    },
+    reportPrintArchiveUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/print-archive${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            printStatus: values.printStatus || "ALL",
+            limit: Math.min(Number(values.limit || 300), mode === "csv" ? 5000 : 1000)
+        }).toString()}`;
+    },
+    reportPrintBatchesUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/print-batches?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            keyword: values.keyword,
+            acceptanceStatus: values.acceptanceStatus || "ALL",
+            limit: Math.min(Number(values.limit || 80), 500)
+        }).toString()}`;
+    },
+    reportPrintBatchAcceptancePackagesUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/print-batches/acceptance-packages.zip?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            keyword: values.keyword,
+            acceptanceStatus: values.acceptanceStatus || "PENDING",
+            limit: Math.min(Number(values.limit || 50), 50)
+        }).toString()}`;
+    },
+    reportMigrationClosureUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-closure${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            limit: Math.min(Number(values.limit || 300), 10000)
+        }).toString()}`;
+    },
+    reportPrintSelfCheckCsvUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-print-self-check.csv?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            limit: Math.min(Number(values.limit || 300), 10000)
+        }).toString()}`;
+    },
+    reportMigrationDeliveryPackageUrl() {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-delivery-package.zip?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            limit: Math.min(Number(values.limit || 300), 10000)
+        }).toString()}`;
+    },
+    reportMigrationMatrixCsvUrl() {
+        return "/api/reports/migration-matrix.csv";
+    },
+    reportMigrationAcceptanceChecklistUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-acceptance-checklist${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            limit: Math.min(Number(values.limit || 300), 10000)
+        }).toString()}`;
+    },
+    reportMigrationSampleEvidenceUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-sample-evidence${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            reviewStatus: values.sampleReviewStatus || "ALL",
+            limit: Math.min(Number(values.limit || 5), 50)
+        }).toString()}`;
+    },
+    reportMigrationSampleComparisonBatchReviewUrl(status = "MATCHED") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-sample-comparison/batch-review?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            reviewStatus: values.sampleReviewStatus || "PENDING_LEGACY",
+            batchReviewStatus: status,
+            reviewCategory: status === "SPECIAL" ? "LEGACY_SPECIAL" : "OTHER",
+            reviewReason: status === "SPECIAL" ? "\u6279\u91cf\u6807\u8bb0\u4e3a\u65e7\u7cfb\u7edf\u7279\u6b8a\u60c5\u51b5" : "\u6279\u91cf\u6807\u8bb0\u4e3a\u65b0\u65e7\u6837\u672c\u4e00\u81f4",
+            limit: Math.min(Number(values.limit || 20), 50)
+        }).toString()}`;
+    },
+    reportMigrationSampleComparisonUrl(mode = "json") {
+        WorkbenchPanel.saveReportCenterPrefs();
+        const values = WorkbenchPanel.reportCenterValues();
+        return `/api/reports/migration-sample-comparison${mode === "csv" ? ".csv" : ""}?${new URLSearchParams({
+            orgCode: values.orgCode,
+            year: values.year,
+            month: values.month,
+            yearFrom: values.yearFrom,
+            yearTo: values.yearTo,
+            businessType: values.businessType,
+            keyword: values.keyword,
+            personCode: values.personCode,
+            limit: Math.min(Number(values.limit || 5), 50)
+        }).toString()}`;
+    },
+    reportCenterShowMessage(html, warning = false) {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<div class="report-preview-grid ${warning ? "warning" : ""}">${html}</div>`;
+    },
+    async loadReportMigrationMatrix() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u8fc1\u79fb\u77e9\u9635...</span>`;
+        try {
+            const result = await Api.request("/api/reports/migration-matrix");
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span>\u62a5\u8868 ${Format.html(result.total || items.length)} \u9879</span>
+                    <span>\u5df2\u8fc1\u79fb ${Format.html(result.migrated || 0)}</span>
+                    <span>\u5f85\u8fc1\u79fb ${Format.html(result.pending || 0)}</span>
+                    <span>${Format.html(result.checkedAt || "")}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.slice(0, 20).map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.title || item.code || "-")}</strong>
+                            <span>${Format.html(item.status || "-")} | ${Format.html(item.category || "-")} | ${Format.html(item.legacyTemplate || "-")}</span>
+                            <small>${Format.html(item.printUrl || item.csvUrl || item.acceptanceEvidence || "-")}</small>
+                            <em>${Format.html(item.nextAction || "-")}</em>
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u8fc1\u79fb\u77e9\u9635\u5df2\u8bfb\u53d6 ${items.length} \u9879`);
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportMigrationAcceptanceChecklist() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u9a8c\u6536\u6e05\u5355...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationAcceptanceChecklistUrl("json"));
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span class="${result.status === "PASS" ? "" : "warning"}">\u9a8c\u6536 ${Format.html(result.status || "-")}</span>
+                    <span>PASS ${Format.html(result.pass || 0)}</span>
+                    <span>WARN ${Format.html(result.warn || 0)}</span>
+                    <span>TODO ${Format.html(result.todo || 0)}</span>
+                    <span>${Format.html(result.period || "")}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.title || item.code || "-")}</strong>
+                            <span>${Format.html(item.status || "-")} | \u6837\u672c ${Format.html(item.sampleCount || 0)} | ${Format.html(item.auditActions || "-")}</span>
+                            <small>${Format.html(item.acceptanceEvidence || "-")}</small>
+                            <em>${Format.html(item.nextAction || "-")}</em>
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u9a8c\u6536\u6e05\u5355\u5df2\u8bfb\u53d6 ${items.length} \u9879`);
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportMigrationSampleEvidence() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u6837\u672c\u8bc1\u636e...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationSampleEvidenceUrl("json"));
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span>\u6837\u672c ${Format.html(result.rows || items.length)} \u6761</span>
+                    <span>${Format.html(result.period || "")}</span>
+                    <span>\u6bcf\u7c7b\u4e0a\u9650 ${Format.html(result.limit || "")}</span>
+                    <span>${Format.html(result.checkedAt || "")}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.slice(0, 40).map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.reportCode || "-")} | ${Format.html(item.sampleKey || "-")}</strong>
+                            <span>${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")} | ${Format.html(item.orgCode || "-")} | ${Format.html(item.period || "-")}</span>
+                            <small>${Format.html(item.sourceTable || "-")} | ${Format.html(item.printUrl || item.csvUrl || "-")}</small>
+                            <em>${Format.html(item.note || "-")}</em>
+                        </div>
+                    `).join("") || `<span class="warning">\u5f53\u524d\u8303\u56f4\u672a\u627e\u5230\u6837\u672c\u8bc1\u636e</span>`}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u6837\u672c\u8bc1\u636e\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportMigrationSampleComparison() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u6837\u672c\u5bf9\u7167...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationSampleComparisonUrl("json"));
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span class="${result.status === "READY" ? "" : "warning"}">\u5bf9\u7167 ${Format.html(result.status || "-")}</span>
+                    <span>PASS ${Format.html(result.pass || 0)}</span>
+                    <span>WARN ${Format.html(result.warn || 0)}</span>
+                    <span>TODO ${Format.html(result.todo || 0)}</span>
+                    <span>\u65e7\u7cfb\u7edf\u5f85\u6838 ${Format.html(result.legacyPending || 0)}</span>
+                    <span>\u5df2\u590d\u6838 ${Format.html(result.legacyReviewed || 0)}</span>
+                    <span>\u7b5b\u9009 ${Format.html(result.reviewStatus || "ALL")}</span>
+                </div>
+                <div class="report-batch-actions">
+                    <button type="button" data-report-sample-comparison-batch-review="MATCHED">\u5f53\u524d\u7b5b\u9009\u6279\u91cf\u4e00\u81f4</button>
+                    <button type="button" data-report-sample-comparison-batch-review="SPECIAL">\u5f53\u524d\u7b5b\u9009\u6279\u91cf\u7279\u6b8a</button>
+                </div>
+                <div class="report-audit-list">
+                    ${items.slice(0, 40).map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.reportCode || "-")} | ${Format.html(item.sampleKey || "-")}</strong>
+                            <span>${Format.html(item.evidenceStatus || "-")} | ${Format.html(item.legacyComparisonStatus || "-")} | ${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")}</span>
+                            <small>${Format.html(item.reviewReason || item.comparisonConclusion || "-")}</small>
+                            <em>${Format.html(item.nextAction || "-")}</em>
+                            <div class="report-batch-actions">
+                                <button type="button" data-report-sample-comparison-review="MATCHED" data-report-code="${Format.html(item.reportCode || "")}" data-sample-key="${Format.html(item.sampleKey || "")}" data-person-code="${Format.html(item.personCode || "")}" data-org-code="${Format.html(item.orgCode || "")}" data-period="${Format.html(item.period || "")}">\u4e00\u81f4</button>
+                                <button type="button" data-report-sample-comparison-review="SPECIAL" data-report-code="${Format.html(item.reportCode || "")}" data-sample-key="${Format.html(item.sampleKey || "")}" data-person-code="${Format.html(item.personCode || "")}" data-org-code="${Format.html(item.orgCode || "")}" data-period="${Format.html(item.period || "")}">\u7279\u6b8a</button>
+                            </div>
+                        </div>
+                    `).join("") || `<span class="warning">\u5f53\u524d\u8303\u56f4\u672a\u751f\u6210\u6837\u672c\u5bf9\u7167</span>`}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async reviewReportMigrationSampleComparison(button) {
+        const status = button.dataset.reportSampleComparisonReview || "MATCHED";
+        const params = new URLSearchParams({
+            reportCode: button.dataset.reportCode || "",
+            sampleKey: button.dataset.sampleKey || "",
+            orgCode: button.dataset.orgCode || "",
+            personCode: button.dataset.personCode || "",
+            period: button.dataset.period || "",
+            reviewStatus: status,
+            reviewCategory: status === "SPECIAL" ? "LEGACY_SPECIAL" : "OTHER",
+            reviewReason: status === "SPECIAL" ? "\u65e7\u7cfb\u7edf\u7279\u6b8a\u60c5\u51b5\uff0c\u7eb3\u5165\u4ea4\u4ed8\u8bf4\u660e" : "\u65b0\u65e7\u6837\u672c\u5bf9\u7167\u4e00\u81f4"
+        });
+        button.disabled = true;
+        try {
+            await Api.request(`/api/reports/migration-sample-comparison/review?${params.toString()}`, { method: "POST" });
+            await WorkbenchPanel.loadReportMigrationSampleComparison();
+            setStatus("\u62a5\u8868\u6837\u672c\u5bf9\u7167\u5df2\u590d\u6838");
+        } catch (error) {
+            button.disabled = false;
+            setStatus(error.message);
+        }
+    },
+    async batchReviewReportMigrationSampleComparison(button) {
+        const status = button.dataset.reportSampleComparisonBatchReview || "MATCHED";
+        button.disabled = true;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationSampleComparisonBatchReviewUrl(status), { method: "POST" });
+            await WorkbenchPanel.loadReportMigrationSampleComparison();
+            setStatus(`\u6279\u91cf\u590d\u6838\u5b8c\u6210 ${Format.html(result.rows || 0)} \u6761`);
+        } catch (error) {
+            button.disabled = false;
+            setStatus(error.message);
+        }
+    },
+    async previewReportCenter() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const previewNode = root?.querySelector("[data-report-preview-result]");
+        if (!root || !previewNode) {
+            return;
+        }
+        previewNode.innerHTML = `<span>\u6b63\u5728\u9884\u89c8\u62a5\u8868\u6570\u91cf...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportCenterPreviewUrl());
+            const items = result.items || [];
+            previewNode.innerHTML = `
+                <div class="report-preview-grid">
+                    ${items.map((item) => `
+                        <span class="${item.requiresOrg ? "warning" : item.limited ? "warning" : ""}">
+                            <b>${Format.html(item.title || item.code || "-")}</b>
+                            ${item.requiresOrg ? "\u9700\u586b\u5199\u5355\u4f4d" : `${Format.html(item.count)} \u6761${item.limited ? ` / \u5c06\u6309\u4e0a\u9650 ${Format.html(item.limit)} \u6761\u8f93\u51fa` : ""}`}
+                        </span>
+                    `).join("")}
+                </div>
+            `;
+            setStatus("\u62a5\u8868\u9884\u89c8\u6570\u91cf\u5df2\u66f4\u65b0");
+        } catch (error) {
+            previewNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async validateBatchApprovalPrint() {
+        const result = await Api.request(WorkbenchPanel.reportCenterBatchApprovalValidateUrl());
+        const items = result.items || [];
+        const blocked = items.filter((item) => !item.printable).slice(0, 6);
+        const warned = items.filter((item) => item.status === "WARNING").slice(0, 6);
+        const lines = [
+            `<span class="${result.printable ? "" : "warning"}"><b>\u6279\u91cf\u5ba1\u6279\u8868</b>${Format.html(result.caseCount || 0)} \u7b14 | \u963b\u65ad ${Format.html(result.blockedCount || 0)} | \u63d0\u793a ${Format.html(result.warningCount || 0)}</span>`
+        ];
+        for (const item of blocked) {
+            const issueText = (item.issues || []).map((issue) => issue.message || issue.code || "").filter(Boolean).join("；");
+            lines.push(`<span class="warning"><b>${Format.html(item.caseNo || "-")}</b>${Format.html(issueText || "\u6253\u5370\u6761\u4ef6\u4e0d\u5b8c\u6574")}</span>`);
+        }
+        if (!blocked.length) {
+            for (const item of warned) {
+                const warningText = (item.warnings || []).map((warning) => warning.message || warning.code || "").filter(Boolean).join("；");
+                lines.push(`<span class="warning"><b>${Format.html(item.caseNo || "-")}</b>${Format.html(warningText || "\u5b58\u5728\u6253\u5370\u63d0\u793a")}</span>`);
+            }
+        }
+        WorkbenchPanel.reportCenterShowMessage(lines.join(""), !result.printable || Number(result.warningCount || 0) > 0);
+        if (!result.printable) {
+            setStatus("\u6279\u91cf\u5ba1\u6279\u8868\u6253\u5370\u5df2\u963b\u65ad\uff0c\u8bf7\u5148\u5904\u7406\u7f3a\u5931\u9879");
+            return false;
+        }
+        setStatus(Number(result.warningCount || 0) > 0 ? "\u6279\u91cf\u5ba1\u6279\u8868\u53ef\u6253\u5370\uff0c\u4f46\u5b58\u5728\u63d0\u793a\u9879" : "\u6279\u91cf\u5ba1\u6279\u8868\u6821\u9a8c\u901a\u8fc7");
+        return true;
+    },
+    async loadReportAudits(overrides = {}) {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const auditNode = root?.querySelector("[data-report-audit-result]");
+        if (!root || !auditNode) {
+            return;
+        }
+        auditNode.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u64cd\u4f5c\u8bb0\u5f55...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportCenterAuditUrl(overrides));
+            const items = result.items || [];
+            const canAuditSystem = Permissions.has("SYSTEM_AUDIT");
+            const auditIdHtml = (item) => canAuditSystem && item.auditId
+                ? `<button type="button" class="batch-result-locate" data-report-center-audit-id="${Format.html(item.auditId)}">${Format.html(item.auditId)}</button>`
+                : Format.html(item.auditId || "-");
+            const targetHtml = (item) => canAuditSystem && item.targetCode
+                ? `<button type="button" class="batch-result-locate" data-report-center-audit-target="${Format.html(item.targetCode)}">${Format.html(item.targetCode || "-")}</button>`
+                : Format.html(item.targetCode || "-");
+            const scope = [
+                result.targetCode ? `\u5bf9\u8c61 ${result.targetCode}` : "\u5168\u90e8\u5bf9\u8c61",
+                result.action ? `\u52a8\u4f5c ${Format.auditActionText(result.action)}` : "\u5168\u90e8\u52a8\u4f5c",
+                result.operator ? `\u64cd\u4f5c\u4eba ${result.operator}` : "",
+                result.start ? `\u8d77 ${result.start}` : "",
+                result.end ? `\u6b62 ${result.end}` : "",
+                `\u4e0a\u9650 ${result.limit || items.length}`
+            ].filter(Boolean).join(" | ");
+            auditNode.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span>\u5f53\u524d ${Format.html(items.length)} \u6761</span>
+                    <span>${Format.html(scope)}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.length ? items.map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(Format.auditActionText(item.actionName || item.action || "-"))}</strong>
+                            <span>${auditIdHtml(item)} | ${Format.html(item.targetType || "-")} | ${targetHtml(item)} | ${Format.html(item.operator || "-")}</span>
+                            <small>${Format.html(item.summary || "-")}</small>
+                            <em>${Format.html(item.createdAt || "-")}</em>
+                        </div>
+                    `).join("") : `<span class="warning">\u672a\u67e5\u5230\u62a5\u8868\u64cd\u4f5c\u8bb0\u5f55</span>`}
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u64cd\u4f5c\u8bb0\u5f55\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            auditNode.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportPrintArchive() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-archive-result]");
+        if (!root || !node) {
+            return;
+        }
+        const canAuditReport = Permissions.has("SYSTEM_AUDIT");
+        const canExportAcceptancePackage = Permissions.has("SALARY_EXPORT") && Permissions.has("SALARY_ACCEPTANCE");
+        const acceptanceStatusHtml = (item) => {
+            if (!item.acceptanceExported) {
+                return "\u672a\u9a8c\u6536";
+            }
+            const auditId = item.acceptanceAuditId || "-";
+            const auditHtml = canAuditReport && item.acceptanceAuditId
+                ? `<button type="button" class="batch-result-locate" data-report-acceptance-audit-id="${Format.html(item.acceptanceAuditId)}">${Format.html(auditId)}</button>`
+                : Format.html(auditId);
+            return `\u5df2\u9a8c\u6536 ${auditHtml}`;
+        };
+        node.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportPrintArchiveUrl("json"));
+            const items = result.items || [];
+            node.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span>\u5f53\u524d ${Format.html(items.length)} \u6761</span>
+                    <span>\u5df2\u6253\u5370 ${Format.html(result.printed || 0)}</span>
+                    <span>\u672a\u6253\u5370 ${Format.html(result.unprinted || 0)}</span>
+                    <span>\u5df2\u91cd\u6253 ${Format.html(result.reprinted || 0)}</span>
+                    <span>\u53ef\u5199\u5165 ${Format.html(result.writeReady || 0)}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${items.length ? items.map((item) => `
+                        <div class="report-audit-row">
+                            <strong>${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")}</strong>
+                            <span>${Format.html(item.archiveStatus || "-")} | ${Format.html(item.businessType || "-")} | ${Format.html(item.orgCode || "-")}</span>
+                            <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.eventYear || "-")}-${String(item.eventMonth || 1).padStart(2, "0")} | \u6253\u5370 ${Format.html(item.printCount || 0)} \u6b21 | ${Format.html(item.latestBatchNo || item.latestTargetCode || "-")}</small>
+                            <em>${Format.html(item.latestOperator || "-")} | ${Format.html(item.latestPrintedAt || "-")} | ${item.writeReady ? "\u53ef\u5199\u5165" : "\u4e0d\u53ef\u5199\u5165"} | ${acceptanceStatusHtml(item)}</em>
+                            ${item.latestBatchNo ? `<div class="report-batch-actions">
+                                <button type="button" data-report-print-batch="${Format.html(item.latestBatchNo)}">\u67e5\u770b\u6279\u6b21</button>
+                                ${canExportAcceptancePackage ? `<button type="button" data-report-print-batch-package="${Format.html(item.latestBatchNo)}">\u9a8c\u6536\u5305</button>` : ""}
+                                ${canAuditReport ? `<button type="button" data-report-batch-export-audits data-audit-action="report-print-batch-acceptance-package" data-audit-target="${Format.html(item.latestBatchNo)}">\u5bfc\u51fa\u5ba1\u8ba1</button>` : ""}
+                            </div>` : ""}
+                        </div>
+                    `).join("") : `<span class="warning">\u672a\u67e5\u5230\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26</span>`}
+                </div>
+            `;
+            setStatus(`\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            node.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportPrintBatches() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-batch-result]");
+        if (!root || !node) {
+            return;
+        }
+        const canExportAcceptancePackage = Permissions.has("SALARY_EXPORT") && Permissions.has("SALARY_ACCEPTANCE");
+        const canAuditReport = Permissions.has("SYSTEM_AUDIT");
+        const acceptanceStatusHtml = (item) => {
+            if (!item.acceptanceExported) {
+                return "\u672a\u9a8c\u6536";
+            }
+            const auditId = item.acceptanceAuditId || "-";
+            const auditHtml = canAuditReport && item.acceptanceAuditId
+                ? `<button type="button" class="batch-result-locate" data-report-acceptance-audit-id="${Format.html(item.acceptanceAuditId)}">${Format.html(auditId)}</button>`
+                : Format.html(auditId);
+            return `\u5df2\u9a8c\u6536 ${auditHtml} ${Format.html(item.acceptanceExportedAt || "")}`;
+        };
+        node.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u6253\u5370\u6279\u6b21...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportPrintBatchesUrl());
+            const items = result.items || [];
+            node.innerHTML = `
+                <div class="report-batch-filter-actions">
+                    <span>\u5f53\u524d\u6279\u6b21 ${Format.html(items.length)}</span>
+                    ${items.length && canExportAcceptancePackage ? `<button type="button" class="primary" data-report-print-batch-bulk-package>\u6279\u91cf\u9a8c\u6536\u5305</button>` : ""}
+                </div>
+                <div data-report-batch-bulk-result></div>
+                <div class="report-audit-list">
+                    ${items.length ? items.map((item) => `
+                        <div class="report-audit-row report-batch-row">
+                            <strong>${Format.html(item.batchNo || "-")}</strong>
+                            <span>${Format.html(item.orgCode || "-")} | ${Format.html(item.eventYear || "-")}-${String(item.eventMonth || 1).padStart(2, "0")} | ${Format.html(item.reportType || "-")}</span>
+                            <small>${Format.html(item.itemCount || item.printedCount || 0)} \u6761 | \u963b\u65ad ${Format.html(item.blockedCount || 0)} | \u63d0\u793a ${Format.html(item.warningCount || 0)} | ${Format.html(item.personSample || item.keyword || "-")}</small>
+                            <em>${Format.html(item.printedBy || "-")} | ${Format.html(item.printedAt || "-")} | ${acceptanceStatusHtml(item)}</em>
+                            <div class="report-batch-actions">
+                                <button type="button" data-report-print-batch="${Format.html(item.batchNo || "")}">\u8be6\u60c5</button>
+                                <button type="button" data-report-print-batch-export="${Format.html(item.batchNo || "")}">\u5bfc\u51fa</button>
+                                ${canExportAcceptancePackage ? `<button type="button" data-report-print-batch-package="${Format.html(item.batchNo || "")}">\u9a8c\u6536\u5305</button>` : ""}
+                                <button type="button" data-report-print-batch-reprint="${Format.html(item.batchNo || "")}">\u91cd\u6253</button>
+                            </div>
+                        </div>
+                    `).join("") : `<span class="warning">\u672a\u67e5\u5230\u6253\u5370\u6279\u6b21</span>`}
+                </div>
+            `;
+            setStatus(`\u6253\u5370\u6279\u6b21\u5df2\u8bfb\u53d6 ${items.length} \u6761`);
+        } catch (error) {
+            node.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    showReportBatchBulkExportResult() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-batch-bulk-result]");
+        if (!node) {
+            return;
+        }
+        node.innerHTML = `
+            <div class="report-batch-return-summary">
+                <strong>\u6279\u91cf\u9a8c\u6536\u5305\u5df2\u89e6\u53d1</strong>
+                <span>\u4e0b\u8f7d\u5b8c\u6210\u540e\uff0c\u53ef\u5237\u65b0\u672a\u9a8c\u6536\u5217\u8868\u6216\u67e5\u770b\u5df2\u9a8c\u6536\u6279\u6b21\u3002</span>
+                <button type="button" data-report-batch-refresh-pending>\u5237\u65b0\u672a\u9a8c\u6536\u5217\u8868</button>
+                <button type="button" data-report-batch-show-exported>\u67e5\u770b\u5df2\u9a8c\u6536\u6279\u6b21</button>
+                <button type="button" data-report-batch-export-audits data-audit-action="report-print-batch-acceptance-package-bulk">\u67e5\u770b\u6279\u91cf\u5bfc\u51fa\u5ba1\u8ba1</button>
+            </div>
+        `;
+    },
+    showReportBatchAcceptanceExportResult(batchNo = "") {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-batch-bulk-result]");
+        if (!node) {
+            return;
+        }
+        node.innerHTML = `
+            <div class="report-batch-return-summary">
+                <strong>\u9a8c\u6536\u5305\u5df2\u89e6\u53d1</strong>
+                <span>${Format.html(batchNo || "\u5f53\u524d\u6279\u6b21")} \u4e0b\u8f7d\u5b8c\u6210\u540e\uff0c\u53ef\u67e5\u770b\u5df2\u9a8c\u6536\u6279\u6b21\u6216\u5237\u65b0\u672a\u9a8c\u6536\u5217\u8868\u3002</span>
+                <button type="button" data-report-batch-show-exported>\u67e5\u770b\u5df2\u9a8c\u6536\u6279\u6b21</button>
+                <button type="button" data-report-batch-refresh-pending>\u5237\u65b0\u672a\u9a8c\u6536\u5217\u8868</button>
+                <button type="button" data-report-batch-export-audits data-audit-action="report-print-batch-acceptance-package" data-audit-target="${Format.html(batchNo || "")}">\u67e5\u770b\u672c\u6279\u5bfc\u51fa\u5ba1\u8ba1</button>
+            </div>
+        `;
+    },
+    async switchReportBatchAcceptanceStatus(status) {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const acceptanceSelect = root?.querySelector('[name="acceptanceStatus"]');
+        if (acceptanceSelect) {
+            acceptanceSelect.value = status;
+        }
+        WorkbenchPanel.saveReportCenterPrefs();
+        await WorkbenchPanel.loadReportPrintBatches();
+    },
+    async openPendingReportBatchAcceptance() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const acceptanceSelect = root?.querySelector('[name="acceptanceStatus"]');
+        if (acceptanceSelect) {
+            acceptanceSelect.value = "PENDING";
+        }
+        WorkbenchPanel.saveReportCenterPrefs();
+        await WorkbenchPanel.loadReportPrintBatches();
+        setStatus("\u5df2\u5b9a\u4f4d\u672a\u9a8c\u6536\u6253\u5370\u6279\u6b21");
+    },
+    async loadReportMigrationClosure() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-closure-result]");
+        if (!root || !node) {
+            return;
+        }
+        node.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u8fc1\u79fb\u95ed\u73af\u603b\u89c8...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationClosureUrl());
+            const batch = result.batchSummary || {};
+            const audit = result.auditSummary || {};
+            const actions = audit.actions || [];
+            node.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span class="${result.status === "READY" ? "" : "warning"}">\u95ed\u73af ${Format.html(result.status || "-")}</span>
+                    <span>\u76ee\u5f55 ${Format.html(result.migratedReports || 0)} / ${Format.html(result.catalogTotal || 0)}</span>
+                    <span>\u5f85\u8fc1\u79fb ${Format.html(result.pendingReports || 0)}</span>
+                    <span>\u5ba1\u6279\u5f52\u6863 ${Format.html(result.printed || 0)} / ${Format.html(result.archiveTotal || 0)}</span>
+                    <span>\u672a\u6253\u5370 ${Format.html(result.unprinted || 0)}</span>
+                    <span>\u53ef\u5199\u5165 ${Format.html(result.writeReady || 0)}</span>
+                    <span>\u6253\u5370\u6279\u6b21 ${Format.html(batch.batchCount || 0)}</span>
+                    <span>\u6279\u6b21\u963b\u65ad ${Format.html(batch.blockedRows || 0)}</span>
+                    <button type="button" class="link-button ${Number(batch.pendingAcceptanceBatches || 0) ? "warning" : ""}" data-report-pending-acceptance-batches>\u672a\u9a8c\u6536\u6279\u6b21 ${Format.html(batch.pendingAcceptanceBatches || 0)}</button>
+                    <span>\u5df2\u9a8c\u6536\u6279\u6b21 ${Format.html(batch.acceptanceExportedBatches || 0)}</span>
+                    <span>\u64cd\u4f5c\u7559\u75d5 ${Format.html(audit.auditCount || 0)}</span>
+                </div>
+                <div class="report-audit-list">
+                    <div class="report-audit-row">
+                        <strong>\u6700\u8fd1\u6253\u5370</strong>
+                        <span>${Format.html(batch.latestPrintedAt || "-")}</span>
+                        <small>\u6253\u5370\u884c ${Format.html(batch.printedRows || 0)} | \u63d0\u793a ${Format.html(batch.warningRows || 0)} | \u91cd\u6253 ${Format.html(result.reprinted || 0)}</small>
+                        <em>\u6700\u8fd1\u9a8c\u6536 ${Format.html(batch.latestAcceptanceExportedAt || "-")} | \u68c0\u67e5\u65f6\u95f4 ${Format.html(result.checkedAt || "-")}</em>
+                    </div>
+                    <div class="report-audit-row">
+                        <strong>\u6700\u8fd1\u7559\u75d5</strong>
+                        <span>${Format.html(audit.latestAuditAt || "-")}</span>
+                        <small>${actions.length ? actions.map((item) => `${Format.auditActionText(item.actionName || "-")} ${item.actionCount || 0}`).join(" | ") : "\u6682\u65e0\u64cd\u4f5c\u5206\u5e03"}</small>
+                    </div>
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u8fc1\u79fb\u95ed\u73af\u603b\u89c8\u5df2\u8bfb\u53d6\uff1a${result.status || "-"}`);
+        } catch (error) {
+            node.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    async loadReportPrintSelfCheck() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-closure-result]");
+        if (!root || !node) {
+            return;
+        }
+        node.innerHTML = `<span>\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u81ea\u68c0...</span>`;
+        try {
+            const result = await Api.request(WorkbenchPanel.reportMigrationClosureUrl());
+            const batch = result.batchSummary || {};
+            const audit = result.auditSummary || {};
+            const pendingAcceptance = Number(batch.pendingAcceptanceBatches || 0);
+            const blockedBatches = Number(batch.blockedBatches || 0);
+            const auditCount = Number(audit.auditCount || 0);
+            const archiveTotal = Number(result.archiveTotal || 0);
+            const printed = Number(result.printed || 0);
+            const checks = [
+                {
+                    label: "\u5ba1\u6279\u8868\u5f52\u6863",
+                    ok: archiveTotal === 0 || printed > 0,
+                    detail: `\u5df2\u5f52\u6863 ${printed} / ${archiveTotal}\uff0c\u672a\u6253\u5370 ${Number(result.unprinted || 0)}`
+                },
+                {
+                    label: "\u6253\u5370\u6279\u6b21",
+                    ok: Number(batch.batchCount || 0) > 0,
+                    detail: `\u6279\u6b21 ${Number(batch.batchCount || 0)}\uff0c\u884c\u6570 ${Number(batch.printedRows || 0)}\uff0c\u963b\u65ad ${Number(batch.blockedRows || 0)}`
+                },
+                {
+                    label: "\u9a8c\u6536\u5305",
+                    ok: pendingAcceptance === 0 && Number(batch.acceptanceExportedBatches || 0) > 0,
+                    detail: `\u5df2\u9a8c\u6536 ${Number(batch.acceptanceExportedBatches || 0)}\uff0c\u672a\u9a8c\u6536 ${pendingAcceptance}`
+                },
+                {
+                    label: "\u64cd\u4f5c\u7559\u75d5",
+                    ok: auditCount > 0,
+                    detail: `\u7559\u75d5 ${auditCount}\uff0c\u6700\u8fd1 ${audit.latestAuditAt || "-"}`
+                },
+                {
+                    label: "\u95ed\u73af\u98ce\u9669",
+                    ok: result.status === "READY" && blockedBatches === 0,
+                    detail: `\u72b6\u6001 ${result.status || "-"}\uff0c\u963b\u65ad\u6279\u6b21 ${blockedBatches}`
+                }
+            ];
+            const readyCount = checks.filter((item) => item.ok).length;
+            node.innerHTML = `
+                <div class="history-plan-summary batch-preview-summary">
+                    <span class="${readyCount === checks.length ? "" : "warning"}">\u6253\u5370\u81ea\u68c0 ${Format.html(readyCount)} / ${Format.html(checks.length)}</span>
+                    <span>\u6700\u8fd1\u6253\u5370 ${Format.html(batch.latestPrintedAt || "-")}</span>
+                    <span>\u6700\u8fd1\u9a8c\u6536 ${Format.html(batch.latestAcceptanceExportedAt || "-")}</span>
+                    <span>\u68c0\u67e5\u65f6\u95f4 ${Format.html(result.checkedAt || "-")}</span>
+                </div>
+                <div class="report-audit-list">
+                    ${checks.map((item) => `
+                        <div class="report-audit-row ${item.ok ? "" : "report-batch-returned"}">
+                            <strong>${item.ok ? "\u901a\u8fc7" : "\u5f85\u5904\u7406"} | ${Format.html(item.label)}</strong>
+                            <span>${Format.html(item.detail)}</span>
+                        </div>
+                    `).join("")}
+                    <div class="report-batch-actions">
+                        <button type="button" data-report-archive-view>\u67e5\u770b\u5f52\u6863</button>
+                        <button type="button" data-report-batch-view>\u67e5\u770b\u6279\u6b21</button>
+                        <button type="button" class="${pendingAcceptance ? "warning" : ""}" data-report-pending-acceptance-batches>\u672a\u9a8c\u6536\u6279\u6b21 ${Format.html(pendingAcceptance)}</button>
+                        <button type="button" data-report-audit-view>\u67e5\u770b\u7559\u75d5</button>
+                        <button type="button" data-report-print-self-check-export>\u5bfc\u51fa\u81ea\u68c0\u9a8c\u6536\u5355</button>
+                        <button type="button" data-report-batch-export-audits data-audit-action="report-print-self-check-csv">\u67e5\u770b\u81ea\u68c0\u5bfc\u51fa\u5ba1\u8ba1</button>
+                    </div>
+                </div>
+            `;
+            setStatus(`\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u81ea\u68c0\u5df2\u5b8c\u6210\uff1a${readyCount}/${checks.length}`);
+        } catch (error) {
+            node.innerHTML = `<span class="warning">${Format.html(error.message)}</span>`;
+            setStatus(error.message);
+        }
+    },
+    showReportMigrationGuide() {
+        const root = els.migrationToolResult?.querySelector("[data-report-center]");
+        const node = root?.querySelector("[data-report-closure-result]");
+        if (!root || !node) {
+            return;
+        }
+        const guideItems = [
+            {
+                title: "\u62a5\u8868\u5165\u53e3",
+                detail: "\u5ba1\u6279\u6253\u5370\u3001\u5de5\u8d44\u540d\u518c\u3001\u5386\u53f2\u53f0\u8d26\u3001\u7edf\u8ba1\u548c\u6807\u51c6\u8868\u5df2\u7edf\u4e00\u7eb3\u5165\u62a5\u8868\u4e2d\u5fc3\u3002"
+            },
+            {
+                title: "\u6253\u5370\u6279\u6b21",
+                detail: "\u6279\u91cf\u5ba1\u6279\u8868\u6253\u5370\u4f1a\u751f\u6210\u6279\u6b21\uff0c\u652f\u6301\u67e5\u8be2\u3001\u91cd\u6253\u3001\u660e\u7ec6CSV\u3001\u672a\u5199\u5165/\u672a\u95ed\u73af\u9001\u961f\u5217\u3002"
+            },
+            {
+                title: "\u5f52\u6863\u53f0\u8d26",
+                detail: "\u5ba1\u6279\u8868\u5f52\u6863\u80fd\u8ffd\u5230\u4eba\u5458\u3001\u4e1a\u52a1\u3001\u6700\u8fd1\u6279\u6b21\u3001\u9a8c\u6536\u72b6\u6001\u548c\u5199\u5165\u51c6\u5907\u72b6\u6001\u3002"
+            },
+            {
+                title: "\u9a8c\u6536\u5305",
+                detail: "\u5355\u6279\u548c\u6279\u91cf\u9a8c\u6536\u5305\u5747\u5305\u542bREADME\u3001\u660e\u7ec6\u3001\u5ba1\u8ba1\u3001\u672a\u5199\u5165\u3001\u672a\u95ed\u73af\u3001\u963b\u65ad\u6e05\u5355\u548cmeta\u5143\u6570\u636e\u3002"
+            },
+            {
+                title: "\u81ea\u68c0\u9a8c\u6536",
+                detail: "\u6253\u5370\u81ea\u68c0\u6309\u5f52\u6863\u3001\u6279\u6b21\u3001\u9a8c\u6536\u5305\u3001\u7559\u75d5\u548c\u95ed\u73af\u98ce\u9669\u4e94\u9879\u51fa\u5177PASS/TODO\u7ed3\u679c\uff0c\u5e76\u53ef\u5bfc\u51faCSV\u9a8c\u6536\u5355\u3002"
+            },
+            {
+                title: "\u5ba1\u8ba1\u8ffd\u8e2a",
+                detail: "\u6253\u5370\u3001\u5bfc\u51fa\u3001\u9a8c\u6536\u5305\u3001\u81ea\u68c0\u9a8c\u6536\u5355\u5747\u8bb0\u5f55\u64cd\u4f5c\u7559\u75d5\uff0c\u53ef\u6309\u52a8\u4f5c\u3001\u5bf9\u8c61\u3001\u64cd\u4f5c\u4eba\u548c\u65f6\u95f4\u8ffd\u67e5\u3002"
+            }
+        ];
+        node.innerHTML = `
+            <div class="history-plan-summary batch-preview-summary">
+                <span>\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e</span>
+                <span>\u4ea4\u4ed8\u4e3b\u7ebf\uff1a\u5165\u53e3\u2192\u6253\u5370\u2192\u5f52\u6863\u2192\u9a8c\u6536\u2192\u7559\u75d5</span>
+            </div>
+            <div class="report-audit-list">
+                ${guideItems.map((item) => `
+                    <div class="report-audit-row">
+                        <strong>${Format.html(item.title)}</strong>
+                        <span>${Format.html(item.detail)}</span>
+                    </div>
+                `).join("")}
+                <div class="report-batch-actions">
+                    <button type="button" data-report-print-self-check>\u6253\u5370\u81ea\u68c0</button>
+                    <button type="button" data-report-print-self-check-export>\u5bfc\u51fa\u81ea\u68c0\u9a8c\u6536\u5355</button>
+                    <button type="button" data-report-closure-view>\u95ed\u73af\u603b\u89c8</button>
+                    <button type="button" data-report-catalog-export>\u5bfc\u51fa\u62a5\u8868\u76ee\u5f55</button>
+                    <button type="button" data-report-migration-matrix>\u8fc1\u79fb\u77e9\u9635</button>
+                    <button type="button" data-report-migration-matrix-export>\u5bfc\u51fa\u77e9\u9635</button>
+                    <button type="button" data-report-acceptance-checklist>\u9a8c\u6536\u6e05\u5355</button>
+                    <button type="button" data-report-acceptance-checklist-export>\u5bfc\u51fa\u9a8c\u6536\u6e05\u5355</button>
+                    <button type="button" data-report-sample-evidence>\u6837\u672c\u8bc1\u636e</button>
+                    <button type="button" data-report-sample-evidence-export>\u5bfc\u51fa\u6837\u672c\u8bc1\u636e</button>
+                    <button type="button" data-report-sample-comparison>\u6837\u672c\u5bf9\u7167</button>
+                    <button type="button" data-report-sample-comparison-export>\u5bfc\u51fa\u6837\u672c\u5bf9\u7167</button>
+                    <button type="button" data-report-migration-guide-export>\u5bfc\u51fa\u8fc1\u79fb\u8bf4\u660e</button>
+                    <button type="button" data-report-migration-delivery-package>\u5bfc\u51fa\u4ea4\u4ed8\u5305</button>
+                    <button type="button" data-report-batch-export-audits data-audit-action="report-migration-delivery-package">\u67e5\u770b\u4ea4\u4ed8\u5305\u5ba1\u8ba1</button>
+                </div>
+            </div>
+        `;
+        setStatus("\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u8bf4\u660e\u5df2\u751f\u6210");
+    },
+    async loadReportCatalog() {
+        if (!Permissions.has("SALARY_REPORT") && !Permissions.has("SALARY_EXPORT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u62a5\u8868\u6253\u5370\u76ee\u5f55...");
+        try {
+            const reports = await Api.request("/api/reports/catalog");
+            const migrated = (reports || []).filter((item) => item.migrationStatus === "\u5df2\u8fc1\u79fb");
+            const pending = (reports || []).length - migrated.length;
+            const currentDate = new Date();
+            const savedPrefs = WorkbenchPanel.reportCenterSavedPrefs();
+            const defaultYear = String(savedPrefs.year || currentDate.getFullYear());
+            const defaultMonth = String(savedPrefs.month || currentDate.getMonth() + 1);
+            const defaultYearFrom = String(savedPrefs.yearFrom || "2006");
+            const defaultYearTo = String(savedPrefs.yearTo || defaultYear);
+            const defaultKeyword = String(savedPrefs.keyword || (els.workbenchKeywordInput?.value || "").trim());
+            const defaultBusinessType = String(savedPrefs.businessType || els.workbenchChangeTypeSelect?.value || "");
+            const defaultPrintStatus = String(savedPrefs.printStatus || "ALL");
+            const defaultAcceptanceStatus = String(savedPrefs.acceptanceStatus || "ALL");
+            const defaultSampleReviewStatus = String(savedPrefs.sampleReviewStatus || "ALL");
+            const defaultAuditAction = String(savedPrefs.auditAction || "");
+            const defaultAuditOperator = String(savedPrefs.auditOperator || "");
+            const defaultAuditStart = String(savedPrefs.auditStart || "");
+            const defaultAuditEnd = String(savedPrefs.auditEnd || "");
+            const defaultOrgCode = String(savedPrefs.orgCode || orgCode || "");
+            const defaultPersonCode = String(savedPrefs.personCode || "");
+            const defaultSalaryColumns = String(savedPrefs.salaryColumns || "ZWGZSE2,JBGZSE2,JCGZ2,JXGZ");
+            const defaultTableName = String(savedPrefs.tableName || "bz06_jbt");
+            const defaultLimit = String(savedPrefs.limit || "1000");
+            const tableOption = (value, label) => `<option value="${Format.html(value)}" ${defaultTableName === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const printStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultPrintStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const acceptanceStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultAcceptanceStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const sampleReviewStatusOption = (value, label) => `<option value="${Format.html(value)}" ${defaultSampleReviewStatus === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const auditActionOption = (value, label) => `<option value="${Format.html(value)}" ${defaultAuditAction === value ? "selected" : ""}>${Format.html(label)}</option>`;
+            const actionButton = (kind, mode, label, requiresOrg = true) => `
+                <button type="button" class="link-button" data-report-action="${Format.html(kind)}" data-report-mode="${Format.html(mode)}" ${requiresOrg && !defaultOrgCode ? "disabled" : ""}>${Format.html(label)}</button>
+            `;
+            const actionGroup = (title, desc, buttons) => `
+                <section class="report-action-group">
+                    <header>
+                        <b>${title}</b>
+                        <span>${desc}</span>
+                    </header>
+                    <div class="report-action-buttons">${buttons}</div>
+                </section>
+            `;
+            const resolveCatalogPrintUrl = (url) => {
+                let resolved = String(url || "");
+                if (!resolved || resolved.includes("{caseNo}")) {
+                    return "";
+                }
+                const replacements = {
+                    "{orgCode}": defaultOrgCode,
+                    "{year}": defaultYear,
+                    "{month}": defaultMonth
+                };
+                Object.entries(replacements).forEach(([key, value]) => {
+                    resolved = resolved.replaceAll(key, encodeURIComponent(value || ""));
+                });
+                return resolved.includes("{") ? "" : resolved;
+            };
+            const catalogChip = (item, status) => {
+                const printUrl = status === "migrated" ? resolveCatalogPrintUrl(item.printUrl) : "";
+                const needsCaseNo = status === "migrated" && String(item.printUrl || "").includes("{caseNo}");
+                const printAction = printUrl
+                    ? `<button type="button" class="link-button report-catalog-print" data-report-print-url="${Format.html(printUrl)}">\u6253\u5370</button>`
+                    : (needsCaseNo ? `<small>\u9700\u4e1a\u52a1\u53f7</small>` : "");
+                return `
+                    <span class="report-catalog-chip ${Format.html(status)}" data-report-catalog-${Format.html(status)}>
+                        <span>${Format.html(item.title || item.code || "-")}</span>
+                        <small>${Format.html(item.legacyTemplate || item.code || "")} ${Format.html(item.migrationStatus || "")}</small>
+                        ${printAction}
+                    </span>
+                `;
+            };
+            const migratedCatalogRows = migrated.slice(0, 12).map((item) => catalogChip(item, "migrated")).join(" ");
+            const pendingCatalogRows = (reports || [])
+                .filter((item) => item.migrationStatus !== "\u5df2\u8fc1\u79fb")
+                .slice(0, 12)
+                .map((item) => catalogChip(item, "pending"))
+                .join(" ");
+            els.migrationToolResult.innerHTML = `
+                <div class="report-center" data-report-center>
+                    <div class="report-center-head">
+                        <div class="report-center-titlebar">
+                            <strong>\u62a5\u8868\u4e2d\u5fc3</strong>
+                            <span>\u5df2\u8fc1\u79fb ${Format.html(String(migrated.length))}</span>
+                            <span>\u5f85\u8fc1\u79fb ${Format.html(String(pending))}</span>
+                            <span class="report-center-pref-hint">${Object.keys(savedPrefs || {}).length ? "\u5df2\u5957\u7528\u4e0a\u6b21\u53c2\u6570" : "\u5df2\u7ee7\u627f\u5de5\u4f5c\u53f0\u53c2\u6570"}</span>
+                        </div>
+                        <div class="report-center-toolbar">
+                            <button type="button" class="link-button" data-report-migration-guide>\u8fc1\u79fb\u8bf4\u660e</button>
+                            <button type="button" class="link-button" data-report-migration-matrix>\u8fc1\u79fb\u77e9\u9635</button>
+                            <button type="button" class="link-button" data-report-acceptance-checklist>\u9a8c\u6536\u6e05\u5355</button>
+                            <button type="button" class="link-button" data-report-sample-evidence>\u6837\u672c\u8bc1\u636e</button>
+                            <button type="button" class="link-button" data-report-sample-comparison>\u6837\u672c\u5bf9\u7167</button>
+                            <button type="button" class="link-button" data-report-migration-delivery-package>\u4ea4\u4ed8\u5305</button>
+                            <button type="button" class="link-button" data-report-print-self-check>\u6253\u5370\u81ea\u68c0</button>
+                            <button type="button" class="link-button" data-report-closure-view>\u95ed\u73af\u603b\u89c8</button>
+                            <button type="button" class="link-button" data-report-closure-export>\u5bfc\u51fa\u95ed\u73afCSV</button>
+                            <button type="button" class="link-button" data-report-preview>\u9884\u89c8\u6570\u91cf</button>
+                            <button type="button" class="link-button" data-report-audit-view>\u67e5\u770b\u64cd\u4f5c\u8bb0\u5f55</button>
+                            <button type="button" class="link-button" data-report-archive-view>\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26</button>
+                            <button type="button" class="link-button" data-report-batch-view>\u6253\u5370\u6279\u6b21\u67e5\u8be2</button>
+                            <button type="button" class="link-button" data-report-archive-export>\u5bfc\u51fa\u5f52\u6863CSV</button>
+                            <button type="button" class="link-button" data-report-pref-clear>\u6e05\u9664\u8bb0\u5fc6</button>
+                        </div>
+                    </div>
+                    <div class="report-center-query">
+                        <div class="report-center-params">
+                            <label>\u5355\u4f4d<input name="orgCode" value="${Format.html(defaultOrgCode)}" placeholder="001"></label>
+                            <label>\u5e74\u5ea6<input name="year" type="number" min="1900" max="2099" value="${Format.html(defaultYear)}"></label>
+                            <label>\u6708\u4efd<input name="month" type="number" min="1" max="12" value="${Format.html(defaultMonth)}"></label>
+                            <label>\u8d77\u59cb\u5e74<input name="yearFrom" type="number" min="1900" max="2099" value="${Format.html(defaultYearFrom)}"></label>
+                            <label>\u622a\u6b62\u5e74<input name="yearTo" type="number" min="1900" max="2099" value="${Format.html(defaultYearTo)}"></label>
+                            <label>\u4eba\u5458\u7f16\u7801<input name="personCode" value="${Format.html(defaultPersonCode)}" placeholder="001-00001"></label>
+                            <label>\u4e1a\u52a1\u7c7b\u578b<input name="businessType" value="${Format.html(defaultBusinessType)}" placeholder="\u5168\u90e8"></label>
+                            <label>\u5173\u952e\u5b57<input name="keyword" value="${Format.html(defaultKeyword)}" placeholder="\u59d3\u540d/\u7f16\u53f7/\u52a8\u4f5c"></label>
+                            <label>\u5f52\u6863\u72b6\u6001<select name="printStatus">
+                                ${printStatusOption("ALL", "\u5168\u90e8")}
+                                ${printStatusOption("PRINTED", "\u5df2\u6253\u5370")}
+                                ${printStatusOption("UNPRINTED", "\u672a\u6253\u5370")}
+                                ${printStatusOption("REPRINTED", "\u5df2\u91cd\u6253")}
+                                ${printStatusOption("WRITE_READY", "\u53ef\u5199\u5165")}
+                                ${printStatusOption("WRITE_BLOCKED", "\u4e0d\u53ef\u5199\u5165")}
+                            </select></label>
+                            <label>\u9a8c\u6536\u72b6\u6001<select name="acceptanceStatus">
+                                ${acceptanceStatusOption("ALL", "\u5168\u90e8")}
+                                ${acceptanceStatusOption("PENDING", "\u672a\u9a8c\u6536")}
+                                ${acceptanceStatusOption("EXPORTED", "\u5df2\u9a8c\u6536")}
+                            </select></label>
+                            <label>\u6837\u672c\u590d\u6838<select name="sampleReviewStatus">
+                                ${sampleReviewStatusOption("ALL", "\u5168\u90e8")}
+                                ${sampleReviewStatusOption("PENDING_LEGACY", "\u5f85\u65e7\u7cfb\u7edf\u6838\u5bf9")}
+                                ${sampleReviewStatusOption("REVIEWED", "\u5df2\u590d\u6838")}
+                                ${sampleReviewStatusOption("MATCHED", "\u4e00\u81f4")}
+                                ${sampleReviewStatusOption("MISMATCHED", "\u4e0d\u4e00\u81f4")}
+                                ${sampleReviewStatusOption("SPECIAL", "\u7279\u6b8a")}
+                                ${sampleReviewStatusOption("IGNORED", "\u5ffd\u7565")}
+                            </select></label>
+                            <label>\u5ba1\u8ba1\u52a8\u4f5c<select name="auditAction">
+                                ${auditActionOption("", "\u5168\u90e8\u52a8\u4f5c")}
+                                ${auditActionOption("salary-case-approval-print", "\u6253\u5370\u5ba1\u6279\u8868")}
+                                ${auditActionOption("salary-case-approvals-print", "\u6279\u91cf\u6253\u5370\u5ba1\u6279\u8868")}
+                                ${auditActionOption("salary-case-approval-roster-print", "\u6253\u5370\u5ba1\u6279\u6e05\u518c")}
+                                ${auditActionOption("salary-history-print", "\u6253\u5370\u5386\u53f2\u660e\u7ec6")}
+                                ${auditActionOption("salary-history-csv", "\u5bfc\u51fa\u5386\u53f2\u660e\u7ec6")}
+                                ${auditActionOption("salary-change-ledger-print", "\u6253\u5370\u53d8\u52a8\u53f0\u8d26")}
+                                ${auditActionOption("salary-change-ledger-csv", "\u5bfc\u51fa\u53d8\u52a8\u53f0\u8d26")}
+                                ${auditActionOption("report-print-batch-acceptance-package", "\u5bfc\u51fa\u6279\u6b21\u9a8c\u6536\u5305")}
+                                ${auditActionOption("report-print-batch-acceptance-package-bulk", "\u6279\u91cf\u5bfc\u51fa\u9a8c\u6536\u5305")}
+                                ${auditActionOption("report-print-self-check-csv", "\u5bfc\u51fa\u6253\u5370\u81ea\u68c0\u9a8c\u6536\u5355")}
+                                ${auditActionOption("report-migration-sample-evidence-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u8bc1\u636e")}
+                                ${auditActionOption("report-migration-sample-comparison-csv", "\u5bfc\u51fa\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
+                                ${auditActionOption("report-migration-sample-comparison-review", "\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
+                                ${auditActionOption("report-migration-sample-comparison-batch-review", "\u6279\u91cf\u590d\u6838\u62a5\u8868\u6837\u672c\u5bf9\u7167")}
+                                ${auditActionOption("report-migration-delivery-package", "\u5bfc\u51fa\u6253\u5370\u8fc1\u79fb\u4ea4\u4ed8\u5305")}
+                                ${auditActionOption("salary-migration-delivery-package", "\u5bfc\u51fa\u5de5\u8d44\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305")}
+                            </select></label>
+                            <label>\u5ba1\u8ba1\u64cd\u4f5c\u4eba<input name="auditOperator" value="${Format.html(defaultAuditOperator)}" placeholder="\u64cd\u4f5c\u4eba"></label>
+                            <label>\u5ba1\u8ba1\u8d77\u59cb<input name="auditStart" type="datetime-local" value="${Format.html(defaultAuditStart)}"></label>
+                            <label>\u5ba1\u8ba1\u622a\u6b62<input name="auditEnd" type="datetime-local" value="${Format.html(defaultAuditEnd)}"></label>
+                            <label>\u5de5\u8d44\u5217<input name="salaryColumns" value="${Format.html(defaultSalaryColumns)}" placeholder="ZWGZSE2,JBGZSE2,JCGZ2,JXGZ"></label>
+                            <label>\u6807\u51c6\u8868<select name="tableName">
+                                ${tableOption("bz06_jbt", "\u6d25\u8865\u8d34")}
+                                ${tableOption("bz06_jbgz", "\u7ea7\u522b\u5de5\u8d44")}
+                                ${tableOption("bz06_djgz", "\u7b49\u7ea7\u5de5\u8d44")}
+                                ${tableOption("bz06_zwgz", "\u804c\u52a1\u5de5\u8d44")}
+                                ${tableOption("bz06_zzdz", "\u89c1\u4e60/\u8bd5\u7528\u671f")}
+                                ${tableOption("bz06_xjgz", "\u85aa\u7ea7\u5de5\u8d44")}
+                            </select></label>
+                            <label>\u6761\u6570<input name="limit" type="number" min="1" max="10000" value="${Format.html(defaultLimit)}"></label>
+                        </div>
+                        <div class="report-column-presets">
+                            <button type="button" class="link-button" data-report-column-preset="default">\u57fa\u672c\u5de5\u8d44\u5217</button>
+                            <button type="button" class="link-button" data-report-column-preset="allowance">\u6d25\u8865\u8d34\u5e38\u7528\u5217</button>
+                            <button type="button" class="link-button" data-report-column-preset="clear">\u56de\u5230\u56fa\u5b9a\u5217</button>
+                        </div>
+                    </div>
+                    <div class="report-center-results">
+                        <div class="report-preview-result" data-report-closure-result></div>
+                        <div class="report-preview-result" data-report-preview-result></div>
+                        <div class="report-audit-result" data-report-audit-result></div>
+                        <div class="report-audit-result" data-report-archive-result></div>
+                        <div class="report-audit-result" data-report-batch-result></div>
+                    </div>
+                    <div class="report-center-grid">
+                        ${actionGroup("\u5ba1\u6279\u6253\u5370", "\u5ba1\u6279\u6e05\u518c\u3001\u6279\u91cf\u5ba1\u6279\u8868\u548c\u5199\u5165\u524d\u5f52\u6863", `${actionButton("approvalRoster", "print", "\u6253\u5370\u5ba1\u6279\u6e05\u518c")}${actionButton("approvalRoster", "csv", "\u5bfc\u51fa\u5ba1\u6279\u6e05\u518cCSV")}${actionButton("approvalBatch", "print", "\u6279\u91cf\u6253\u5370\u5ba1\u6279\u8868")}`)}
+                        ${actionGroup("\u5de5\u8d44\u540d\u518c", "\u4eba\u5458\u82b1\u540d\u518c\u3001\u5de5\u8d44\u8868\u53ca\u81ea\u5b9a\u4e49\u5de5\u8d44\u5217", `${actionButton("personRoster", "print", "\u6253\u5370\u82b1\u540d\u518c")}${actionButton("personRoster", "csv", "\u5bfc\u51fa\u82b1\u540d\u518cCSV")}${actionButton("salaryRoster", "print", "\u6253\u5370\u5de5\u8d44\u8868")}${actionButton("salaryRoster", "csv", "\u5bfc\u51fa\u5de5\u8d44\u8868CSV")}`)}
+                        ${actionGroup("\u5386\u53f2\u548c\u53f0\u8d26", "\u5de5\u8d44\u53d8\u52a8\u53f0\u8d26\u3001\u4e2a\u4eba\u5386\u53f2\u660e\u7ec6\u548c\u8ffd\u6eaf", `${actionButton("changeLedger", "print", "\u6253\u5370\u53d8\u52a8\u53f0\u8d26")}${actionButton("changeLedger", "csv", "\u5bfc\u51fa\u53d8\u52a8\u53f0\u8d26CSV")}${actionButton("salaryHistory", "print", "\u6253\u5370\u5386\u53f2\u660e\u7ec6")}${actionButton("salaryHistory", "csv", "\u5bfc\u51fa\u5386\u53f2\u660e\u7ec6CSV")}`)}
+                        ${actionGroup("\u7edf\u8ba1/\u6807\u51c6/\u5ba1\u8ba1", "\u8003\u6838\u7edf\u8ba1\u3001\u6807\u51c6\u8868\u6838\u5bf9\u548c\u64cd\u4f5c\u5ba1\u8ba1", `${actionButton("assessment", "print", "\u6253\u5370\u8003\u6838\u7edf\u8ba1")}${actionButton("standardTable", "print", "\u6253\u5370\u6807\u51c6\u8868", false)}${actionButton("reportAudit", "csv", "\u5bfc\u51fa\u64cd\u4f5c\u5ba1\u8ba1CSV", false)}<button type="button" class="link-button" data-report-catalog-export>\u5bfc\u51fa\u62a5\u8868\u76ee\u5f55</button><button type="button" class="link-button" data-report-migration-matrix-export>\u5bfc\u51fa\u8fc1\u79fb\u77e9\u9635</button><button type="button" class="link-button" data-report-acceptance-checklist-export>\u5bfc\u51fa\u9a8c\u6536\u6e05\u5355</button><button type="button" class="link-button" data-report-sample-evidence-export>\u5bfc\u51fa\u6837\u672c\u8bc1\u636e</button><button type="button" class="link-button" data-report-sample-comparison-export>\u5bfc\u51fa\u6837\u672c\u5bf9\u7167</button>`)}
+                    </div>
+                    <div class="report-center-catalog" data-report-catalog-summary>
+                        <section class="report-catalog-section" data-report-catalog-migrated-section>
+                            <b>\u5df2\u8fc1\u79fb\u62a5\u8868\u76ee\u5f55</b>
+                            <div class="report-center-catalog-list">${migratedCatalogRows || `<span class="warning">\u6682\u65e0\u5df2\u8fc1\u79fb\u62a5\u8868</span>`}</div>
+                        </section>
+                        <section class="report-catalog-section" data-report-catalog-pending-section>
+                            <b>\u5f85\u8fc1\u79fb\u65e7\u6a21\u677f</b>
+                            <div class="report-center-catalog-list">${pendingCatalogRows || `<span class="warning">\u6682\u65e0\u5f85\u8fc1\u79fb\u65e7\u6a21\u677f</span>`}</div>
+                        </section>
+                    </div>
+                </div>
+            `;
+            setStatus("\u62a5\u8868\u6253\u5370\u76ee\u5f55\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async runMigrationRegressionSamples() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        els.migrationRegressionButton.disabled = true;
+        setStatus("\u6b63\u5728\u6267\u884c\u8fc1\u79fb\u56de\u5f52\u6837\u672c\u626b\u63cf...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-regression/run?${new URLSearchParams({ orgCode, limit: "100" }).toString()}`, {
+                method: "POST"
+            });
+            const samples = result.samples || [];
+            const warnSamples = samples.filter((sample) => sample.status === "WARN");
+            WorkbenchPanel.renderMigrationToolResult("\u8fc1\u79fb\u56de\u5f52\u6837\u672c", [
+                result.overallStatus || "-",
+                `\u6837\u672c\u7c7b ${result.sampleCount ?? samples.length}`,
+                `PASS ${result.passCount ?? 0}`,
+                `WARN ${result.warningCount ?? warnSamples.length}`,
+                warnSamples.length ? `\u7f3a\u53e3 ${warnSamples.map((sample) => sample.title || sample.code).slice(0, 4).join("、")}` : "\u6838\u5fc3\u6837\u672c\u5df2\u8986\u76d6"
+            ]);
+            if (samples.length && els.migrationToolResult) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <div class="audit-safety-row">
+                        ${samples.slice(0, 10).map((sample) => `
+                            <span>${Format.html(sample.title || sample.code)} ${Format.html(sample.status || "-")} ${sample.count ?? 0}</span>
+                        `).join("")}
+                    </div>
+                `);
+            }
+            setStatus(`\u8fc1\u79fb\u56de\u5f52\u6837\u672c\u626b\u63cf\u5b8c\u6210 ${result.overallStatus || "-"}`);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationRegressionButton.disabled = false;
+        }
+    },
+    async runMigrationRegressionLibrary(refresh = true) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        els.migrationRegressionLibraryButton.disabled = true;
+        setStatus("\u6b63\u5728\u5237\u65b0\u5e76\u590d\u6d4b\u56fa\u5b9a\u56de\u5f52\u6837\u672c...");
+        try {
+            const params = new URLSearchParams({ orgCode, limit: "100" }).toString();
+            const refreshed = refresh ? await Api.request(`/api/workbench/migration-regression/sample-library/refresh?${params}`, {
+                method: "POST"
+            }) : {};
+            const result = await Api.request(`/api/workbench/migration-regression/sample-library/run?${params}`, {
+                method: "POST"
+            });
+            const samples = result.samples || [];
+            const warnSamples = samples.filter((sample) => sample.status === "WARN");
+            WorkbenchPanel.renderMigrationToolResult("\u56fa\u5b9a\u56de\u5f52\u6837\u672c", [
+                result.overallStatus || "-",
+                refresh ? `\u5165\u5e93 ${refreshed.refreshedCount ?? 0}` : "\u4ec5\u590d\u6d4b",
+                refresh ? `\u5e93\u5185 ${refreshed.libraryCount ?? 0}` : `\u5e93\u5185 ${result.sampleCount ?? samples.length}`,
+                `\u590d\u6d4b ${result.sampleCount ?? samples.length}`,
+                `WARN ${result.warningCount ?? warnSamples.length}`,
+                warnSamples.length ? `\u5f02\u5e38 ${warnSamples.map((sample) => sample.personCode || sample.sampleId).slice(0, 4).join("、")}` : "\u56fa\u5b9a\u6837\u672c\u53ef\u5b9a\u4f4d"
+            ]);
+            if (samples.length && els.migrationToolResult) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    ${WorkbenchPanel.renderMigrationRegressionManualForm()}
+                    ${await WorkbenchPanel.renderMigrationRegressionLibraryList(orgCode)}
+                    <div class="audit-safety-row">
+                        ${samples.slice(0, 12).map((sample) => `
+                            <span>${Format.html(sample.personCode || "-")} ${Format.html(sample.title || sample.code)} ${Format.html(sample.status || "-")}</span>
+                        `).join("")}
+                    </div>
+                    ${WorkbenchPanel.renderMigrationRegressionDiffs(warnSamples)}
+                `);
+            }
+            setStatus(`\u56fa\u5b9a\u56de\u5f52\u6837\u672c\u590d\u6d4b\u5b8c\u6210 ${result.overallStatus || "-"}`);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationRegressionLibraryButton.disabled = false;
+        }
+    },
+    migrationRegressionValue(value) {
+        const text = String(value ?? "").trim();
+        return text.length > 160 ? `${text.slice(0, 160)}...` : (text || "-");
+    },
+    migrationRegressionDiffFields(sample) {
+        return [
+            {
+                label: "\u72b6\u6001",
+                expected: sample.expectedStatus,
+                actual: sample.actualStatus
+            },
+            {
+                label: "\u91d1\u989d",
+                expected: sample.expectedAmount,
+                actual: sample.actualAmount
+            },
+            {
+                label: "\u6458\u8981",
+                expected: sample.expectedPayload,
+                actual: sample.actualPayload
+            }
+        ].filter((field) => String(field.expected ?? "") !== String(field.actual ?? ""));
+    },
+    renderMigrationRegressionDiffs(samples = []) {
+        if (!samples.length) {
+            return "";
+        }
+        return `
+            <div class="migration-regression-diffs">
+                ${samples.slice(0, 8).map((sample) => {
+                    const fields = WorkbenchPanel.migrationRegressionDiffFields(sample);
+                    const reviewStatus = String(sample.reviewStatus || "PENDING").trim() || "PENDING";
+                    return `
+                        <div class="migration-regression-diff" data-review-status="${Format.html(reviewStatus)}">
+                            <strong>${Format.html(sample.personCode || "-")} ${Format.html(sample.personName || "")}</strong>
+                            <span>${Format.html(sample.title || sample.code || "-")} | ${Format.html(sample.sampleId || "-")} | ${Format.html(sample.message || "-")}</span>
+                            <span>${Format.html(reviewStatus)} ${sample.reviewCategory ? `| ${Format.html(sample.reviewCategory)}` : ""}${sample.retestStatus ? ` | ${Format.html(sample.retestStatus)}` : ""}</span>
+                            <button type="button"
+                                    class="link-button"
+                                    data-regression-sample-enabled="false"
+                                    data-regression-sample-code="${Format.html(sample.code || "")}"
+                                    data-regression-sample-id="${Format.html(sample.sampleId || "")}"
+                                    data-regression-sample-person="${Format.html(sample.personCode || "")}">\u7981\u7528\u6837\u672c</button>
+                            ${sample.runNo ? `
+                                <button type="button"
+                                        class="link-button"
+                                        data-regression-governance-task
+                                        data-regression-run-no="${Format.html(sample.runNo || "")}"
+                                        data-regression-sample-code="${Format.html(sample.code || "")}"
+                                        data-regression-sample-id="${Format.html(sample.sampleId || "")}"
+                                        data-regression-sample-person="${Format.html(sample.personCode || "")}">${sample.governanceWorkItemId ? "\u5df2\u8f6c\u6cbb\u7406" : "\u8f6c\u6cbb\u7406\u4efb\u52a1"}</button>
+                            ` : ""}
+                            ${fields.length ? fields.map((field) => `
+                                <small>
+                                    <b>${Format.html(field.label)}</b>
+                                    <em>E ${Format.html(WorkbenchPanel.migrationRegressionValue(field.expected))}</em>
+                                    <em>A ${Format.html(WorkbenchPanel.migrationRegressionValue(field.actual))}</em>
+                                </small>
+                            `).join("") : `<small><b>\u5b9a\u4f4d</b><em>${Format.html(sample.message || "-")}</em></small>`}
+                            ${sample.runNo ? `
+                                <form class="migration-regression-review-form" data-regression-review-form>
+                                    <input type="hidden" name="runNo" value="${Format.html(sample.runNo || "")}" />
+                                    <input type="hidden" name="sampleCode" value="${Format.html(sample.code || "")}" />
+                                    <input type="hidden" name="sampleId" value="${Format.html(sample.sampleId || "")}" />
+                                    <input type="hidden" name="personCode" value="${Format.html(sample.personCode || "")}" />
+                                    <select name="reviewCategory" aria-label="\u5f52\u56e0">
+                                        <option value="">\u5f85\u5224\u65ad</option>
+                                        <option value="BASE_CHANGED">\u57fa\u7840\u4fe1\u606f\u53d8\u5316</option>
+                                        <option value="BASE_MISSING">\u57fa\u7840\u4fe1\u606f\u7f3a\u5931</option>
+                                        <option value="POLICY_DIFF">\u653f\u7b56\u53d6\u503c\u5dee\u5f02</option>
+                                        <option value="HISTORY_SPECIAL">\u5386\u53f2\u7279\u6b8a\u5904\u7406</option>
+                                        <option value="NEED_FIX">\u9700\u4fee\u590d</option>
+                                    </select>
+                                    <select name="reviewStatus" aria-label="\u72b6\u6001">
+                                        <option value="REVIEWED">\u5df2\u6838\u67e5</option>
+                                        <option value="PENDING">\u5f85\u6838\u67e5</option>
+                                        <option value="FIXING">\u4fee\u590d\u4e2d</option>
+                                        <option value="DEFERRED">\u6682\u7f13</option>
+                                    </select>
+                                    <input name="reviewNote" placeholder="\u8bf4\u660e" />
+                                    <button type="submit">\u6807\u8bb0</button>
+                                </form>
+                            ` : ""}
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    },
+    renderMigrationRegressionReviewSummary(summary = {}) {
+        const items = [
+            ["", "\u5168\u90e8", summary.warnCount ?? 0],
+            ["PENDING", "\u5f85\u6838\u67e5", summary.pendingCount ?? 0],
+            ["REVIEWED", "\u5df2\u6838\u67e5", summary.reviewedCount ?? 0],
+            ["FIXING", "\u4fee\u590d\u4e2d", summary.fixingCount ?? 0],
+            ["DEFERRED", "\u6682\u7f13", summary.deferredCount ?? 0]
+        ];
+        return `
+            <div class="migration-regression-review-summary">
+                ${items.map(([status, label, count]) => `
+                    <button type="button" data-regression-review-filter="${Format.html(status)}">
+                        <strong>${Format.html(count)}</strong>
+                        <span>${Format.html(label)}</span>
+                    </button>
+                `).join("")}
+            </div>
+        `;
+    },
+    filterMigrationRegressionReview(button) {
+        const box = button.closest(".migration-regression-run-detail");
+        if (!box) {
+            return;
+        }
+        const status = button.dataset.regressionReviewFilter || "";
+        box.querySelectorAll("[data-regression-review-filter]").forEach((item) => {
+            item.classList.toggle("active", item === button);
+        });
+        box.querySelectorAll(".migration-regression-diff").forEach((item) => {
+            const itemStatus = item.dataset.reviewStatus || "PENDING";
+            item.hidden = Boolean(status) && itemStatus !== status;
+        });
+        setStatus(status ? `\u5df2\u7b5b\u9009 ${status}` : "\u5df2\u663e\u793a\u5168\u90e8\u56de\u5f52\u5dee\u5f02");
+    },
+    renderMigrationRegressionManualForm() {
+        return `
+            <form class="migration-regression-manual" data-regression-sample-manual-form>
+                <select name="sampleCode" aria-label="\u6837\u672c\u7c7b\u578b">
+                    <option value="normal-grade">\u6b63\u5e38\u664b\u6863</option>
+                    <option value="entry-salary">\u65b0\u8fdb\u5de5\u8d44</option>
+                    <option value="post-change">\u804c\u52a1\u53d8\u52a8</option>
+                    <option value="allowance-change">\u6d25\u8865\u8d34</option>
+                    <option value="history-write-preview">\u5386\u53f2\u9884\u89c8</option>
+                    <option value="history-write-executed">\u5386\u53f2\u5199\u5165</option>
+                    <option value="history-write-rollback">\u5386\u53f2\u56de\u6eda</option>
+                    <option value="history-diff-review">\u5dee\u5f02\u6838\u67e5</option>
+                    <option value="report-print">\u62a5\u8868\u6253\u5370</option>
+                    <option value="data-governance">\u6570\u636e\u6cbb\u7406</option>
+                </select>
+                <input name="sampleId" placeholder="\u6837\u672c\u7f16\u53f7/\u5355\u53f7" />
+                <input name="personCode" placeholder="\u4eba\u5458\u7f16\u7801" />
+                <input name="title" placeholder="\u6807\u9898(\u53ef\u9009)" />
+                <button type="submit">\u52a0\u5165\u6837\u672c</button>
+            </form>
+        `;
+    },
+    async renderMigrationRegressionLibraryList(orgCode, filters = {}) {
+        const params = new URLSearchParams({
+            orgCode,
+            sampleCode: filters.sampleCode || "",
+            enabled: filters.enabled || "",
+            keyword: filters.keyword || "",
+            batchNo: filters.batchNo || "",
+            limit: "20"
+        });
+        const rows = await Api.request(`/api/workbench/migration-regression/sample-library?${params.toString()}`);
+        return `
+            <div class="migration-regression-library">
+                <form class="migration-regression-library-filter" data-regression-sample-filter-form>
+                    <select name="sampleCode" aria-label="\u6837\u672c\u7c7b\u578b">
+                        <option value="">\u5168\u90e8\u7c7b\u578b</option>
+                        ${[
+                            ["normal-grade", "\u6b63\u5e38\u664b\u6863"],
+                            ["entry-salary", "\u65b0\u8fdb\u5de5\u8d44"],
+                            ["post-change", "\u804c\u52a1\u53d8\u52a8"],
+                            ["allowance-change", "\u6d25\u8865\u8d34"],
+                            ["history-write-preview", "\u5386\u53f2\u9884\u89c8"],
+                            ["history-write-executed", "\u5386\u53f2\u5199\u5165"],
+                            ["report-print", "\u62a5\u8868\u6253\u5370"],
+                            ["data-governance", "\u6570\u636e\u6cbb\u7406"]
+                        ].map(([value, label]) => `<option value="${Format.html(value)}" ${filters.sampleCode === value ? "selected" : ""}>${Format.html(label)}</option>`).join("")}
+                    </select>
+                    <select name="enabled" aria-label="\u542f\u7528\u72b6\u6001">
+                        <option value="" ${!filters.enabled ? "selected" : ""}>\u5168\u90e8\u72b6\u6001</option>
+                        <option value="true" ${filters.enabled === "true" ? "selected" : ""}>\u542f\u7528</option>
+                        <option value="false" ${filters.enabled === "false" ? "selected" : ""}>\u7981\u7528</option>
+                    </select>
+                    <input name="keyword" value="${Format.html(filters.keyword || "")}" placeholder="\u4eba\u5458/\u6837\u672c\u7f16\u53f7" />
+                    <input name="batchNo" value="${Format.html(filters.batchNo || "")}" placeholder="\u6279\u6b21\u53f7" />
+                    <button type="submit">\u67e5\u770b\u6837\u672c\u5e93</button>
+                    <button type="button" data-regression-sample-run-batch>\u8fd0\u884c\u6279\u6b21</button>
+                    <button type="button" data-regression-sample-run-history>\u8fd0\u884c\u5386\u53f2</button>
+                    <button type="button" data-regression-sample-export>\u5bfc\u51fa</button>
+                    <label class="link-button regression-import-label">
+                        \u5bfc\u5165
+                        <input type="file" accept=".csv,text/csv" data-regression-sample-import hidden />
+                    </label>
+                </form>
+                <div class="migration-regression-library-list">
+                    ${rows.length ? rows.map((row) => `
+                        <div class="migration-regression-library-row">
+                            <strong>${Format.html(row.personCode || "-")} ${Format.html(row.personName || "")}</strong>
+                            <span>${Format.html(row.sampleCode || "-")} | ${Format.html(row.sampleId || "-")} | ${Format.html(row.batchNo || "-")} | ${row.enabled ? "\u542f\u7528" : "\u7981\u7528"}</span>
+                            <small>${Format.html(row.sampleTitle || "-")} | ${Format.html(row.expectedStatus || "-")} | ${Format.html(WorkbenchPanel.migrationRegressionValue(row.expectedAmount))} | ${Format.html(row.lastRunStatus || "\u672a\u8fd0\u884c")}</small>
+                            <button type="button"
+                                    class="link-button"
+                                    data-regression-sample-enabled="${row.enabled ? "false" : "true"}"
+                                    data-regression-sample-code="${Format.html(row.sampleCode || "")}"
+                                    data-regression-sample-id="${Format.html(row.sampleId || "")}"
+                                    data-regression-sample-person="${Format.html(row.personCode || "")}">${row.enabled ? "\u7981\u7528" : "\u542f\u7528"}</button>
+                        </div>
+                    `).join("") : `<div class="loading compact">\u6682\u65e0\u6837\u672c</div>`}
+                </div>
+            </div>
+        `;
+    },
+    async filterMigrationRegressionLibrary(form) {
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const data = new FormData(form);
+        const html = await WorkbenchPanel.renderMigrationRegressionLibraryList(orgCode, {
+            sampleCode: String(data.get("sampleCode") || ""),
+            enabled: String(data.get("enabled") || ""),
+            keyword: String(data.get("keyword") || "").trim(),
+            batchNo: String(data.get("batchNo") || "").trim()
+        });
+        const box = form.closest(".migration-regression-library");
+        if (box) {
+            box.outerHTML = html;
+        }
+        setStatus("\u56fa\u5b9a\u6837\u672c\u5e93\u5df2\u5237\u65b0");
+    },
+    migrationRegressionFilterParams(form) {
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const data = new FormData(form);
+        return new URLSearchParams({
+            orgCode,
+            sampleCode: String(data.get("sampleCode") || ""),
+            enabled: String(data.get("enabled") || ""),
+            keyword: String(data.get("keyword") || "").trim(),
+            batchNo: String(data.get("batchNo") || "").trim(),
+            limit: "500"
+        });
+    },
+    async runMigrationRegressionLibraryBatch(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const form = button.closest("form[data-regression-sample-filter-form]");
+        if (!form) {
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const data = new FormData(form);
+        const batchNo = String(data.get("batchNo") || "").trim();
+        if (!orgCode || !batchNo) {
+            setStatus("\u8bf7\u5148\u586b\u5199\u8981\u8fd0\u884c\u7684\u6279\u6b21\u53f7");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u6309\u6279\u6b21\u590d\u6d4b\u56fa\u5b9a\u6837\u672c...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-regression/sample-library/run?${new URLSearchParams({ orgCode, batchNo, limit: "500" }).toString()}`, {
+                method: "POST"
+            });
+            const html = await WorkbenchPanel.renderMigrationRegressionLibraryList(orgCode, {
+                sampleCode: String(data.get("sampleCode") || ""),
+                enabled: String(data.get("enabled") || ""),
+                keyword: String(data.get("keyword") || "").trim(),
+                batchNo
+            });
+            const box = form.closest(".migration-regression-library");
+            if (box) {
+                box.outerHTML = html;
+            }
+            setStatus(`\u6279\u6b21 ${batchNo} \u590d\u6d4b\u5b8c\u6210 ${result.overallStatus || "-"}\uff0cWARN ${result.warningCount ?? 0}`);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async loadMigrationRegressionRunHistory(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const form = button.closest("form[data-regression-sample-filter-form]");
+        if (!form) {
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const data = new FormData(form);
+        const batchNo = String(data.get("batchNo") || "").trim();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u56fa\u5b9a\u6837\u672c\u8fd0\u884c\u5386\u53f2...");
+        try {
+            const runs = await Api.request(`/api/workbench/migration-regression/sample-library/runs?${new URLSearchParams({ orgCode, batchNo, limit: "10" }).toString()}`);
+            const panel = `
+                <div class="migration-regression-run-history">
+                    <div class="section-title">\u56fa\u5b9a\u6837\u672c\u8fd0\u884c\u5386\u53f2</div>
+                    ${runs.length ? runs.map((run) => `
+                        <button type="button" class="migration-regression-run-row" data-regression-run-no="${Format.html(run.runNo || "")}">
+                            <strong>${Format.html(run.runNo || "-")}</strong>
+                            <span>${Format.html(run.batchNo || "\u5168\u90e8\u6279\u6b21")} | ${Format.html(run.overallStatus || "-")} | \u6837\u672c ${Format.html(run.sampleCount ?? 0)} | WARN ${Format.html(run.warningCount ?? 0)}</span>
+                            <small>${Format.html(run.checkedAt || run.createdAt || "-")}</small>
+                        </button>
+                    `).join("") : `<div class="loading compact">\u6682\u65e0\u8fd0\u884c\u5386\u53f2</div>`}
+                </div>
+            `;
+            const box = form.closest(".migration-regression-library");
+            if (box) {
+                box.querySelector(".migration-regression-run-history")?.remove();
+                box.insertAdjacentHTML("beforeend", panel);
+            }
+            setStatus("\u56fa\u5b9a\u6837\u672c\u8fd0\u884c\u5386\u53f2\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async loadMigrationRegressionDashboard() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        els.migrationRegressionDashboardButton.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u56de\u5f52\u95ed\u73af\u770b\u677f...");
+        try {
+            const dashboard = await Api.request(`/api/workbench/migration-regression/sample-library/dashboard?${new URLSearchParams({ orgCode, limit: "10" }).toString()}`);
+            const summary = dashboard.summary || {};
+            WorkbenchPanel.renderMigrationToolResult("\u56de\u5f52\u6279\u6b21\u95ed\u73af\u770b\u677f", [
+                `\u8fd0\u884c ${summary.runCount ?? 0}`,
+                `\u6837\u672c ${summary.sampleCount ?? 0}`,
+                `WARN ${summary.warningCount ?? 0}`,
+                `\u5f85\u6838\u67e5 ${summary.pendingCount ?? 0}`,
+                `\u4fee\u590d\u4e2d ${summary.fixingCount ?? 0}`,
+                `\u590d\u6d4b\u901a\u8fc7 ${summary.retestResolvedCount ?? 0}`
+            ]);
+            const runs = dashboard.runs || [];
+            if (els.migrationToolResult) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <div class="migration-regression-dashboard">
+                        <div class="migration-regression-review-summary">
+                            <button type="button"><strong>${Format.html(summary.pendingCount ?? 0)}</strong><span>\u5f85\u6838\u67e5</span></button>
+                            <button type="button"><strong>${Format.html(summary.reviewedCount ?? 0)}</strong><span>\u5df2\u6838\u67e5</span></button>
+                            <button type="button"><strong>${Format.html(summary.fixingCount ?? 0)}</strong><span>\u4fee\u590d\u4e2d</span></button>
+                            <button type="button"><strong>${Format.html(summary.deferredCount ?? 0)}</strong><span>\u6682\u7f13</span></button>
+                            <button type="button"><strong>${Format.html(summary.retestFoundCount ?? 0)}</strong><span>\u590d\u6d4b\u672a\u901a\u8fc7</span></button>
+                            <button type="button"><strong>${Format.html(summary.retestResolvedCount ?? 0)}</strong><span>\u590d\u6d4b\u901a\u8fc7</span></button>
+                        </div>
+                        <div class="migration-regression-run-history">
+                            ${runs.length ? runs.map((run) => `
+                                <button type="button" class="migration-regression-run-row" data-regression-run-no="${Format.html(run.runNo || "")}">
+                                    <strong>${Format.html(run.runNo || "-")}</strong>
+                                    <span>${Format.html(run.batchNo || "\u5168\u90e8\u6279\u6b21")} | ${Format.html(run.overallStatus || "-")} | WARN ${Format.html(run.warningCount ?? 0)} | \u5f85\u6838\u67e5 ${Format.html(run.reviewSummary?.pendingCount ?? 0)} | \u4fee\u590d\u4e2d ${Format.html(run.reviewSummary?.fixingCount ?? 0)}</span>
+                                    <small>${Format.html(run.checkedAt || run.createdAt || "-")}</small>
+                                </button>
+                            `).join("") : `<div class="loading compact">\u6682\u65e0\u56de\u5f52\u8fd0\u884c\u8bb0\u5f55</div>`}
+                        </div>
+                    </div>
+                `);
+            }
+            setStatus("\u56de\u5f52\u6279\u6b21\u95ed\u73af\u770b\u677f\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationRegressionDashboardButton.disabled = false;
+        }
+    },
+    async loadMigrationQualityOverview() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        els.migrationQualityOverviewButton.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u8fc1\u79fb\u8d28\u91cf\u603b\u89c8...");
+        try {
+            const overview = await Api.request(`/api/workbench/migration-quality-overview?${new URLSearchParams({ orgCode }).toString()}`);
+            const archivedSnapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode, limit: "3", archivedOnly: "true" }).toString()}`);
+            const latestSnapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode, limit: "1" }).toString()}`);
+            const summary = overview.summary || {};
+            const archiveSummary = overview.archiveSummary || {};
+            const canExportAcceptancePackage = Permissions.has("SALARY_ACCEPTANCE") && Permissions.has("SALARY_EXPORT");
+            const guidance = WorkbenchPanel.migrationAcceptanceGuidance(summary, archiveSummary);
+            const progress = WorkbenchPanel.migrationAcceptanceProgress(summary, archiveSummary);
+            const archiveState = WorkbenchPanel.migrationAcceptanceArchiveState(summary, archivedSnapshots || [], latestSnapshots || []);
+            const latestSnapshotNo = (latestSnapshots || [])[0]?.snapshotNo || "";
+            const exportedPackageSnapshot = {
+                snapshotNo: archiveSummary.latestExportSnapshotNo || archiveSummary.latestArchivedSnapshotNo || "",
+                orgCode,
+                overview
+            };
+            const exportedPackageFiles = archiveSummary.latestExportNo
+                ? WorkbenchPanel.migrationQualityAcceptancePackageFiles(exportedPackageSnapshot, latestSnapshotNo)
+                : [];
+            WorkbenchPanel.renderMigrationToolResult("\u8fc1\u79fb\u8d28\u91cf\u603b\u89c8", [
+                overview.status || "-",
+                `\u5f85\u529e ${summary.salaryTodo ?? 0}`,
+                `\u5df2\u529e ${summary.salaryDone ?? 0}`,
+                `\u6cbb\u7406 ${summary.governanceIssues ?? 0}`,
+                `\u56de\u5f52WARN ${summary.regressionWarnings ?? 0}`,
+                `\u5386\u53f2\u963b\u65ad ${summary.historyBlocked ?? 0}`
+            ]);
+            const gates = overview.gates || [];
+            const runs = overview.regression?.runs || [];
+            if (els.migrationToolResult) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <div class="migration-quality-overview">
+                        <div class="migration-acceptance-workspace">
+                            <div class="migration-acceptance-workspace-head">
+                                <strong>\u8fc1\u79fb\u9a8c\u6536\u5de5\u4f5c\u533a</strong>
+                                <span>\u6309\u5de1\u68c0\u3001\u5904\u7406\u98ce\u9669\u3001\u5f52\u6863\u62a5\u544a\u3001\u5bfc\u51fa\u9a8c\u6536\u5305\u7684\u95ed\u73af\u63a8\u8fdb</span>
+                            </div>
+                            <div class="migration-acceptance-progress">
+                                <div class="migration-acceptance-progress-head">
+                                    <strong>\u5b8c\u6210\u5ea6 ${Format.html(progress.percent)}%</strong>
+                                    <span>${Format.html(progress.done)} / ${Format.html(progress.total)} \u9879\u5df2\u5b8c\u6210</span>
+                                </div>
+                                <div class="migration-acceptance-progress-bar"><span style="width: ${Format.html(progress.percent)}%"></span></div>
+                                <div class="migration-acceptance-progress-steps">
+                                    ${progress.steps.map((step) => `
+                                        <button type="button" class="${step.done ? "done" : "pending"}" data-quality-progress-action="${Format.html(step.action || "")}">${Format.html(step.label)}</button>
+                                    `).join("")}
+                                </div>
+                            </div>
+                            ${archiveState.level !== "NONE" ? `
+                                <div class="migration-acceptance-archive-state ${Format.html(archiveState.level.toLowerCase())}">
+                                    <strong>${Format.html(archiveState.title)}</strong>
+                                    <span>${Format.html(archiveState.message)}</span>
+                                    <div>
+                                        ${archiveState.level === "STALE" ? `<button type="button" data-quality-preflight-run>\u91cd\u65b0\u5de1\u68c0</button>` : ""}
+                                        ${archiveState.compareBase && archiveState.compareTarget ? `<button type="button" data-quality-snapshot-compare-base="${Format.html(archiveState.compareBase)}" data-quality-snapshot-compare-target="${Format.html(archiveState.compareTarget)}">\u5bf9\u6bd4\u6700\u65b0\u5feb\u7167</button>` : ""}
+                                        <button type="button" data-quality-snapshot-archive-list>\u5f52\u6863\u53f0\u8d26</button>
+                                    </div>
+                                </div>
+                            ` : ""}
+                            <div class="migration-archive-summary">
+                                <div class="section-title">
+                                    <span>\u7559\u6863\u95ed\u73af</span>
+                                    ${canExportAcceptancePackage && archiveSummary.latestArchivedSnapshotNo ? `<button type="button" data-quality-acceptance-package="${Format.html(archiveSummary.latestArchivedSnapshotNo)}" data-refresh-quality-overview-after-export="true">\u5bfc\u51fa\u6700\u8fd1\u9a8c\u6536\u5305</button>` : ""}
+                                    ${archiveSummary.latestExportSnapshotNo ? `<button type="button" data-quality-snapshot-report="${Format.html(archiveSummary.latestExportSnapshotNo)}" data-open-audits="true" data-audit-action="migration-quality-acceptance-package-export" data-from-archive-ledger="true" data-limit="3">\u67e5\u770b\u6700\u8fd1\u5bfc\u51fa\u5ba1\u8ba1</button>` : ""}
+                                    <button type="button" data-quality-snapshot-archive-list>\u5f52\u6863\u53f0\u8d26</button>
+                                </div>
+                                <div class="migration-archive-summary-grid">
+                                    <span><b>\u95ed\u73af\u72b6\u6001</b>${archiveSummary.latestExportNo ? "\u5df2\u5b8c\u6210" : "\u5f85\u5bfc\u51fa\u9a8c\u6536\u5305"}</span>
+                                    <span><b>\u5df2\u5f52\u6863</b>${Format.html(archiveSummary.archivedCount ?? 0)}</span>
+                                    <span><b>\u6700\u8fd1\u5f52\u6863</b>${Format.html(archiveSummary.latestArchivedSnapshotNo || "-")}<small>${Format.html(archiveSummary.latestArchivedAt || "")}</small></span>
+                                    <span><b>\u6700\u8fd1\u5bfc\u51fa</b>${Format.html(archiveSummary.latestExportSnapshotNo || "-")}<small>${archiveSummary.latestExportNo ? `v${Format.html(archiveSummary.latestExportNo)}` : "-"} ${Format.html(archiveSummary.latestExportedAt || "")}</small></span>
+                                    <span><b>\u5bfc\u51fa\u4eba</b>${Format.html(archiveSummary.latestExportedBy || "-")}</span>
+                                </div>
+                            </div>
+                            ${archiveSummary.latestExportNo ? `
+                                <div class="migration-final-acceptance-summary">
+                                    <div class="section-title">
+                                        <span>\u6700\u7ec8\u9a8c\u6536\u6458\u8981</span>
+                                        <button type="button" data-quality-final-summary-export data-org-code="${Format.html(orgCode)}">\u5bfc\u51fa\u6458\u8981</button>
+                                        <button type="button" data-quality-final-summary-print data-org-code="${Format.html(orgCode)}">\u6253\u5370\u6458\u8981</button>
+                                        <button type="button" data-quality-snapshot-report="${Format.html(archiveSummary.latestExportSnapshotNo || archiveSummary.latestArchivedSnapshotNo || "")}" data-open-audits="true" data-audit-action="migration-quality-acceptance-package-export" data-from-archive-ledger="true" data-limit="3">\u67e5\u770b\u5bfc\u51fa\u5ba1\u8ba1</button>
+                                    </div>
+                                    <div class="migration-final-acceptance-grid">
+                                        <span><b>\u8d28\u91cf\u72b6\u6001</b>${Format.html(overview.status || "-")}</span>
+                                        <span><b>\u5f52\u6863\u5feb\u7167</b>${Format.html(archiveSummary.latestArchivedSnapshotNo || "-")}<small>${Format.html(archiveSummary.latestArchivedAt || "")}</small></span>
+                                        <span><b>\u9a8c\u6536\u5305</b>${Format.html(archiveSummary.latestExportSnapshotNo || "-")}<small>v${Format.html(archiveSummary.latestExportNo || "-")} ${Format.html(archiveSummary.latestExportedAt || "")}</small></span>
+                                        <span><b>\u5bfc\u51fa\u4eba</b>${Format.html(archiveSummary.latestExportedBy || "-")}</span>
+                                        <span><b>\u5386\u53f2\u963b\u65ad</b>${Format.html(summary.historyBlocked ?? 0)}</span>
+                                        <span><b>\u56de\u5f52WARN</b>${Format.html(summary.regressionWarnings ?? 0)}</span>
+                                        <span><b>\u5f85\u590d\u6838</b>${Format.html(summary.reviewPending ?? 0)}</span>
+                                        <span><b>\u6570\u636e\u6cbb\u7406</b>${Format.html(summary.governanceIssues ?? 0)}</span>
+                                        <span><b>\u7559\u6863\u7ed3\u8bba</b>${progress.percent === 100 ? "\u95ed\u73af\u5b8c\u6210" : "\u4ecd\u6709\u5f85\u5904\u7406\u9879"}</span>
+                                    </div>
+                                    <div class="migration-quality-package-files">
+                                        <div class="section-title">
+                                            <span>\u9a8c\u6536\u5305\u6587\u4ef6\u6e05\u5355</span>
+                                            <small>v${Format.html(archiveSummary.latestExportNo || "-")} | ${Format.html(exportedPackageFiles.length)} \u4e2a\u6587\u4ef6 | ${Format.html(archiveSummary.latestExportedAt || "-")}</small>
+                                        </div>
+                                        ${exportedPackageFiles.map((file) => `
+                                            <span>
+                                                <b>${Format.html(WorkbenchPanel.migrationQualityAcceptancePackageFileLabel(file))}</b>
+                                                <small>${Format.html(file)}</small>
+                                            </span>
+                                        `).join("")}
+                                    </div>
+                                    <div class="migration-quality-package-files">
+                                        <div class="section-title">
+                                            <span>\u6700\u8fd1\u5bfc\u51fa\u5ba1\u8ba1</span>
+                                            <button type="button" data-quality-snapshot-report="${Format.html(archiveSummary.latestExportSnapshotNo || "")}" data-open-audits="true" data-audit-action="migration-quality-acceptance-package-export" data-from-archive-ledger="true" data-limit="3">\u67e5\u770b\u5b8c\u6574\u8bb0\u5f55</button>
+                                        </div>
+                                        <span><b>\u7248\u672c</b><small>v${Format.html(archiveSummary.latestExportNo || "-")} | ${Format.html(archiveSummary.latestExportSnapshotNo || "-")}</small></span>
+                                        <span><b>\u6587\u4ef6\u6570</b><small>${Format.html(archiveSummary.latestExportFileCount ?? exportedPackageFiles.length)} \u4e2a</small></span>
+                                        <span><b>\u5dee\u5f02\u5bf9\u6bd4</b><small>${archiveSummary.latestExportHasComparison ? "\u5df2\u9644\u5e26\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4" : "\u672a\u9644\u5e26\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4"}</small></span>
+                                        <span><b>\u64cd\u4f5c\u4eba</b><small>${Format.html(archiveSummary.latestExportedBy || "-")} | ${Format.html(archiveSummary.latestExportedAt || "-")}</small></span>
+                                        <span><b>\u7559\u75d5\u6458\u8981</b><small>${Format.html(archiveSummary.latestExportSummary || "-")}</small></span>
+                                    </div>
+                                    ${archiveSummary.latestPreviewPendingExport ? `
+                                        <div class="migration-quality-package-files">
+                                            <div class="section-title">
+                                                <span>\u9884\u68c0\u540e\u5c1a\u672a\u5bfc\u51fa</span>
+                                                <button type="button" data-quality-acceptance-package="${Format.html(archiveSummary.latestPreviewSnapshotNo || archiveSummary.latestExportSnapshotNo || "")}" data-refresh-quality-overview-after-export="true">\u7ee7\u7eed\u786e\u8ba4\u4e0b\u8f7d</button>
+                                            </div>
+                                            <span><b>\u9884\u68c0\u7248\u672c</b><small>v${Format.html(archiveSummary.latestPreviewExportNo || "-")} | ${Format.html(archiveSummary.latestPreviewSnapshotNo || "-")}</small></span>
+                                            <span><b>\u6587\u4ef6\u6570</b><small>${Format.html(archiveSummary.latestPreviewFileCount ?? "-")} \u4e2a</small></span>
+                                            <span><b>\u5dee\u5f02\u5bf9\u6bd4</b><small>${archiveSummary.latestPreviewHasComparison ? "\u5c06\u9644\u5e26\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4" : "\u4e0d\u9644\u5e26\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4"}</small></span>
+                                            <span><b>\u9884\u68c0\u4eba</b><small>${Format.html(archiveSummary.latestPreviewedBy || "-")} | ${Format.html(archiveSummary.latestPreviewedAt || "-")}</small></span>
+                                            <span><b>\u7559\u75d5\u6458\u8981</b><small>${Format.html(archiveSummary.latestPreviewSummary || "-")}</small></span>
+                                        </div>
+                                    ` : ""}
+                                </div>
+                            ` : ""}
+                            <div class="migration-acceptance-workspace-metrics">
+                                ${[
+                                    ["\u5f85\u529e", summary.salaryTodo],
+                                    ["\u5df2\u529e", summary.salaryDone],
+                                    ["\u6570\u636e\u6cbb\u7406", summary.governanceIssues],
+                                    ["\u56de\u5f52WARN", summary.regressionWarnings],
+                                    ["\u5386\u53f2\u963b\u65ad", summary.historyBlocked],
+                                    ["\u5f85\u590d\u6838", summary.reviewPending]
+                                ].map(([label, value]) => `<span><b>${Format.html(label)}</b>${Format.html(value ?? 0)}</span>`).join("")}
+                            </div>
+                            <div class="migration-acceptance-workspace-actions">
+                                <button type="button" data-quality-overview-refresh>\u5237\u65b0\u5de5\u4f5c\u533a</button>
+                                <button type="button" data-quality-preflight-run>\u4e00\u952e\u5de1\u68c0</button>
+                                <button type="button" data-quality-snapshot-create>\u4fdd\u5b58\u5feb\u7167</button>
+                                <button type="button" data-quality-snapshot-list>\u6700\u8fd1\u5feb\u7167</button>
+                                <button type="button" data-quality-snapshot-archive-list>\u5f52\u6863\u53f0\u8d26</button>
+                            </div>
+                            <div class="migration-acceptance-guidance">
+                                <div class="section-title">\u4e0b\u4e00\u6b65\u5efa\u8bae</div>
+                                ${guidance.map((item, index) => `
+                                    <div class="migration-acceptance-guidance-row ${index === 0 ? "primary" : ""}">
+                                        <strong>${Format.html(item.title)}</strong>
+                                        <span>${Format.html(item.message)}</span>
+                                        ${item.acceptancePackageSnapshot ? `<button type="button" data-quality-acceptance-package="${Format.html(item.acceptancePackageSnapshot)}" data-refresh-quality-overview-after-export="true">${Format.html(item.button)}</button>` : (item.action ? `<button type="button" data-quality-delta-action="${Format.html(item.action)}">${Format.html(item.button)}</button>` : "")}
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                        <div class="migration-quality-archive-strip">
+                            <div class="section-title">\u6700\u8fd1\u5f52\u6863\u62a5\u544a</div>
+                            ${(archivedSnapshots || []).length ? archivedSnapshots.map((snapshot) => `
+                                <div class="migration-quality-archive-strip-row">
+                                    <strong>${Format.html(snapshot.snapshotNo || "-")}</strong>
+                                    <span>${Format.html(snapshot.preflightTitle || snapshot.status || "-")} | ${Format.html(snapshot.archivedAt || "-")} | ${Format.html(snapshot.archivedBy || "-")}</span>
+                                    <button type="button" data-quality-snapshot-report="${Format.html(snapshot.snapshotNo || "")}" data-from-archive-ledger="true" data-limit="3">\u9501\u5b9a\u62a5\u544a</button>
+                                    ${canExportAcceptancePackage ? `<button type="button" data-quality-acceptance-package="${Format.html(snapshot.snapshotNo || "")}">\u9a8c\u6536\u5305</button>` : ""}
+                                </div>
+                            `).join("") : `<div class="loading compact">\u6682\u65e0\u5f52\u6863\u62a5\u544a</div>`}
+                        </div>
+                        <div class="migration-quality-gates">
+                            ${gates.map((gate) => `
+                                <button type="button" class="migration-quality-gate ${gate.status === "PASS" ? "pass" : "warn"}" data-quality-gate="${Format.html(gate.code || "")}">
+                                    <strong>${Format.html(gate.title || gate.code || "-")}</strong>
+                                    <span>${Format.html(gate.status || "-")} | ${Format.html(gate.count ?? 0)}</span>
+                                    <small>${Format.html(gate.message || "")}</small>
+                                </button>
+                            `).join("")}
+                        </div>
+                        <div class="migration-regression-run-history">
+                            <div class="section-title">\u6700\u8fd1\u56de\u5f52\u6279\u6b21</div>
+                            ${runs.length ? runs.map((run) => `
+                                <button type="button" class="migration-regression-run-row" data-regression-run-no="${Format.html(run.runNo || "")}">
+                                    <strong>${Format.html(run.runNo || "-")}</strong>
+                                    <span>${Format.html(run.batchNo || "\u5168\u90e8\u6279\u6b21")} | ${Format.html(run.overallStatus || "-")} | WARN ${Format.html(run.warningCount ?? 0)} | \u5f85\u6838\u67e5 ${Format.html(run.reviewSummary?.pendingCount ?? 0)}</span>
+                                    <small>${Format.html(run.checkedAt || run.createdAt || "-")}</small>
+                                </button>
+                            `).join("") : `<div class="loading compact">\u6682\u65e0\u56de\u5f52\u8fd0\u884c\u8bb0\u5f55</div>`}
+                        </div>
+                    </div>
+                `);
+            }
+            setStatus("\u8fc1\u79fb\u8d28\u91cf\u603b\u89c8\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationQualityOverviewButton.disabled = false;
+        }
+    },
+    migrationAcceptanceProgress(summary = {}, archiveSummary = {}) {
+        const steps = [
+            { label: "\u5386\u53f2\u5199\u5165\u65e0\u963b\u65ad", done: Number(summary.historyBlocked || 0) === 0, action: "history-write" },
+            { label: "\u56de\u5f52\u65e0 WARN", done: Number(summary.regressionWarnings || 0) === 0, action: "regression" },
+            { label: "\u9a8c\u6536\u65e0\u5f85\u590d\u6838", done: Number(summary.reviewPending || 0) === 0, action: "acceptance" },
+            { label: "\u6570\u636e\u6cbb\u7406\u5df2\u6e05\u7406", done: Number(summary.governanceIssues || 0) === 0, action: "governance" },
+            { label: "\u5df2\u5f52\u6863\u5e76\u5bfc\u51fa\u9a8c\u6536\u5305", done: Number(archiveSummary.archivedCount || 0) > 0 && Boolean(archiveSummary.latestExportNo) && !archiveSummary.latestPreviewPendingExport, action: "archive-ledger" }
+        ];
+        const done = steps.filter((step) => step.done).length;
+        return {
+            steps,
+            done,
+            total: steps.length,
+            percent: Math.round((done / steps.length) * 100)
+        };
+    },
+    migrationAcceptanceArchiveState(summary = {}, archivedSnapshots = [], latestSnapshots = []) {
+        if (!archivedSnapshots.length) {
+            return {
+                level: "NONE",
+                title: "\u5c1a\u672a\u5f52\u6863",
+                message: "\u5c1a\u65e0\u9501\u5b9a\u7684\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u3002"
+            };
+        }
+        const riskCount = Number(summary.historyBlocked || 0)
+            + Number(summary.regressionWarnings || 0)
+            + Number(summary.reviewPending || 0)
+            + Number(summary.governanceIssues || 0);
+        const latest = archivedSnapshots[0] || {};
+        const latestSnapshot = latestSnapshots[0] || {};
+        const compareBase = latest.snapshotNo || "";
+        const compareTarget = latestSnapshot.snapshotNo && latestSnapshot.snapshotNo !== compareBase ? latestSnapshot.snapshotNo : "";
+        if (riskCount > 0) {
+            return {
+                level: "STALE",
+                title: "\u5df2\u6709\u5f52\u6863\uff0c\u4f46\u5f53\u524d\u4ecd\u6709\u5f85\u5904\u7406\u9879",
+                message: `\u6700\u8fd1\u5f52\u6863 ${latest.snapshotNo || "-"} ${latest.archivedAt || ""}\uff0c\u5f53\u524d\u4ecd\u6709 ${riskCount} \u9879\u98ce\u9669/\u5f85\u5904\u7406\u9879\uff0c\u5efa\u8bae\u5904\u7406\u540e\u91cd\u65b0\u5de1\u68c0\u5e76\u5f52\u6863\u65b0\u62a5\u544a\u3002`,
+                compareBase,
+                compareTarget
+            };
+        }
+        return {
+            level: "CURRENT",
+            title: "\u5f52\u6863\u62a5\u544a\u4e0e\u5f53\u524d\u72b6\u6001\u5339\u914d",
+            message: `\u6700\u8fd1\u5f52\u6863 ${latest.snapshotNo || "-"} ${latest.archivedAt || ""}\uff0c\u5f53\u524d\u672a\u89c1\u9a8c\u6536\u963b\u65ad\u9879\u3002`,
+            compareBase,
+            compareTarget
+        };
+    },
+    migrationAcceptanceGuidance(summary = {}, archiveSummary = {}) {
+        const guidance = [];
+        if (archiveSummary.latestPreviewPendingExport) {
+            guidance.push({
+                title: "\u7ee7\u7eed\u786e\u8ba4\u9a8c\u6536\u5305\u4e0b\u8f7d",
+                message: `\u6700\u8fd1\u9884\u68c0 v${archiveSummary.latestPreviewExportNo || "-"} \u5c1a\u672a\u5b8c\u6210\u5bfc\u51fa\uff0c\u5171 ${archiveSummary.latestPreviewFileCount ?? "-"} \u4e2a\u6587\u4ef6\uff0c\u8bf7\u786e\u8ba4\u4e0b\u8f7d\u540e\u5b8c\u6210\u7559\u6863\u3002`,
+                acceptancePackageSnapshot: archiveSummary.latestPreviewSnapshotNo || archiveSummary.latestArchivedSnapshotNo || archiveSummary.latestExportSnapshotNo || "",
+                button: "\u7ee7\u7eed\u4e0b\u8f7d"
+            });
+        }
+        if ((summary.historyBlocked ?? 0) > 0) {
+            guidance.push({
+                title: "\u4f18\u5148\u5904\u7406\u5386\u53f2\u5199\u5165\u963b\u65ad",
+                message: `\u5f53\u524d\u6709 ${summary.historyBlocked ?? 0} \u9879\u5199\u5165\u963b\u65ad\uff0c\u5148\u5904\u7406\u540e\u518d\u6267\u884c\u4e0a\u7ebf\u5de1\u68c0\u3002`,
+                action: "history-write",
+                button: "\u6253\u5f00\u5199\u5165\u961f\u5217"
+            });
+        }
+        if ((summary.regressionWarnings ?? 0) > 0) {
+            guidance.push({
+                title: "\u590d\u6838\u56de\u5f52 WARN",
+                message: `\u56de\u5f52\u6279\u6b21\u8fd8\u6709 ${summary.regressionWarnings ?? 0} \u9879 WARN\uff0c\u9700\u786e\u8ba4\u662f\u5426\u4e3a\u57fa\u7840\u6570\u636e\u6216\u89c4\u5219\u95ee\u9898\u3002`,
+                action: "regression",
+                button: "\u6253\u5f00\u56de\u5f52\u770b\u677f"
+            });
+        }
+        if ((summary.reviewPending ?? 0) > 0) {
+            guidance.push({
+                title: "\u6e05\u7406\u5f85\u590d\u6838\u95ee\u9898",
+                message: `\u8fd8\u6709 ${summary.reviewPending ?? 0} \u9879\u9a8c\u6536\u95ee\u9898\u5f85\u590d\u6838\uff0c\u5efa\u8bae\u5148\u5f62\u6210\u6838\u67e5\u7ed3\u8bba\u3002`,
+                action: "acceptance",
+                button: "\u6253\u5f00\u9a8c\u6536\u5386\u53f2"
+            });
+        }
+        if ((summary.governanceIssues ?? 0) > 0) {
+            guidance.push({
+                title: "\u5904\u7406\u6570\u636e\u6cbb\u7406\u4efb\u52a1",
+                message: `\u68c0\u51fa ${summary.governanceIssues ?? 0} \u9879\u6570\u636e\u6cbb\u7406\u95ee\u9898\uff0c\u4e0d\u5c5e\u786c\u963b\u65ad\u7684\u53ef\u5206\u6279\u6838\u67e5\u3002`,
+                action: "governance",
+                button: "\u6253\u5f00\u6cbb\u7406\u626b\u63cf"
+            });
+        }
+        if (!guidance.length && Number(archiveSummary.archivedCount || 0) === 0) {
+            guidance.push({
+                title: "\u53ef\u8fdb\u5165\u5f52\u6863\u7559\u75d5",
+                message: "\u672a\u89c1\u5f53\u524d\u963b\u65ad\u9879\uff0c\u53ef\u6267\u884c\u4e00\u952e\u5de1\u68c0\u5e76\u5f52\u6863\u9501\u5b9a\u62a5\u544a\u3002",
+                action: "archive-ledger",
+                button: "\u6253\u5f00\u5f52\u6863\u53f0\u8d26"
+            });
+        }
+        if (!guidance.length && !archiveSummary.latestExportNo) {
+            guidance.push({
+                title: "\u5bfc\u51fa\u9a8c\u6536\u5305\u5b8c\u6210\u7559\u6863",
+                message: `\u5df2\u6709 ${archiveSummary.archivedCount ?? 0} \u4efd\u5f52\u6863\u62a5\u544a\uff0c\u4f46\u5c1a\u672a\u5bfc\u51fa\u9a8c\u6536\u5305\uff0c\u8bf7\u5bfc\u51fa\u6700\u8fd1\u5f52\u6863\u62a5\u544a\u7684\u9a8c\u6536\u5305\u3002`,
+                action: "archive-ledger",
+                button: "\u6253\u5f00\u5f52\u6863\u53f0\u8d26"
+            });
+        }
+        if (!guidance.length) {
+            guidance.push({
+                title: "\u7559\u6863\u95ed\u73af\u5df2\u5b8c\u6210",
+                message: `\u6700\u8fd1\u9a8c\u6536\u5305\u5df2\u5bfc\u51fa v${archiveSummary.latestExportNo || "-"}\uff0c\u53ef\u8fdb\u5165\u5f52\u6863\u53f0\u8d26\u590d\u6838\u5ba1\u8ba1\u8bb0\u5f55\u3002`,
+                action: "archive-ledger",
+                button: "\u67e5\u770b\u5f52\u6863\u53f0\u8d26"
+            });
+        }
+        return guidance.slice(0, 4);
+    },
+    async createMigrationQualitySnapshot(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u4fdd\u5b58\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167...");
+        try {
+            const snapshot = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode }).toString()}`, { method: "POST" });
+            WorkbenchPanel.renderMigrationQualitySnapshots([snapshot], "\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167\u5df2\u4fdd\u5b58");
+            setStatus(`\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167\u5df2\u4fdd\u5b58 ${snapshot.snapshotNo || ""}`);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async runMigrationPreflight() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        els.migrationPreflightButton.disabled = true;
+        setStatus("\u6b63\u5728\u6267\u884c\u4e0a\u7ebf\u524d\u4e00\u952e\u5de1\u68c0...");
+        try {
+            const snapshot = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode }).toString()}`, { method: "POST" });
+            const summary = snapshot.summary || {};
+            WorkbenchPanel.renderMigrationToolResult("\u4e0a\u7ebf\u524d\u4e00\u952e\u5de1\u68c0", [
+                snapshot.status || "-",
+                `\u5feb\u7167 ${snapshot.snapshotNo || "-"}`,
+                `\u6cbb\u7406 ${summary.governanceIssues ?? 0}`,
+                `\u56de\u5f52WARN ${summary.regressionWarnings ?? 0}`,
+                `\u5386\u53f2\u963b\u65ad ${summary.historyBlocked ?? 0}`,
+                `\u5f85\u590d\u6838 ${summary.reviewPending ?? 0}`
+            ]);
+            const snapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode, limit: "2" }).toString()}`);
+            WorkbenchPanel.renderMigrationQualitySnapshots(snapshots || [snapshot], "\u672c\u6b21\u5de1\u68c0\u5feb\u7167");
+            if ((snapshots || []).length >= 2) {
+                const comparison = await Api.request(`/api/workbench/migration-quality-overview/snapshots/compare?${new URLSearchParams({
+                    baseSnapshotNo: snapshots[1].snapshotNo || "",
+                    targetSnapshotNo: snapshots[0].snapshotNo || ""
+                }).toString()}`);
+                WorkbenchPanel.renderMigrationQualityComparison(comparison);
+                const compareSummary = comparison.summary || {};
+                WorkbenchPanel.renderMigrationPreflightDecision(snapshot, comparison);
+                setStatus(`\u4e0a\u7ebf\u5de1\u68c0\u5b8c\u6210\uff1a\u98ce\u9669\u4e0a\u5347 ${compareSummary.increased ?? 0}\uff0c\u4e0b\u964d ${compareSummary.decreased ?? 0}`);
+            } else {
+                WorkbenchPanel.renderMigrationPreflightDecision(snapshot, null);
+                setStatus("\u4e0a\u7ebf\u5de1\u68c0\u5b8c\u6210\uff1a\u5df2\u4fdd\u5b58\u9996\u6b21\u5feb\u7167");
+            }
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationPreflightButton.disabled = false;
+        }
+    },
+    migrationPreflightDecision(snapshot = {}, comparison = null) {
+        if (snapshot.decision?.level) {
+            return snapshot.decision;
+        }
+        const summary = snapshot.summary || {};
+        const compareSummary = comparison?.summary || {};
+        const blocking = [];
+        const warnings = [];
+        if ((summary.historyBlocked ?? 0) > 0) {
+            blocking.push({ label: "\u5386\u53f2\u5199\u5165\u963b\u65ad", count: summary.historyBlocked, action: "history-write" });
+        }
+        if ((summary.regressionWarnings ?? 0) > 0) {
+            blocking.push({ label: "\u56de\u5f52WARN", count: summary.regressionWarnings, action: "regression" });
+        }
+        if ((summary.governanceIssues ?? 0) > 0) {
+            warnings.push({ label: "\u6570\u636e\u6cbb\u7406\u95ee\u9898", count: summary.governanceIssues, action: "governance" });
+        }
+        if ((summary.reviewPending ?? 0) > 0) {
+            warnings.push({ label: "\u5f85\u590d\u6838", count: summary.reviewPending, action: "acceptance" });
+        }
+        if ((compareSummary.increased ?? 0) > 0) {
+            warnings.push({ label: "\u5bf9\u6bd4\u4e0a\u6b21\u98ce\u9669\u4e0a\u5347", count: compareSummary.increased, action: "" });
+        }
+        const level = blocking.length ? "BLOCKED" : (warnings.length ? "WARN" : "READY");
+        const title = level === "BLOCKED" ? "\u4e0d\u5efa\u8bae\u4e0a\u7ebf" : (level === "WARN" ? "\u9700\u5904\u7406\u540e\u4e0a\u7ebf" : "\u53ef\u4e0a\u7ebf");
+        const message = level === "BLOCKED"
+            ? "\u5b58\u5728\u963b\u65ad\u9879\uff0c\u5efa\u8bae\u5148\u5904\u7406\u5e76\u91cd\u65b0\u5de1\u68c0\u3002"
+            : (level === "WARN" ? "\u672a\u89c1\u786c\u963b\u65ad\uff0c\u4f46\u5efa\u8bae\u5904\u7406\u98ce\u9669\u9879\u540e\u518d\u4e0a\u7ebf\u3002" : "\u672a\u53d1\u73b0\u963b\u65ad\u6216\u4e0a\u5347\u98ce\u9669\u3002");
+        return { level, title, message, items: [...blocking, ...warnings] };
+    },
+    renderMigrationPreflightDecision(snapshot = {}, comparison = null) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const decision = WorkbenchPanel.migrationPreflightDecision(snapshot, comparison);
+        els.migrationToolResult.querySelector(".migration-preflight-decision")?.remove();
+        els.migrationToolResult.insertAdjacentHTML("afterbegin", `
+            <div class="migration-preflight-decision ${decision.level.toLowerCase()}">
+                <strong>${Format.html(decision.title)}</strong>
+                <span>${Format.html(decision.message)}</span>
+                <div class="audit-safety-row">
+                    ${decision.items.length ? decision.items.map((item) => `
+                        ${item.action ? `<button type="button" data-quality-delta-action="${Format.html(item.action)}">${Format.html(item.label)} ${Format.html(item.count ?? 0)}</button>` : `<span>${Format.html(item.label)} ${Format.html(item.count ?? 0)}</span>`}
+                    `).join("") : `<span>\u65e0\u963b\u65ad\u9879</span>`}
+                </div>
+            </div>
+        `);
+    },
+    async loadMigrationQualitySnapshots(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167...");
+        try {
+            const snapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode, limit: "10" }).toString()}`);
+            WorkbenchPanel.renderMigrationQualitySnapshots(snapshots || [], "\u6700\u8fd1\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167", { archivedOnly: false, limit: 10 });
+            setStatus("\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async loadMigrationQualityArchiveLedger(button, filters = {}) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u5de1\u68c0\u62a5\u544a\u5f52\u6863\u53f0\u8d26...");
+        try {
+            const params = WorkbenchPanel.migrationQualityLedgerParams(orgCode, { ...filters, limit: filters.limit || "50", archivedOnly: true });
+            const snapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${params.toString()}`);
+            const latestSnapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${new URLSearchParams({ orgCode, limit: "1" }).toString()}`);
+            WorkbenchPanel.renderMigrationQualitySnapshots(snapshots || [], "\u5de1\u68c0\u62a5\u544a\u5f52\u6863\u53f0\u8d26", { archivedOnly: true, limit: filters.limit || 50, filters, latestSnapshotNo: latestSnapshots?.[0]?.snapshotNo || "" });
+            setStatus("\u5de1\u68c0\u62a5\u544a\u5f52\u6863\u53f0\u8d26\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    migrationQualityLedgerParams(orgCode, options = {}) {
+        const archivedOnly = options.archivedOnly === true || options.archivedOnly === "true";
+        const params = new URLSearchParams({
+            orgCode,
+            limit: String(options.limit || 50),
+            archivedOnly: archivedOnly ? "true" : "false"
+        });
+        ["preflightLevel", "archivedBy", "archivedFrom", "archivedTo"].forEach((key) => {
+            const value = String(options[key] || "").trim();
+            if (value) {
+                params.set(key, value);
+            }
+        });
+        return params;
+    },
+    migrationQualityArchiveFilterValues(form) {
+        const data = new FormData(form);
+        return {
+            preflightLevel: String(data.get("preflightLevel") || "").trim(),
+            archivedBy: String(data.get("archivedBy") || "").trim(),
+            archivedFrom: String(data.get("archivedFrom") || "").trim(),
+            archivedTo: String(data.get("archivedTo") || "").trim(),
+            limit: String(data.get("limit") || "50").trim() || "50"
+        };
+    },
+    async filterMigrationQualityArchiveLedger(form) {
+        const button = form.querySelector("button[type='submit']");
+        if (button) {
+            await WorkbenchPanel.loadMigrationQualityArchiveLedger(button, WorkbenchPanel.migrationQualityArchiveFilterValues(form));
+        }
+    },
+    renderMigrationQualitySnapshots(snapshots = [], title = "\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167", options = {}) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const archivedOnly = options.archivedOnly ? "true" : "false";
+        const limit = String(options.limit || 50);
+        const filters = options.filters || {};
+        const latestSnapshotNo = options.latestSnapshotNo || "";
+        els.migrationToolResult.querySelector(".migration-quality-snapshots")?.remove();
+        els.migrationToolResult.insertAdjacentHTML("beforeend", `
+            <div class="migration-quality-snapshots">
+                <div class="section-title">
+                    <span>${Format.html(title)}</span>
+                    <button type="button" data-quality-snapshot-ledger-export data-archived-only="${archivedOnly}" data-limit="${Format.html(limit)}" data-preflight-level="${Format.html(filters.preflightLevel || "")}" data-archived-by="${Format.html(filters.archivedBy || "")}" data-archived-from="${Format.html(filters.archivedFrom || "")}" data-archived-to="${Format.html(filters.archivedTo || "")}">\u5bfc\u51fa\u53f0\u8d26</button>
+                </div>
+                ${options.archivedOnly ? `
+                    <form class="migration-quality-ledger-filter" data-quality-archive-filter-form>
+                        <select name="preflightLevel" aria-label="\u5de1\u68c0\u7ed3\u8bba">
+                            <option value="" ${!filters.preflightLevel ? "selected" : ""}>\u5168\u90e8\u7ed3\u8bba</option>
+                            <option value="READY" ${filters.preflightLevel === "READY" ? "selected" : ""}>\u53ef\u4e0a\u7ebf</option>
+                            <option value="WARN" ${filters.preflightLevel === "WARN" ? "selected" : ""}>\u9700\u5173\u6ce8</option>
+                            <option value="BLOCKED" ${filters.preflightLevel === "BLOCKED" ? "selected" : ""}>\u963b\u65ad</option>
+                        </select>
+                        <input name="archivedBy" type="search" value="${Format.html(filters.archivedBy || "")}" placeholder="\u5f52\u6863\u4eba">
+                        <input name="archivedFrom" type="date" value="${Format.html(filters.archivedFrom || "")}" aria-label="\u5f52\u6863\u8d77\u59cb\u65e5\u671f">
+                        <input name="archivedTo" type="date" value="${Format.html(filters.archivedTo || "")}" aria-label="\u5f52\u6863\u622a\u6b62\u65e5\u671f">
+                        <input name="limit" type="number" min="1" max="100" value="${Format.html(limit)}" aria-label="\u6761\u6570">
+                        <button type="submit">\u67e5\u8be2</button>
+                        <button type="button" data-quality-archive-filter-reset>\u91cd\u7f6e</button>
+                    </form>
+                ` : ""}
+                ${snapshots.length ? snapshots.map((snapshot, index) => {
+                    const summary = snapshot.summary || {};
+                    const snapshotNo = snapshot.snapshotNo || "";
+                    const previousSnapshotNo = snapshots[index + 1]?.snapshotNo || "";
+                    const superseded = options.archivedOnly && latestSnapshotNo && latestSnapshotNo !== snapshotNo;
+                    const archiveFreshness = options.archivedOnly ? (superseded ? "\u5df2\u88ab\u65b0\u5feb\u7167\u8d85\u8d8a" : "\u5f53\u524d\u5f52\u6863") : "";
+                    return `
+                        <div class="migration-quality-snapshot-row">
+                            <strong>${Format.html(snapshotNo || "-")}</strong>
+                            <span>${Format.html(snapshot.preflightTitle || snapshot.status || "-")} | ${Format.html(snapshot.archiveStatus === "ARCHIVED" ? "\u5df2\u5f52\u6863" : "\u672a\u5f52\u6863")}${archiveFreshness ? ` | ${Format.html(archiveFreshness)}` : ""} | \u6cbb\u7406 ${Format.html(snapshot.governanceIssues ?? summary.governanceIssues ?? 0)} | \u56de\u5f52WARN ${Format.html(snapshot.regressionWarnings ?? summary.regressionWarnings ?? 0)} | \u5386\u53f2\u963b\u65ad ${Format.html(snapshot.historyBlocked ?? summary.historyBlocked ?? 0)}</span>
+                            <small>${Format.html(snapshot.checkedAt || snapshot.createdAt || "-")} | ${Format.html(snapshot.createdBy || "-")}</small>
+                            ${previousSnapshotNo ? `<button type="button" data-quality-snapshot-compare-base="${Format.html(previousSnapshotNo)}" data-quality-snapshot-compare-target="${Format.html(snapshotNo)}">\u5bf9\u6bd4\u4e0a\u6b21</button>` : ""}
+                            ${superseded ? `<button type="button" data-quality-snapshot-compare-base="${Format.html(snapshotNo)}" data-quality-snapshot-compare-target="${Format.html(latestSnapshotNo)}">\u5bf9\u6bd4\u6700\u65b0</button>` : ""}
+                            <button type="button" data-quality-snapshot-report="${Format.html(snapshotNo)}" data-from-archive-ledger="${archivedOnly}" data-preflight-level="${Format.html(filters.preflightLevel || "")}" data-archived-by="${Format.html(filters.archivedBy || "")}" data-archived-from="${Format.html(filters.archivedFrom || "")}" data-archived-to="${Format.html(filters.archivedTo || "")}" data-limit="${Format.html(limit)}">\u62a5\u544a</button>
+                            ${options.archivedOnly ? `<button type="button" data-quality-snapshot-report="${Format.html(snapshotNo)}" data-open-audits="true" data-from-archive-ledger="true" data-preflight-level="${Format.html(filters.preflightLevel || "")}" data-archived-by="${Format.html(filters.archivedBy || "")}" data-archived-from="${Format.html(filters.archivedFrom || "")}" data-archived-to="${Format.html(filters.archivedTo || "")}" data-limit="${Format.html(limit)}">\u5ba1\u8ba1</button>` : ""}
+                            <button type="button" data-quality-snapshot-export="${Format.html(snapshotNo)}">\u5bfc\u51fa</button>
+                        </div>
+                    `;
+                }).join("") : `<div class="loading compact">\u6682\u65e0\u8d28\u91cf\u5feb\u7167</div>`}
+            </div>
+        `);
+    },
+    async compareMigrationQualitySnapshots(button) {
+        const baseSnapshotNo = button.dataset.qualitySnapshotCompareBase || "";
+        const targetSnapshotNo = button.dataset.qualitySnapshotCompareTarget || "";
+        if (!baseSnapshotNo || !targetSnapshotNo) {
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u5bf9\u6bd4\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167...");
+        try {
+            const comparison = await Api.request(`/api/workbench/migration-quality-overview/snapshots/compare?${new URLSearchParams({ baseSnapshotNo, targetSnapshotNo }).toString()}`);
+            WorkbenchPanel.renderMigrationQualityComparison(comparison);
+            setStatus("\u8fc1\u79fb\u8d28\u91cf\u5feb\u7167\u5bf9\u6bd4\u5b8c\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async openMigrationQualityReport(snapshotNo, options = {}) {
+        if (!snapshotNo) {
+            return;
+        }
+        setStatus("\u6b63\u5728\u6253\u5f00\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a...");
+        try {
+            const snapshot = await Api.request(`/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}`);
+            const orgCode = snapshot.orgCode || snapshot.overview?.orgCode || WorkbenchPanel.selectedOrgCode();
+            let latestSnapshotNo = "";
+            if (orgCode) {
+                try {
+                    const latestSnapshots = await Api.request(`/api/workbench/migration-quality-overview/snapshots?${WorkbenchPanel.migrationQualityLedgerParams(orgCode, { limit: 1 })}`);
+                    latestSnapshotNo = latestSnapshots?.[0]?.snapshotNo || "";
+                } catch (error) {
+                    latestSnapshotNo = "";
+                }
+            }
+            WorkbenchPanel.renderMigrationQualityReport(snapshot, { ...options, latestSnapshotNo });
+            if (options.openAudits) {
+                await WorkbenchPanel.loadMigrationQualityReportAudits(options.auditAction || "");
+            }
+            setStatus(options.openAudits ? "\u5de1\u68c0\u62a5\u544a\u548c\u64cd\u4f5c\u8bb0\u5f55\u5df2\u6253\u5f00" : "\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u5df2\u6253\u5f00");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    migrationQualityAcceptancePackageFiles(snapshot = {}, latestSnapshotNo = "") {
+        const snapshotNo = snapshot.snapshotNo || "";
+        const orgCode = snapshot.orgCode || snapshot.overview?.orgCode || "";
+        if (!snapshotNo) {
+            return [];
+        }
+        const files = [
+            "README.txt",
+            `migration-quality-final-summary-${snapshotNo}.csv`,
+            `migration-quality-summary-${snapshotNo}.csv`,
+            `migration-quality-report-${snapshotNo}.csv`,
+            `migration-quality-print-audits-${snapshotNo}.csv`,
+            `migration-quality-archive-ledger-${orgCode || "-"}.csv`,
+            `salary-report-migration-closure-${orgCode || "-"}.csv`
+        ];
+        if (latestSnapshotNo && latestSnapshotNo !== snapshotNo) {
+            files.push(`migration-quality-snapshot-compare-${snapshotNo}-${latestSnapshotNo}.csv`);
+        }
+        return files;
+    },
+    migrationQualityAcceptancePackageFileLabel(filename = "") {
+        if (filename === "README.txt") {
+            return "\u9a8c\u6536\u5305\u8bf4\u660e";
+        }
+        if (filename.startsWith("migration-quality-final-summary-")) {
+            return "\u6700\u7ec8\u9a8c\u6536\u6458\u8981";
+        }
+        if (filename.startsWith("migration-quality-summary-")) {
+            return "\u9a8c\u6536\u6458\u8981";
+        }
+        if (filename.startsWith("migration-quality-report-")) {
+            return "\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a";
+        }
+        if (filename.startsWith("migration-quality-print-audits-")) {
+            return "\u6253\u5370\u4e0e\u5bfc\u51fa\u5ba1\u8ba1";
+        }
+        if (filename.startsWith("migration-quality-archive-ledger-")) {
+            return "\u5f52\u6863\u53f0\u8d26";
+        }
+        if (filename.startsWith("salary-report-migration-closure-")) {
+            return "\u62a5\u8868\u6253\u5370\u8fc1\u79fb\u95ed\u73af";
+        }
+        if (filename.startsWith("migration-quality-snapshot-compare-")) {
+            return "\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4";
+        }
+        return "\u7559\u6863\u6587\u4ef6";
+    },
+    renderMigrationQualityReport(snapshot = {}, options = {}) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const overview = snapshot.overview || {};
+        const summary = overview.summary || {};
+        const gates = overview.gates || [];
+        const decision = snapshot.decision?.level ? snapshot.decision : {
+            level: snapshot.preflightLevel || "READY",
+            title: snapshot.preflightTitle || "\u5de1\u68c0\u7ed3\u8bba",
+            message: snapshot.preflightMessage || "",
+            items: []
+        };
+        const archived = snapshot.archiveStatus === "ARCHIVED";
+        const backToArchiveLedger = archived || options.fromArchiveLedger;
+        const ledgerFilters = options.ledgerFilters || {};
+        const canExportAcceptancePackage = Permissions.has("SALARY_ACCEPTANCE") && Permissions.has("SALARY_EXPORT");
+        const latestSnapshotNo = options.latestSnapshotNo || "";
+        const packageFiles = WorkbenchPanel.migrationQualityAcceptancePackageFiles(snapshot, latestSnapshotNo);
+        els.migrationToolResult.querySelector(".migration-quality-report")?.remove();
+        els.migrationToolResult.insertAdjacentHTML("beforeend", `
+            <div class="migration-quality-report" data-quality-report-snapshot="${Format.html(snapshot.snapshotNo || "")}" data-archive-status="${Format.html(snapshot.archiveStatus || "")}" data-latest-snapshot-no="${Format.html(latestSnapshotNo)}" data-package-file-count="${Format.html(packageFiles.length)}" data-decision-title="${Format.html(decision.title || "")}" data-decision-message="${Format.html(decision.message || "")}" data-salary-todo="${Format.html(summary.salaryTodo ?? 0)}" data-governance-issues="${Format.html(summary.governanceIssues ?? 0)}" data-regression-warnings="${Format.html(summary.regressionWarnings ?? 0)}" data-history-blocked="${Format.html(summary.historyBlocked ?? 0)}" data-review-pending="${Format.html(summary.reviewPending ?? 0)}" data-preflight-level="${Format.html(ledgerFilters.preflightLevel || "")}" data-archived-by="${Format.html(ledgerFilters.archivedBy || "")}" data-archived-from="${Format.html(ledgerFilters.archivedFrom || "")}" data-archived-to="${Format.html(ledgerFilters.archivedTo || "")}" data-limit="${Format.html(ledgerFilters.limit || 50)}">
+                <div class="migration-quality-report-head ${Format.html(String(decision.level || "").toLowerCase())}">
+                    <strong>${Format.html(decision.title || "-")}</strong>
+                    <span>${Format.html(decision.message || "")}</span>
+                    <small>${Format.html(snapshot.snapshotNo || "-")} | ${Format.html(snapshot.orgCode || overview.orgCode || "-")} | ${Format.html(overview.checkedAt || snapshot.checkedAt || "-")} | ${Format.html(snapshot.createdBy || "-")}</small>
+                    <small>${Format.html(archived ? "\u5df2\u5f52\u6863" : "\u672a\u5f52\u6863")}${snapshot.archivedBy ? ` | ${Format.html(snapshot.archivedBy)} | ${Format.html(snapshot.archivedAt || "")}` : ""}${snapshot.archiveNote ? ` | ${Format.html(snapshot.archiveNote)}` : ""}</small>
+                    ${archived ? `<span class="migration-quality-archive-lock">\u5f52\u6863\u9501\u5b9a\uff1a\u62a5\u544a\u7248\u672c\u5df2\u56fa\u5316\uff0c\u5f52\u6863\u4fe1\u606f\u4e0d\u518d\u88ab\u91cd\u590d\u64cd\u4f5c\u8986\u76d6</span>` : ""}
+                </div>
+                <div class="migration-quality-report-actions">
+                    ${backToArchiveLedger ? `<button type="button" data-quality-report-back-ledger>\u8fd4\u56de\u5f52\u6863\u53f0\u8d26</button>` : ""}
+                    ${archived ? `<button type="button" disabled>\u5df2\u5f52\u6863</button>` : `<button type="button" data-quality-report-archive>\u5f52\u6863\u62a5\u544a</button>`}
+                    <button type="button" data-quality-report-print>\u6253\u5370\u62a5\u544a</button>
+                    <button type="button" data-quality-report-audits>\u64cd\u4f5c\u8bb0\u5f55</button>
+                    <button type="button" data-quality-snapshot-export="${Format.html(snapshot.snapshotNo || "")}">\u5bfc\u51faCSV</button>
+                    ${canExportAcceptancePackage ? `<button type="button" data-quality-acceptance-package="${Format.html(snapshot.snapshotNo || "")}">\u5bfc\u51fa\u9a8c\u6536\u5305</button>` : ""}
+                </div>
+                ${canExportAcceptancePackage ? `
+                    <div class="migration-quality-package-files">
+                        <div class="section-title">
+                            <span>\u9a8c\u6536\u5305\u6587\u4ef6\u6e05\u5355</span>
+                            <small>\u9884\u8ba1 ${Format.html(packageFiles.length)} \u4e2a\u6587\u4ef6</small>
+                        </div>
+                        ${packageFiles.map((file) => `
+                            <span>
+                                <b>${Format.html(WorkbenchPanel.migrationQualityAcceptancePackageFileLabel(file))}</b>
+                                <small>${Format.html(file)}</small>
+                            </span>
+                        `).join("")}
+                    </div>
+                ` : ""}
+                <div class="migration-quality-report-metrics">
+                    ${[
+                        ["\u5f85\u529e", summary.salaryTodo],
+                        ["\u5df2\u529e", summary.salaryDone],
+                        ["\u6570\u636e\u6cbb\u7406", summary.governanceIssues],
+                        ["\u56de\u5f52WARN", summary.regressionWarnings],
+                        ["\u5386\u53f2\u963b\u65ad", summary.historyBlocked],
+                        ["\u5386\u53f2\u961f\u5217", summary.historyOpen],
+                        ["\u5f85\u590d\u6838", summary.reviewPending]
+                    ].map(([label, value]) => `<span><b>${Format.html(label)}</b>${Format.html(value ?? 0)}</span>`).join("")}
+                </div>
+                <div class="migration-quality-report-section">
+                    <b>\u963b\u65ad\u4e0e\u98ce\u9669</b>
+                    <div class="audit-safety-row">
+                        ${(decision.items || []).length ? decision.items.map((item) => `
+                            ${item.action ? `<button type="button" data-quality-delta-action="${Format.html(item.action)}">${Format.html(item.label)} ${Format.html(item.count ?? 0)}</button>` : `<span>${Format.html(item.label)} ${Format.html(item.count ?? 0)}</span>`}
+                        `).join("") : `<span>\u65e0\u963b\u65ad\u9879</span>`}
+                    </div>
+                </div>
+                <div class="migration-quality-report-section">
+                    <b>\u8d28\u91cf\u95f8\u53e3</b>
+                    <div class="migration-quality-gates">
+                        ${gates.map((gate) => `
+                            <button type="button" class="migration-quality-gate ${gate.status === "PASS" ? "pass" : "warn"}" data-quality-gate="${Format.html(gate.code || "")}">
+                                <strong>${Format.html(gate.title || gate.code || "-")}</strong>
+                                <span>${Format.html(gate.status || "-")} | ${Format.html(gate.count ?? 0)}</span>
+                                <small>${Format.html(gate.message || "")}</small>
+                            </button>
+                        `).join("")}
+                    </div>
+                </div>
+            </div>
+        `);
+    },
+    async exportMigrationQualityAcceptancePackage(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE") || !Permissions.has("SALARY_EXPORT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const snapshotNo = button.dataset.qualityAcceptancePackage || "";
+        if (!snapshotNo) {
+            setStatus("\u9a8c\u6536\u5305\u7f3a\u5c11\u5feb\u7167\u7f16\u53f7");
+            return;
+        }
+        const report = button.closest(".migration-quality-report");
+        const archiveStatus = report?.dataset.archiveStatus || "";
+        if (report && archiveStatus !== "ARCHIVED") {
+            setStatus("\u5f53\u524d\u62a5\u544a\u5c1a\u672a\u5f52\u6863\uff0c\u8bf7\u5148\u5f52\u6863\u518d\u5bfc\u51fa\u9a8c\u6536\u5305");
+            return;
+        }
+        setStatus("\u6b63\u5728\u6267\u884c\u9a8c\u6536\u5305\u5bfc\u51fa\u524d\u9884\u68c0...");
+        try {
+            const preview = await Api.request(`/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/acceptance-package/preview`);
+            WorkbenchPanel.renderMigrationAcceptancePackagePreview(button, preview);
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    renderMigrationAcceptancePackagePreview(button, preview = {}) {
+        const target = button.closest(".migration-quality-report") || els.migrationToolResult?.querySelector(".migration-quality-overview") || els.migrationToolResult;
+        if (!target) {
+            setStatus("\u9a8c\u6536\u5305\u9884\u68c0\u5931\u8d25\uff1a\u627e\u4e0d\u5230\u5c55\u793a\u533a\u57df");
+            return;
+        }
+        target.querySelector(".migration-acceptance-package-preview")?.remove();
+        const files = preview.packageFiles || [];
+        target.insertAdjacentHTML("afterbegin", `
+            <div class="migration-quality-package-files migration-acceptance-package-preview">
+                <div class="section-title">
+                    <span>\u9a8c\u6536\u5305\u5bfc\u51fa\u524d\u9884\u68c0</span>
+                    <small>v${Format.html(preview.nextExportNo || "-")} | ${Format.html(preview.fileCount ?? files.length)} \u4e2a\u6587\u4ef6</small>
+                </div>
+                <span><b>\u5feb\u7167</b><small>${Format.html(preview.snapshotNo || "-")} | ${Format.html(preview.preflightTitle || "-")}</small></span>
+                <span><b>\u5f52\u6863</b><small>${Format.html(preview.archivedBy || "-")} | ${Format.html(preview.archivedAt || "-")}</small></span>
+                <span><b>\u5dee\u5f02\u5bf9\u6bd4</b><small>${preview.hasComparison ? `\u5c06\u9644\u5e26 ${Format.html(preview.latestSnapshotNo || "-")} \u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4` : "\u672c\u6b21\u4e0d\u9644\u5e26\u5feb\u7167\u5dee\u5f02\u5bf9\u6bd4"}</small></span>
+                ${files.map((file) => `
+                    <span>
+                        <b>${Format.html(WorkbenchPanel.migrationQualityAcceptancePackageFileLabel(file))}</b>
+                        <small>${Format.html(file)}</small>
+                    </span>
+                `).join("")}
+                <div class="report-batch-actions">
+                    <button type="button" data-quality-acceptance-package-confirm="${Format.html(preview.snapshotNo || "")}" data-refresh-quality-overview-after-export="${Format.html(button.dataset.refreshQualityOverviewAfterExport || "")}" data-expected-export-no="${Format.html(preview.nextExportNo || "")}" data-expected-file-count="${Format.html(preview.fileCount ?? files.length)}">\u786e\u8ba4\u4e0b\u8f7d\u9a8c\u6536\u5305</button>
+                    <button type="button" data-quality-acceptance-package-preview-close>\u53d6\u6d88</button>
+                </div>
+            </div>
+        `);
+        setStatus(`\u9a8c\u6536\u5305\u9884\u68c0\u5b8c\u6210\uff1av${preview.nextExportNo || "-"}\uff0c${preview.fileCount ?? files.length} \u4e2a\u6587\u4ef6`);
+    },
+    confirmMigrationQualityAcceptancePackage(button) {
+        const snapshotNo = button.dataset.qualityAcceptancePackageConfirm || "";
+        if (!snapshotNo) {
+            setStatus("\u9a8c\u6536\u5305\u7f3a\u5c11\u5feb\u7167\u7f16\u53f7");
+            return;
+        }
+        const preview = button.closest(".migration-acceptance-package-preview");
+        const report = button.closest(".migration-quality-report");
+        if (preview) {
+            const exportNo = button.dataset.expectedExportNo || "-";
+            const fileCount = button.dataset.expectedFileCount || "-";
+            preview.querySelector(".report-batch-actions")?.remove();
+            preview.insertAdjacentHTML("beforeend", `
+                <div class="report-batch-actions">
+                    <span>\u5df2\u89e6\u53d1\u4e0b\u8f7d\uff1av${Format.html(exportNo)} | ${Format.html(fileCount)} \u4e2a\u6587\u4ef6</span>
+                    <button type="button" data-quality-snapshot-report="${Format.html(snapshotNo)}" data-open-audits="true" data-audit-action="migration-quality-acceptance-package-export" data-from-archive-ledger="true" data-limit="3">\u67e5\u770b\u5bfc\u51fa\u5ba1\u8ba1</button>
+                </div>
+            `);
+        }
+        setStatus("\u6b63\u5728\u5bfc\u51fa\u9a8c\u6536\u5305");
+        window.location.href = `/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/acceptance-package.zip`;
+        if (button.dataset.refreshQualityOverviewAfterExport === "true") {
+            window.setTimeout(async () => {
+                try {
+                    await WorkbenchPanel.loadMigrationQualityOverview();
+                    setStatus("\u9a8c\u6536\u5305\u5df2\u89e6\u53d1\u4e0b\u8f7d\uff0c\u7559\u6863\u72b6\u6001\u5df2\u5237\u65b0\uff1b\u53ef\u6253\u5f00\u5f52\u6863\u53f0\u8d26\u67e5\u770b\u672c\u6b21\u5bfc\u51fa\u5ba1\u8ba1\u3002");
+                } catch (error) {
+                    setStatus(`\u9a8c\u6536\u5305\u5df2\u89e6\u53d1\u4e0b\u8f7d\uff0c\u4f46\u7559\u6863\u72b6\u6001\u5237\u65b0\u5931\u8d25\uff1a${error.message}`);
+                }
+            }, 1800);
+        } else if (report) {
+            window.setTimeout(async () => {
+                try {
+                    await WorkbenchPanel.loadMigrationQualityReportAudits("migration-quality-acceptance-package-export");
+                    setStatus("\u9a8c\u6536\u5305\u5df2\u89e6\u53d1\u4e0b\u8f7d\uff0c\u5bfc\u51fa\u5ba1\u8ba1\u5df2\u5237\u65b0\u3002");
+                } catch (error) {
+                    setStatus(`\u9a8c\u6536\u5305\u5df2\u89e6\u53d1\u4e0b\u8f7d\uff0c\u4f46\u5bfc\u51fa\u5ba1\u8ba1\u5237\u65b0\u5931\u8d25\uff1a${error.message}`);
+                }
+            }, 1800);
+        }
+    },
+    async printMigrationFinalAcceptanceSummary(button) {
+        const summary = els.migrationToolResult?.querySelector(".migration-final-acceptance-summary");
+        if (!summary) {
+            setStatus("\u8bf7\u5148\u751f\u6210\u6700\u7ec8\u9a8c\u6536\u6458\u8981");
+            return;
+        }
+        const orgCode = button?.dataset.orgCode || WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        setStatus("\u6b63\u5728\u8bb0\u5f55\u6700\u7ec8\u9a8c\u6536\u6458\u8981\u6253\u5370\u7559\u75d5...");
+        try {
+            await Api.request(`/api/workbench/migration-quality-overview/final-summary/print?${new URLSearchParams({ orgCode }).toString()}`, { method: "POST" });
+        } catch (error) {
+            setStatus(error.message);
+            return;
+        }
+        const win = window.open("", "_blank", "noopener,width=860,height=680");
+        if (!win) {
+            setStatus("\u6d4f\u89c8\u5668\u963b\u6b62\u4e86\u6253\u5370\u7a97\u53e3");
+            return;
+        }
+        win.document.write(`
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="utf-8">
+                <title>\u6700\u7ec8\u9a8c\u6536\u6458\u8981</title>
+                <style>
+                    body { margin: 24px; color: #1f2933; font: 13px/1.5 Arial, "Microsoft YaHei", sans-serif; }
+                    h1 { margin: 0 0 14px; font-size: 20px; }
+                    button { display: none !important; }
+                    .migration-final-acceptance-summary { display: grid; gap: 10px; border: 1px solid #b7dfc8; border-left: 5px solid #1f8f55; border-radius: 4px; padding: 12px; }
+                    .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-weight: 700; }
+                    .migration-final-acceptance-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+                    .migration-final-acceptance-grid span { display: grid; gap: 3px; border: 1px solid #d7eadf; border-radius: 4px; padding: 8px 10px; break-inside: avoid; }
+                    .migration-final-acceptance-grid b { color: #1f2933; }
+                    .migration-final-acceptance-grid small { color: #5d6b78; overflow-wrap: anywhere; }
+                    .signature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; }
+                    .signature-row span { border-top: 1px solid #8a97a3; padding-top: 8px; color: #5d6b78; }
+                    @media print { body { margin: 12mm; } }
+                </style>
+            </head>
+            <body>
+                <h1>\u6700\u7ec8\u9a8c\u6536\u6458\u8981</h1>
+                ${summary.outerHTML}
+                <div class="signature-row">
+                    <span>\u7ecf\u529e\u4eba / \u65e5\u671f</span>
+                    <span>\u590d\u6838\u4eba / \u65e5\u671f</span>
+                </div>
+            </body>
+            </html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 250);
+        setStatus("\u6700\u7ec8\u9a8c\u6536\u6458\u8981\u6253\u5370\u7a97\u53e3\u5df2\u6253\u5f00");
+    },
+    async printMigrationQualityReport() {
+        const report = els.migrationToolResult?.querySelector(".migration-quality-report");
+        if (!report) {
+            setStatus("\u8bf7\u5148\u6253\u5f00\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a");
+            return;
+        }
+        const snapshotNo = report.dataset.qualityReportSnapshot || "";
+        if (!snapshotNo) {
+            setStatus("\u5de1\u68c0\u62a5\u544a\u7f3a\u5c11\u5feb\u7167\u7f16\u53f7");
+            return;
+        }
+        await Api.request(`/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/print`, { method: "POST" });
+        const win = window.open("", "_blank", "noopener,width=980,height=720");
+        if (!win) {
+            setStatus("\u6d4f\u89c8\u5668\u963b\u6b62\u4e86\u6253\u5370\u7a97\u53e3");
+            return;
+        }
+        win.document.write(`
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="utf-8">
+                <title>\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a</title>
+                <style>
+                    body { margin: 24px; color: #1f2933; font: 13px/1.5 Arial, "Microsoft YaHei", sans-serif; }
+                    h1 { margin: 0 0 14px; font-size: 20px; }
+                    button { display: none !important; }
+                    .migration-quality-report { display: grid; gap: 12px; }
+                    .migration-quality-report-head, .migration-quality-report-metrics span, .migration-quality-gate { border: 1px solid #cfd7df; border-radius: 4px; padding: 10px; background: #fff; }
+                    .migration-quality-report-head { border-left-width: 5px; }
+                    .migration-quality-report-head.ready { border-left-color: #1f8f55; }
+                    .migration-quality-report-head.warn { border-left-color: #b7791f; }
+                    .migration-quality-report-head.blocked { border-left-color: #c53030; }
+                    .migration-quality-report-head span, .migration-quality-report-head small, .migration-quality-gate span, .migration-quality-gate small { display: block; color: #5d6b78; }
+                    .migration-quality-report-actions { display: none; }
+                    .migration-quality-report-metrics, .migration-quality-gates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+                    .migration-quality-report-metrics b, .migration-quality-gate strong { display: block; color: #1f2933; }
+                    .migration-quality-report-section { display: grid; gap: 8px; break-inside: avoid; }
+                    .audit-safety-row { display: flex; flex-wrap: wrap; gap: 6px; }
+                    .audit-safety-row span { border: 1px solid #cfd7df; border-radius: 4px; padding: 5px 8px; }
+                    @media print { body { margin: 12mm; } }
+                </style>
+            </head>
+            <body>
+                <h1>\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a</h1>
+                ${report.outerHTML}
+            </body>
+            </html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 250);
+        setStatus("\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u6253\u5370\u7a97\u53e3\u5df2\u6253\u5f00");
+    },
+    async archiveMigrationQualityReport() {
+        const report = els.migrationToolResult?.querySelector(".migration-quality-report");
+        if (!report) {
+            setStatus("\u8bf7\u5148\u6253\u5f00\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a");
+            return;
+        }
+        const snapshotNo = report.dataset.qualityReportSnapshot || "";
+        if (!snapshotNo) {
+            setStatus("\u5de1\u68c0\u62a5\u544a\u7f3a\u5c11\u5feb\u7167\u7f16\u53f7");
+            return;
+        }
+        const confirmMessage = [
+            "\u5f52\u6863\u540e\u62a5\u544a\u7248\u672c\u5c06\u9501\u5b9a\uff0c\u9a8c\u6536\u5305\u53ea\u5141\u8bb8\u4ece\u5df2\u5f52\u6863\u5feb\u7167\u5bfc\u51fa\u3002",
+            "",
+            `\u5feb\u7167\uff1a${snapshotNo}`,
+            `\u5de1\u68c0\u7ed3\u8bba\uff1a${report.dataset.decisionTitle || "-"}`,
+            report.dataset.decisionMessage ? `\u7ed3\u8bba\u8bf4\u660e\uff1a${report.dataset.decisionMessage}` : "",
+            `\u5f85\u529e\uff1a${report.dataset.salaryTodo || 0}`,
+            `\u6570\u636e\u6cbb\u7406\uff1a${report.dataset.governanceIssues || 0}`,
+            `\u56de\u5f52WARN\uff1a${report.dataset.regressionWarnings || 0}`,
+            `\u5386\u53f2\u963b\u65ad\uff1a${report.dataset.historyBlocked || 0}`,
+            `\u5f85\u590d\u6838\uff1a${report.dataset.reviewPending || 0}`,
+            `\u9a8c\u6536\u5305\u9884\u8ba1\u6587\u4ef6\uff1a${report.dataset.packageFileCount || 0} \u4e2a`,
+            "",
+            "\u786e\u5b9a\u5f52\u6863\u8be5\u5de1\u68c0\u62a5\u544a\u5417\uff1f"
+        ].filter(Boolean).join("\n");
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+        const note = window.prompt("\u5f52\u6863\u8bf4\u660e", "\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u5f52\u6863");
+        if (note === null) {
+            return;
+        }
+        setStatus("\u6b63\u5728\u5f52\u6863\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a...");
+        try {
+            const archived = await Api.request(`/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/archive?${new URLSearchParams({ note }).toString()}`, { method: "POST" });
+            WorkbenchPanel.renderMigrationQualityReport(archived);
+            await WorkbenchPanel.loadMigrationQualityReportAudits();
+            setStatus(archived.archiveMessage ? "\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u5df2\u5f52\u6863\u9501\u5b9a" : "\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a\u5df2\u5f52\u6863");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async loadMigrationQualityReportAudits(action = "") {
+        const report = els.migrationToolResult?.querySelector(".migration-quality-report");
+        if (!report) {
+            setStatus("\u8bf7\u5148\u6253\u5f00\u4e0a\u7ebf\u5de1\u68c0\u62a5\u544a");
+            return;
+        }
+        const snapshotNo = report.dataset.qualityReportSnapshot || "";
+        if (!snapshotNo) {
+            setStatus("\u5de1\u68c0\u62a5\u544a\u7f3a\u5c11\u5feb\u7167\u7f16\u53f7");
+            return;
+        }
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u5de1\u68c0\u62a5\u544a\u64cd\u4f5c\u8bb0\u5f55...");
+        try {
+            const query = action ? `?${new URLSearchParams({ action }).toString()}` : "";
+            const audits = await Api.request(`/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/print-audits${query}`);
+            WorkbenchPanel.renderMigrationQualityReportAudits(audits || [], action);
+            setStatus("\u5de1\u68c0\u62a5\u544a\u64cd\u4f5c\u8bb0\u5f55\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    renderMigrationQualityReportAudits(audits = [], action = "") {
+        const report = els.migrationToolResult?.querySelector(".migration-quality-report");
+        if (!report) {
+            return;
+        }
+        const selectedAction = action || "";
+        report.querySelector(".migration-quality-report-audits")?.remove();
+        report.insertAdjacentHTML("beforeend", `
+            <div class="migration-quality-report-audits">
+                <div class="section-title">
+                    <span>\u64cd\u4f5c\u8bb0\u5f55</span>
+                    <select data-quality-report-audits-filter aria-label="\u64cd\u4f5c\u7c7b\u578b">
+                        <option value="" ${!selectedAction ? "selected" : ""}>\u5168\u90e8\u64cd\u4f5c</option>
+                        <option value="migration-quality-report-archive" ${selectedAction === "migration-quality-report-archive" ? "selected" : ""}>\u5f52\u6863</option>
+                        <option value="migration-quality-report-print" ${selectedAction === "migration-quality-report-print" ? "selected" : ""}>\u6253\u5370</option>
+                        <option value="migration-quality-final-summary-print" ${selectedAction === "migration-quality-final-summary-print" ? "selected" : ""}>\u6458\u8981\u6253\u5370</option>
+                        <option value="migration-quality-acceptance-package-preview" ${selectedAction === "migration-quality-acceptance-package-preview" ? "selected" : ""}>\u9a8c\u6536\u5305\u9884\u68c0</option>
+                        <option value="migration-quality-acceptance-package-export" ${selectedAction === "migration-quality-acceptance-package-export" ? "selected" : ""}>\u9a8c\u6536\u5305\u5bfc\u51fa</option>
+                    </select>
+                    <button type="button" data-quality-report-audits-export="${Format.html(report.dataset.qualityReportSnapshot || "")}" data-audit-action="${Format.html(selectedAction)}">\u5bfc\u51fa\u8bb0\u5f55</button>
+                </div>
+                ${audits.length ? audits.map((audit) => `
+                    <div class="migration-quality-report-audit-row">
+                        <strong>${Format.html(audit.operator || "-")}</strong>
+                        <span>${Format.html(audit.createdAt || "-")}</span>
+                        <small>${Format.html(audit.summary || "")}</small>
+                    </div>
+                `).join("") : `<div class="loading compact">\u6682\u65e0\u6253\u5370\u8bb0\u5f55</div>`}
+            </div>
+        `);
+    },
+    renderMigrationQualityComparison(comparison = {}) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const deltas = comparison.deltas || [];
+        const summary = comparison.summary || {};
+        const base = comparison.base || {};
+        const target = comparison.target || {};
+        const canExport = base.snapshotNo && target.snapshotNo;
+        els.migrationToolResult.querySelector(".migration-quality-comparison")?.remove();
+        els.migrationToolResult.insertAdjacentHTML("beforeend", `
+            <div class="migration-quality-comparison">
+                <div class="section-title">
+                    <span>\u5feb\u7167\u5bf9\u6bd4 ${Format.html(base.snapshotNo || "-")} \u2192 ${Format.html(target.snapshotNo || "-")}</span>
+                    ${canExport ? `<button type="button" data-quality-snapshot-comparison-export data-base-snapshot-no="${Format.html(base.snapshotNo)}" data-target-snapshot-no="${Format.html(target.snapshotNo)}">\u5bfc\u51fa\u5bf9\u6bd4</button>` : ""}
+                </div>
+                <div class="audit-safety-row">
+                    <span>${Format.html(summary.status || "-")}</span>
+                    <span>\u4e0a\u5347 ${Format.html(summary.increased ?? 0)}</span>
+                    <span>\u4e0b\u964d ${Format.html(summary.decreased ?? 0)}</span>
+                    <span>\u6301\u5e73 ${Format.html(summary.unchanged ?? 0)}</span>
+                </div>
+                <div class="migration-quality-deltas">
+                    ${deltas.map((delta) => WorkbenchPanel.migrationQualityDeltaHtml(delta)).join("")}
+                </div>
+            </div>
+        `);
+    },
+    migrationQualityDeltaHtml(delta = {}) {
+        const directionClass = delta.direction === "DECREASED" ? "better" : (delta.direction === "INCREASED" ? "worse" : "same");
+        const action = WorkbenchPanel.migrationQualityDeltaAction(delta.code || "");
+        const showAction = delta.direction === "INCREASED" && action.code;
+        return `
+            <div class="migration-quality-delta ${directionClass}">
+                <strong>${Format.html(delta.title || delta.code || "-")}</strong>
+                <span>${Format.html(delta.base ?? 0)} \u2192 ${Format.html(delta.target ?? 0)}</span>
+                <small>${delta.delta > 0 ? "+" : ""}${Format.html(delta.delta ?? 0)}</small>
+                ${showAction ? `<button type="button" data-quality-delta-action="${Format.html(action.code)}">${Format.html(action.label)}</button>` : ""}
+            </div>
+        `;
+    },
+    migrationQualityDeltaAction(code) {
+        if (code === "governanceIssues") {
+            return { code: "governance", label: "\u5904\u7406\u6cbb\u7406" };
+        }
+        if (["regressionWarnings", "regressionPending", "regressionFixing"].includes(code)) {
+            return { code: "regression", label: "\u5904\u7406\u56de\u5f52" };
+        }
+        if (["historyBlocked", "historyOpen"].includes(code)) {
+            return { code: "history-write", label: "\u5904\u7406\u5199\u5165" };
+        }
+        if (code === "reviewPending") {
+            return { code: "acceptance", label: "\u5904\u7406\u590d\u6838" };
+        }
+        if (code === "salaryTodo") {
+            return { code: "todo", label: "\u67e5\u770b\u5f85\u529e" };
+        }
+        return { code: "", label: "" };
+    },
+    async openMigrationQualityDeltaAction(actionCode) {
+        if (actionCode === "todo") {
+            await WorkbenchPanel.loadPage("TODO", true);
+            els.todoWorkItems?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+        await WorkbenchPanel.openMigrationQualityGate(actionCode);
+    },
+    async openMigrationQualityGate(gateCode) {
+        if (!gateCode) {
+            return;
+        }
+        if (gateCode === "acceptance") {
+            await WorkbenchPanel.loadMigrationAcceptanceHistory();
+            els.migrationToolResult?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+        if (gateCode === "regression") {
+            await WorkbenchPanel.loadMigrationRegressionDashboard();
+            els.migrationToolResult?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+        if (gateCode === "governance") {
+            await WorkbenchPanel.dataGovernanceScan();
+            els.migrationToolResult?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+        if (gateCode === "history-write") {
+            await WorkbenchPanel.loadHistoryWritePendingQueues();
+            els.historyWritePlans?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+    },
+    async openMigrationRegressionRun(runNo) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        if (!runNo) {
+            return;
+        }
+        setStatus("\u6b63\u5728\u6253\u5f00\u56fa\u5b9a\u6837\u672c\u8fd0\u884c\u8be6\u60c5...");
+        try {
+            const detail = await Api.request(`/api/workbench/migration-regression/sample-library/runs/${encodeURIComponent(runNo)}`);
+            const samples = detail.samples || [];
+            const warnSamples = samples.filter((sample) => sample.status === "WARN").map((sample) => ({
+                ...sample,
+                runNo: detail.runNo
+            }));
+            if (els.migrationToolResult) {
+                els.migrationToolResult.querySelector(".migration-regression-run-detail")?.remove();
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <div class="migration-regression-run-detail" data-regression-run-detail="${Format.html(detail.runNo || "")}">
+                        <div class="section-title">${Format.html(detail.runNo || "-")}</div>
+                        <div class="audit-safety-row">
+                            <span>${Format.html(detail.batchNo || "\u5168\u90e8\u6279\u6b21")}</span>
+                            <span>${Format.html(detail.overallStatus || "-")}</span>
+                            <span>\u6837\u672c ${Format.html(detail.sampleCount ?? samples.length)}</span>
+                            <span>WARN ${Format.html(detail.warningCount ?? warnSamples.length)}</span>
+                            <button type="button"
+                                    data-regression-rerun-batch
+                                    data-regression-org-code="${Format.html(detail.orgCode || "")}"
+                                    data-regression-batch-no="${Format.html(detail.batchNo || "")}">\u91cd\u65b0\u8fd0\u884c\u6279\u6b21</button>
+                        </div>
+                        ${WorkbenchPanel.renderMigrationRegressionReviewSummary(detail.reviewSummary || {})}
+                        ${WorkbenchPanel.renderMigrationRegressionDiffs(warnSamples)}
+                    </div>
+                `);
+            }
+            setStatus(`\u8fd0\u884c\u8be6\u60c5\u5df2\u6253\u5f00 ${detail.overallStatus || "-"}`);
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async rerunMigrationRegressionBatchFromDetail(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = button.dataset.regressionOrgCode || WorkbenchPanel.selectedOrgCode();
+        const batchNo = button.dataset.regressionBatchNo || "";
+        if (!orgCode || !batchNo) {
+            setStatus("\u8be5\u8fd0\u884c\u8bb0\u5f55\u6ca1\u6709\u6279\u6b21\u53f7\uff0c\u8bf7\u5728\u6837\u672c\u5e93\u4e2d\u6307\u5b9a\u6279\u6b21\u8fd0\u884c");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u91cd\u65b0\u8fd0\u884c\u56de\u5f52\u6279\u6b21...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-regression/sample-library/run?${new URLSearchParams({ orgCode, batchNo, limit: "500" }).toString()}`, {
+                method: "POST"
+            });
+            await WorkbenchPanel.openMigrationRegressionRun(result.runNo || "");
+            setStatus(`\u6279\u6b21 ${batchNo} \u5df2\u91cd\u65b0\u8fd0\u884c ${result.overallStatus || "-"}`);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async reviewMigrationRegressionRunSample(form) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const data = new FormData(form);
+        const runNo = String(data.get("runNo") || "").trim();
+        const params = new URLSearchParams({
+            sampleCode: String(data.get("sampleCode") || "").trim(),
+            sampleId: String(data.get("sampleId") || "").trim(),
+            personCode: String(data.get("personCode") || "").trim(),
+            reviewCategory: String(data.get("reviewCategory") || "").trim(),
+            reviewStatus: String(data.get("reviewStatus") || "REVIEWED").trim(),
+            reviewNote: String(data.get("reviewNote") || "").trim()
+        });
+        if (!runNo || !params.get("sampleCode") || !params.get("sampleId") || !params.get("personCode")) {
+            setStatus("\u56de\u5f52\u6837\u672c\u6807\u8bc6\u4e0d\u5b8c\u6574");
+            return;
+        }
+        const button = form.querySelector("button[type='submit']");
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u6807\u8bb0\u56de\u5f52\u5dee\u5f02\u5f52\u56e0...");
+        try {
+            await Api.request(`/api/workbench/migration-regression/sample-library/runs/${encodeURIComponent(runNo)}/review?${params.toString()}`, {
+                method: "POST"
+            });
+            setStatus("\u56de\u5f52\u5dee\u5f02\u5f52\u56e0\u5df2\u6807\u8bb0");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async createGovernanceTaskFromRegression(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE") || !Permissions.has("SALARY_GOVERNANCE") || !Permissions.has("SALARY_TODO")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const runNo = button.dataset.regressionRunNo || "";
+        const sampleCode = button.dataset.regressionSampleCode || "";
+        const sampleId = button.dataset.regressionSampleId || "";
+        const personCode = button.dataset.regressionSamplePerson || "";
+        const card = button.closest(".migration-regression-diff");
+        const form = card?.querySelector("form[data-regression-review-form]");
+        const formData = form ? new FormData(form) : new FormData();
+        const reviewCategory = String(formData.get("reviewCategory") || "NEED_FIX").trim() || "NEED_FIX";
+        const reviewNote = String(formData.get("reviewNote") || "").trim();
+        if (!runNo || !sampleCode || !sampleId || !personCode) {
+            setStatus("\u56de\u5f52\u6837\u672c\u6807\u8bc6\u4e0d\u5b8c\u6574");
+            return;
+        }
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u8f6c\u4e3a\u6570\u636e\u6cbb\u7406\u4efb\u52a1...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-regression/sample-library/runs/${encodeURIComponent(runNo)}/governance-task?${new URLSearchParams({
+                sampleCode,
+                sampleId,
+                personCode,
+                reviewCategory,
+                reviewNote
+            }).toString()}`, { method: "POST" });
+            button.textContent = "\u5df2\u8f6c\u6cbb\u7406";
+            card?.setAttribute("data-review-status", "FIXING");
+            setStatus(`\u5df2\u751f\u6210\u6570\u636e\u6cbb\u7406\u5f85\u529e ${result.workItemId || ""}`);
+        } catch (error) {
+            setStatus(error.message);
+            button.disabled = false;
+        }
+    },
+    exportMigrationRegressionLibrary(button) {
+        const form = button.closest("form[data-regression-sample-filter-form]");
+        if (!form) {
+            return;
+        }
+        window.location.href = `/api/workbench/migration-regression/sample-library.csv?${WorkbenchPanel.migrationRegressionFilterParams(form).toString()}`;
+    },
+    async importMigrationRegressionLibrary(input) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const file = input.files?.[0];
+        if (!file) {
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+            return;
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        setStatus("\u6b63\u5728\u5bfc\u5165\u56fa\u5b9a\u56de\u5f52\u6837\u672c...");
+        try {
+            const response = await fetch(`/api/workbench/migration-regression/sample-library/import?${new URLSearchParams({ orgCode }).toString()}`, {
+                method: "POST",
+                credentials: "same-origin",
+                body: formData
+            });
+            const payload = await response.json();
+            if (!response.ok || !payload.success) {
+                throw new Error(payload.message || `${TEXT.requestFail}: ${response.status}`);
+            }
+            input.value = "";
+            await WorkbenchPanel.runMigrationRegressionLibrary(false);
+            setStatus(`\u6837\u672c\u5e93\u5df2\u5bfc\u5165 ${payload.data?.importedCount ?? 0} \u6761`);
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async addMigrationRegressionSample(form) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const data = new FormData(form);
+        const params = new URLSearchParams({
+            orgCode,
+            sampleCode: String(data.get("sampleCode") || "").trim(),
+            sampleId: String(data.get("sampleId") || "").trim(),
+            personCode: String(data.get("personCode") || "").trim(),
+            title: String(data.get("title") || "").trim(),
+            note: "\u624b\u5de5\u52a0\u5165\u56fa\u5b9a\u56de\u5f52\u6837\u672c"
+        });
+        if (!orgCode || !params.get("sampleCode") || !params.get("sampleId") || !params.get("personCode")) {
+            setStatus("\u8bf7\u586b\u5199\u6837\u672c\u7c7b\u578b\u3001\u6837\u672c\u7f16\u53f7\u548c\u4eba\u5458\u7f16\u7801");
+            return;
+        }
+        const button = form.querySelector("button[type='submit']");
+        button.disabled = true;
+        setStatus("\u6b63\u5728\u52a0\u5165\u56fa\u5b9a\u56de\u5f52\u6837\u672c...");
+        try {
+            await Api.request(`/api/workbench/migration-regression/sample-library?${params.toString()}`, {
+                method: "POST"
+            });
+            form.reset();
+            await WorkbenchPanel.runMigrationRegressionLibrary(false);
+            setStatus("\u56fa\u5b9a\u56de\u5f52\u6837\u672c\u5df2\u52a0\u5165");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async setMigrationRegressionSampleEnabled(button) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgCode();
+        const sampleCode = button.dataset.regressionSampleCode || "";
+        const sampleId = button.dataset.regressionSampleId || "";
+        const personCode = button.dataset.regressionSamplePerson || "";
+        const enabled = button.dataset.regressionSampleEnabled !== "false";
+        if (!orgCode || !sampleCode || !sampleId || !personCode) {
+            setStatus("\u56de\u5f52\u6837\u672c\u6807\u8bc6\u4e0d\u5b8c\u6574");
+            return;
+        }
+        button.disabled = true;
+        setStatus(enabled ? "\u6b63\u5728\u542f\u7528\u56de\u5f52\u6837\u672c..." : "\u6b63\u5728\u7981\u7528\u56de\u5f52\u6837\u672c...");
+        try {
+            const params = new URLSearchParams({ orgCode, sampleCode, sampleId, personCode, enabled: String(enabled) }).toString();
+            await Api.request(`/api/workbench/migration-regression/sample-library/enabled?${params}`, {
+                method: "POST"
+            });
+            await WorkbenchPanel.runMigrationRegressionLibrary(false);
+            setStatus(enabled ? "\u56de\u5f52\u6837\u672c\u5df2\u542f\u7528" : "\u56de\u5f52\u6837\u672c\u5df2\u7981\u7528");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    },
+    async loadMigrationReadiness() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u8fc1\u79fb\u4e0a\u7ebf\u6e05\u5355...");
+        try {
+            const readiness = await Api.request("/api/workbench/migration-readiness");
+            const items = readiness.items || [];
+            const readyCount = items.filter((item) => item.status === "READY").length;
+            const deferredCount = items.filter((item) => item.status === "DEFERRED").length;
+            WorkbenchPanel.renderMigrationToolResult("\u8fc1\u79fb\u4e0a\u7ebf\u6e05\u5355", [
+                readiness.status || "-",
+                `\u9879\u76ee ${items.length}`,
+                `READY ${readyCount}`,
+                `DEFERRED ${deferredCount}`
+            ]);
+            setStatus("\u8fc1\u79fb\u4e0a\u7ebf\u6e05\u5355\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async loadMigrationAcceptance() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        els.migrationAcceptanceButton.disabled = true;
+        setStatus("\u6b63\u5728\u63d0\u4ea4\u8fc1\u79fb\u9a8c\u6536\u4efb\u52a1...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-acceptance/run-async?${new URLSearchParams({ orgCode, limit: "100" }).toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u8fc1\u79fb\u9a8c\u6536\u4efb\u52a1", [
+                ...WorkbenchPanel.migrationAcceptanceRows(result, orgCode),
+                result.acceptedExisting ? "\u5df2\u5b58\u5728\u540e\u53f0\u8fd0\u884c\u4efb\u52a1" : "\u5df2\u8fdb\u5165\u540e\u53f0\u6267\u884c",
+                "\u6b63\u5728\u81ea\u52a8\u5237\u65b0\u672c\u6279\u6b21\u7ed3\u679c"
+            ]);
+            setStatus(result.acceptedExisting ? "\u5df2\u63a5\u7ba1\u6b63\u5728\u8fd0\u884c\u7684\u9a8c\u6536\u4efb\u52a1" : "\u8fc1\u79fb\u9a8c\u6536\u4efb\u52a1\u5df2\u63d0\u4ea4");
+            await WorkbenchPanel.waitMigrationAcceptanceRun(result.runNo || "", orgCode);
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationAcceptanceButton.disabled = false;
+        }
+    },
+    async exportMigrationAcceptance() {
+        if (!Permissions.has("SALARY_EXPORT") || !Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        setStatus("\u6b63\u5728\u67e5\u627e\u6700\u8fd1\u9a8c\u6536\u6279\u6b21...");
+        try {
+            const runs = await Api.request(`/api/workbench/migration-acceptance/runs?${new URLSearchParams({ orgCode, limit: "1" }).toString()}`);
+            const latest = runs[0];
+            if (!latest?.runNo) {
+                setStatus("\u6682\u65e0\u9a8c\u6536\u6279\u6b21\uff0c\u8bf7\u5148\u6267\u884c\u9a8c\u6536\u95f8\u53e3");
+                return;
+            }
+            if (latest.overallStatus === "RUNNING") {
+                setStatus("\u6700\u8fd1\u9a8c\u6536\u6279\u6b21\u4ecd\u5728\u8fd0\u884c\uff0c\u5b8c\u6210\u540e\u518d\u5bfc\u51fa");
+                return;
+            }
+            window.location.href = `/api/workbench/migration-acceptance/runs/${encodeURIComponent(latest.runNo)}.csv`;
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async loadMigrationAcceptanceHistory() {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const orgCode = WorkbenchPanel.selectedOrgForMigrationTools();
+        if (!orgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        els.migrationAcceptanceHistoryButton.disabled = true;
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u9a8c\u6536\u5386\u53f2...");
+        try {
+            const runs = await Api.request(`/api/workbench/migration-acceptance/runs?${new URLSearchParams({ orgCode, limit: "10" }).toString()}`);
+            if (!runs.length) {
+                WorkbenchPanel.renderMigrationToolResult("\u9a8c\u6536\u5386\u53f2", ["\u6682\u65e0\u6279\u6b21"]);
+                setStatus("\u6682\u65e0\u9a8c\u6536\u5386\u53f2");
+                return;
+            }
+            els.migrationToolResult.innerHTML = `<strong>\u9a8c\u6536\u5386\u53f2</strong> ${runs.map((run) => `
+                <button type="button" class="link-button" data-acceptance-run="${Format.html(run.runNo || "")}">
+                    ${Format.html(run.runNo || "-")} ${Format.html(Format.acceptanceStatusText(run.overallStatus))} \u9884\u8b66 ${Format.html(String(run.warningCount ?? 0))} \u95ee\u9898 ${Format.html(String(run.issueCount ?? 0))} \u6837\u672c ${Format.html(String(run.sampleLimit ?? "-"))} ${Format.html(run.checkedAt || "")}
+                </button>
+                ${run.overallStatus !== "RUNNING" ? `
+                    <button type="button" class="link-button" data-acceptance-run-export="${Format.html(run.runNo || "")}">\u5bfc\u51fa</button>
+                ` : ""}
+            `).join(" ")}`;
+            setStatus("\u9a8c\u6536\u5386\u53f2\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.migrationAcceptanceHistoryButton.disabled = false;
+        }
+    },
+    async openMigrationAcceptanceRun(runNo) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        if (!runNo) {
+            return;
+        }
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u9a8c\u6536\u6279\u6b21\u8be6\u60c5...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-acceptance/runs/${encodeURIComponent(runNo)}`);
+            WorkbenchPanel.renderMigrationToolResult("\u9a8c\u6536\u6279\u6b21\u8be6\u60c5", WorkbenchPanel.migrationAcceptanceRows(result));
+            if (result.runNo && result.overallStatus !== "RUNNING" && Permissions.has("SALARY_ACCEPTANCE") && Permissions.has("SALARY_EXPORT")) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <button type="button" class="link-button" data-acceptance-run-export="${Format.html(result.runNo)}">\u5bfc\u51fa\u672c\u6279\u6b21</button>
+                `);
+            }
+            const issues = (result.issues || []).slice(0, 8);
+            if (issues.length) {
+                els.migrationToolResult.insertAdjacentHTML("beforeend", `
+                    <div class="inline-actions">
+                        ${issues.map((issue) => `
+                            <span>
+                                ${Format.html(issue.personCode || "-")}
+                                ${Format.html(issue.issueType || "-")}
+                                ${Format.html(Format.reviewStatusText(issue.reviewStatus || "PENDING"))}
+                                ${issue.reviewReason ? ` ${Format.html(issue.reviewReason)}` : ""}
+                                ${issue.reviewedAt ? ` ${Format.html(issue.reviewedAt)}` : ""}
+                            </span>
+                            ${issue.reviewStatus === "PENDING" && Permissions.has("SALARY_ACCEPTANCE") ? `
+                                <button type="button" class="link-button" data-acceptance-issue-review="${Format.html(String(issue.id || ""))}">\u5df2\u6838\u67e5</button>
+                                <button type="button" class="link-button" data-acceptance-issue-ignore="${Format.html(String(issue.id || ""))}">\u6682\u4e0d\u5904\u7406</button>
+                            ` : ""}
+                        `).join(" ")}
+                    </div>
+                `);
+            }
+            setStatus("\u9a8c\u6536\u6279\u6b21\u8be6\u60c5\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    exportMigrationAcceptanceRun(runNo) {
+        if (!Permissions.has("SALARY_EXPORT") || !Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        if (!runNo) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u9a8c\u6536\u6279\u6b21");
+            return;
+        }
+        window.location.href = `/api/workbench/migration-acceptance/runs/${encodeURIComponent(runNo)}.csv`;
+    },
+    async reviewMigrationAcceptanceIssue(issueId, reviewStatus) {
+        if (!Permissions.has("SALARY_ACCEPTANCE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const defaultReason = reviewStatus === "IGNORED" ? "\u786e\u8ba4\u6682\u4e0d\u5904\u7406" : "\u786e\u8ba4\u5df2\u6838\u67e5";
+        const reviewReason = window.prompt("\u8bf7\u586b\u5199\u9a8c\u6536\u95ee\u9898\u6838\u67e5\u8bf4\u660e", defaultReason);
+        if (!reviewReason) {
+            return;
+        }
+        setStatus("\u6b63\u5728\u767b\u8bb0\u9a8c\u6536\u95ee\u9898\u6838\u67e5...");
+        try {
+            const result = await Api.request(`/api/workbench/migration-acceptance/issues/${encodeURIComponent(issueId)}/review`, {
+                method: "POST",
+                body: JSON.stringify({ reviewStatus, reviewReason })
+            });
+            setStatus(`\u9a8c\u6536\u95ee\u9898\u5df2\u6807\u8bb0 ${Format.reviewStatusText(result.reviewStatus || reviewStatus)}`);
+            if (result.runNo) {
+                await WorkbenchPanel.openMigrationAcceptanceRun(result.runNo);
+            }
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
     itemHtml(item) {
         const dateText = item.year ? `${item.year}-${String(item.month || 1).padStart(2, "0")}` : "-";
         const personText = [item.personName, item.personCode].filter(Boolean).join(" ");
-        const canComplete = item.status === "TODO" && item.source === "SALARY_EVENT" && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_DONE");
+        const canComplete = item.status === "TODO" && WorkbenchPanel.isSalaryTodoSource(item.source) && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_DONE");
+        const canReviewGeneratedIssue = item.status === "TODO" && item.source === "GENERATED_TIMELINE" && Permissions.has("SALARY_TODO");
+        const canRetestGeneratedIssue = canReviewGeneratedIssue && Permissions.has("SALARY_TRIAL");
+        const isDataGovernanceSource = ["DATA_GOVERNANCE", "REPORT_SAMPLE_COMPARISON"].includes(item.source || "");
+        const canReviewDataGovernance = item.status === "TODO" && isDataGovernanceSource && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_GOVERNANCE");
+        const canHandleClosure = item.status === "TODO" && item.source === "SALARY_CLOSURE" && Permissions.has("SALARY_DONE");
+        const canUseSalaryDone = item.status !== "TODO" && item.source === "SALARY_CASE" && Permissions.has("SALARY_DONE");
+        const canUseSalaryClosure = canUseSalaryDone || canHandleClosure;
         const statusText = item.status === "CANCELLED" ? Format.businessStatusText(item.status) : "";
         const trialText = item.trialStatus ? Format.statusText(item.trialStatus) : "";
         const trialClass = Format.trialStatusClass(item.trialStatus);
         const reviewText = item.reviewStatus ? Format.reviewStatusText(item.reviewStatus) : "";
         const reviewClass = Format.reviewStatusClass(item.reviewStatus);
+        const workflowText = item.workflowStatus ? Format.workflowStatusText(item.workflowStatus) : "";
+        const workflowClass = Format.workflowStatusClass(item.workflowStatus);
+        const closureText = item.closureStatus ? Format.closureStatusText(item.closureStatus) : "";
+        const closureClass = Format.closureStatusClass(item.closureStatus);
+        const governanceTraceText = item.status !== "TODO" && isDataGovernanceSource
+            ? [item.reviewedBy, item.reviewedAt, item.retestSummary ? `\u590d\u6d4b\uff1a${item.retestSummary}` : ""].filter(Boolean).join(" | ")
+            : "";
+        const nextActionText = item.nextActionLabel || "";
+        const hasNextAction = Boolean(item.nextActionCode || item.nextActionLabel);
+        const isMigrationDeliveryGovernance = item.source === "DATA_GOVERNANCE" && String(item.id || "").startsWith("salary-migration-delivery-error-");
+        const migrationDeliveryGovernanceActions = isMigrationDeliveryGovernance && Permissions.has("SYSTEM_AUDIT") ? `
+            <button type="button" data-workbench-audit-salary-migration-delivery>\u603b\u4ea4\u4ed8\u5ba1\u8ba1</button>
+            <button type="button" data-workbench-audit-history-closure>\u5386\u53f2\u9a8c\u6536\u5ba1\u8ba1</button>
+            <button type="button" data-workbench-audit-report-delivery>\u62a5\u8868\u4ea4\u4ed8\u5ba1\u8ba1</button>
+        ` : "";
+        const showWritePlan = canUseSalaryClosure && ["HISTORY_READY", "HISTORY_PREPARED", "HISTORY_WRITTEN", "HISTORY_REVIEW_PENDING", "HISTORY_CLOSED", "HISTORY_EXECUTED", "HISTORY_ROLLED_BACK", "HISTORY_BLOCKED"].includes(item.workflowStatus || "");
+        const showComparison = canUseSalaryClosure && ["HISTORY_WRITTEN", "HISTORY_REVIEW_PENDING", "HISTORY_CLOSED", "HISTORY_EXECUTED"].includes(item.workflowStatus || "");
+        const showReview = canUseSalaryDone && item.workflowStatus === "REVIEW_PENDING";
         return `
-            <div class="work-item"
+            <div class="work-item ${hasNextAction ? "has-next-action" : ""} ${isMigrationDeliveryGovernance ? "migration-delivery-governance" : ""}"
                 data-work-id="${Format.html(item.id)}"
                 data-source="${Format.html(item.source || "")}"
                 data-status="${Format.html(item.status || "")}"
@@ -1011,10 +6382,36 @@ const WorkbenchPanel = {
                     <span class="work-item-meta">${Format.html(personText || item.orgCode || "-")}</span>
                     <span class="work-item-summary">${Format.html(item.summary || "")}</span>
                     ${statusText ? `<span class="work-item-state">${statusText}</span>` : ""}
+                    ${isMigrationDeliveryGovernance ? `<span class="work-item-delivery-warning">\u8fc1\u79fb\u4ea4\u4ed8\u5f02\u5e38</span>` : ""}
+                    ${closureText ? `<span class="work-item-closure ${Format.html(closureClass)}" title="${Format.html(item.closureMessage || closureText)}">${Format.html(closureText)}</span>` : ""}
+                    ${nextActionText ? `<span class="work-item-next-action" title="${Format.html(item.closureMessage || nextActionText)}"><b>\u4e0b\u4e00\u6b65</b>${Format.html(nextActionText)}</span>` : ""}
+                    ${workflowText ? `<span class="work-item-workflow ${Format.html(workflowClass)}">${Format.html(workflowText)}</span>` : ""}
                     ${trialText ? `<span class="work-item-trial ${Format.html(trialClass)}">${Format.html(trialText)}</span>` : ""}
                     ${reviewText ? `<span class="work-item-review ${Format.html(reviewClass)}">${Format.html(reviewText)}</span>` : ""}
+                    ${governanceTraceText ? `<span class="work-item-governance-trace" title="${Format.html(item.reviewReason || governanceTraceText)}">${Format.html(governanceTraceText)}</span>` : ""}
                 </button>
-                ${canComplete ? `<button type="button" class="work-item-complete" data-complete-work-id="${Format.html(item.id)}">\u529e\u7406</button>` : ""}
+                ${canComplete ? `<button type="button" class="work-item-complete" data-complete-work-id="${Format.html(item.id)}">\u9884\u68c0\u529e\u7406</button>` : ""}
+                ${canReviewGeneratedIssue ? `<div class="work-item-actions">
+                    ${canRetestGeneratedIssue ? `<button type="button" data-generated-issue-retest="${Format.html(item.id)}">\u590d\u6d4b</button>` : ""}
+                    <button type="button" data-generated-issue-review="${Format.html(item.id)}" data-generated-issue-review-status="REVIEWED">\u786e\u8ba4</button>
+                    <button type="button" data-generated-issue-review="${Format.html(item.id)}" data-generated-issue-review-status="IGNORED">\u5ffd\u7565</button>
+                </div>` : ""}
+                ${canReviewDataGovernance ? `<div class="work-item-actions">
+                    ${item.source === "DATA_GOVERNANCE" ? `<button type="button" data-data-governance-retest="${Format.html(item.id)}">\u590d\u6d4b</button>` : ""}
+                    ${migrationDeliveryGovernanceActions}
+                    <button type="button" data-data-governance-review="${Format.html(item.id)}" data-data-governance-review-status="REVIEWED">\u786e\u8ba4</button>
+                    <button type="button" data-data-governance-review="${Format.html(item.id)}" data-data-governance-review-status="IGNORED">\u5ffd\u7565</button>
+                </div>` : ""}
+                ${canHandleClosure ? `<div class="work-item-actions">
+                    <button type="button" data-work-id="${Format.html(item.id)}">${Format.html(nextActionText || "\u5904\u7406\u95ed\u73af")}</button>
+                    ${showWritePlan ? `<button type="button" data-history-write-plan-case-no="${Format.html(item.id)}">\u5199\u5165\u8ba1\u5212</button>` : ""}
+                    ${showComparison ? `<button type="button" data-history-write-comparison-case-no="${Format.html(item.id)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
+                </div>` : ""}
+                ${canUseSalaryDone && (showReview || showWritePlan || showComparison) ? `<div class="work-item-actions">
+                    ${showReview ? `<button type="button" data-work-id="${Format.html(item.id)}">${Format.html(nextActionText || "\u590d\u6838")}</button>` : ""}
+                    ${showWritePlan ? `<button type="button" data-history-write-plan-case-no="${Format.html(item.id)}">\u5199\u5165\u8ba1\u5212</button>` : ""}
+                    ${showComparison ? `<button type="button" data-history-write-comparison-case-no="${Format.html(item.id)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
+                </div>` : ""}
             </div>
         `;
     },
@@ -1057,9 +6454,20 @@ const WorkbenchPanel = {
         }
         return "MANUAL";
     },
+    historyPlanWritten(plan) {
+        return plan?.planStatus === "EXECUTED" && plan?.executionResult === "SUCCESS";
+    },
+    historyPlanBlocked(plan) {
+        return Boolean(plan)
+            && !WorkbenchPanel.historyPlanWritten(plan)
+            && (plan.planStatus === "BLOCKED" || plan.previewStatus === "BLOCKED" || plan.writable === false);
+    },
     historyWriteWorkflow(plan) {
         if (plan?.processingPriority || plan?.nextAction || plan?.nextActionCode) {
             return { priority: plan.processingPriority || "DONE", actionCode: plan.nextActionCode || "", action: plan.nextAction || Format.historyWriteActionText(plan.nextActionCode) };
+        }
+        if (plan?.planStatus === "ROLLED_BACK" || plan?.executionResult === "ROLLED_BACK") {
+            return { priority: "MEDIUM", actionCode: "REPREVIEW_HISTORY", action: "\u91cd\u65b0\u9884\u68c0" };
         }
         const comparisonStatus = plan?.comparisonStatus || "";
         const reviewStatus = plan?.comparisonReviewStatus || "";
@@ -1150,6 +6558,18 @@ const WorkbenchPanel = {
         </div>`;
     },
     historyPlanSelectable(plan, workflow) {
+        if (plan?.planStatus === "ROLLED_BACK" || plan?.executionResult === "ROLLED_BACK") {
+            return true;
+        }
+        if (WorkbenchPanel.historyPlanBlocked(plan)) {
+            return true;
+        }
+        if (plan.planStatus === "PREPARED" && (plan.writable === true || plan.previewStatus === "WARNING" || plan.previewStatus === "READY")) {
+            return true;
+        }
+        if (WorkbenchPanel.historyPlanWritten(plan)) {
+            return true;
+        }
         return plan.comparisonStatus === "MISMATCHED"
             && plan.comparisonReviewStatus !== "REVIEWED"
             && ["RETEST_FIRST", "MAINTAIN_AND_RETEST", "APPROVE_RETEST"].includes(workflow?.actionCode || "");
@@ -1163,26 +6583,69 @@ const WorkbenchPanel = {
         const sameAction = actionCodes.length === 1;
         const actionText = sameAction ? Format.historyWriteActionText(actionCodes[0]) : "\u591a\u79cd\u4e0b\u4e00\u6b65\u52a8\u4f5c";
         const actionCode = sameAction ? actionCodes[0] : "";
-        const canRetest = ["RETEST_FIRST", "MAINTAIN_AND_RETEST"].includes(actionCode);
+        const canRetest = ["RETEST_FIRST", "MAINTAIN_AND_RETEST", "COMPARE_RETEST"].includes(actionCode);
         const canApprove = actionCode === "APPROVE_RETEST";
+        const canRepreview = actionCode === "REPREVIEW_HISTORY";
+        const canWrite = actionCode === "WRITE_HISTORY" && Permissions.has("SALARY_HISTORY_WRITE");
+        const canRollback = actionCode === "ROLLBACK_HISTORY" && Permissions.has("SALARY_HISTORY_ROLLBACK");
+        const canReviewDifference = WorkbenchPanel.selectedHistoryPlanReviewableCount() > 0;
+        const canMarkSpecial = WorkbenchPanel.selectedHistoryPlanSpecialCount() > 0;
         const maintenanceTargets = WorkbenchPanel.selectedHistoryPlanMaintenanceTargets();
         const queueFilter = state.historyPlanQueueFilter;
+        const queueLabel = queueFilter?.label || "\u5904\u7406\u961f\u5217";
         return `<div class="history-plan-selection">
             <span>\u5df2\u9009 ${Format.html(selected.length)} \u6761 | ${Format.html(actionText)}</span>
-            ${queueFilter ? `<small>\u6765\u81ea\u672c\u8f6e\u4ecd\u6709\u5dee\u5f02\u961f\u5217</small>` : ""}
+            ${queueFilter ? `<small>\u6765\u81ea${Format.html(queueLabel)}</small>` : ""}
             ${actionCode === "MAINTAIN_AND_RETEST" && maintenanceTargets.length ? `<small>\u7ef4\u62a4</small>${maintenanceTargets.map((target) => `<button type="button" data-history-plan-selection-maintenance="${Format.html(target)}">${Format.html(WorkbenchPanel.maintenanceTargetText(target))}</button>`).join("")}` : ""}
-            ${canRetest ? `<button type="button" data-history-plan-selection-retest>\u590d\u6d4b\u9009\u4e2d\u9879</button>` : ""}
+            ${canRetest ? `<button type="button" data-history-plan-selection-retest>${actionCode === "COMPARE_RETEST" ? "\u590d\u6d4b\u5bf9\u7167\u961f\u5217" : "\u590d\u6d4b\u9009\u4e2d\u9879"}</button>` : ""}
+            ${canRepreview ? `<button type="button" data-history-plan-selection-preview>\u91cd\u65b0\u9884\u68c0\u9009\u4e2d\u9879</button>` : ""}
             ${canApprove ? `<button type="button" data-history-plan-selection-approve>\u6807\u8bb0\u9009\u4e2d\u901a\u8fc7</button>` : ""}
+            ${canReviewDifference ? `<button type="button" data-history-plan-selection-review>\u6838\u67e5\u9009\u4e2d\u5dee\u5f02</button>` : ""}
+            ${canMarkSpecial ? `<button type="button" data-history-plan-selection-special>\u6807\u8bb0\u9009\u4e2d\u7279\u6b8a\u60c5\u51b5</button>` : ""}
+            ${canWrite ? `<button type="button" class="primary" data-history-plan-selection-preview>\u6279\u91cf\u5199\u5165\u5b89\u5168\u9884\u68c0</button><button type="button" data-history-plan-selection-execute>\u5b89\u5168\u786e\u8ba4\u540e\u5199\u5165</button>` : ""}
+            ${canRollback ? `<button type="button" data-history-plan-selection-rollback>\u64a4\u9500\u9009\u4e2d\u9879</button>` : ""}
             ${sameAction ? `<button type="button" data-history-plan-selection-filter="${Format.html(actionCode)}">\u7b5b\u5230\u6b64\u52a8\u4f5c</button>` : `<small>\u8bf7\u9009\u62e9\u540c\u4e00\u7c7b\u4e0b\u4e00\u6b65\u52a8\u4f5c</small>`}
             <button type="button" data-history-plan-selection-clear>\u6e05\u9664\u9009\u62e9</button>
         </div>`;
     },
     historyPlanQueuePanelHtml(plans = []) {
         const queueFilter = state.historyPlanQueueFilter;
-        if (!queueFilter?.caseNos?.length) {
+        if (!queueFilter?.caseNos?.length && !queueFilter?.readyOnly && !queueFilter?.printQueue && !queueFilter?.pendingQueue && !queueFilter?.statusQueue) {
             return "";
         }
+        const queueLabel = queueFilter.label || "\u5f53\u524d\u5904\u7406\u961f\u5217";
+        const sourceLabel = queueFilter.source === "workbench-next-action"
+            ? `\u6765\u81ea\u5de5\u4f5c\u53f0\u4e0b\u4e00\u6b65\uff1a${Format.nextActionText(queueFilter.nextAction || "")}`
+            : "";
+        const workbenchSourceAction = queueFilter.source === "workbench-next-action"
+            ? `<button type="button" data-history-plan-workbench-source>\u56de\u5230\u5de5\u4f5c\u53f0\u7b5b\u9009</button>`
+            : "";
         const items = Array.isArray(plans) ? plans : [];
+        const sourceBatchAction = queueFilter.sourceBatchNo
+            ? `<button type="button" data-history-plan-queue-batch="${Format.html(queueFilter.sourceBatchNo)}">\u8fd4\u56de\u6253\u5370\u6279\u6b21</button>`
+            : "";
+        if (!queueFilter?.caseNos?.length) {
+            const selectedCount = state.historyPlanSelected.size;
+            return `<div class="history-plan-queue-panel">
+                <span>
+                    <strong>${Format.html(queueLabel)}</strong>
+                    <em>\u5f53\u524d\u53ef\u89c1 ${Format.html(items.length)} | \u5df2\u9009 ${Format.html(selectedCount)}</em>
+                    ${sourceLabel ? `<small>${Format.html(sourceLabel)}</small>` : ""}
+                </span>
+                <div>
+                    ${queueFilter.pendingQueue === "review" && items.length ? `<button type="button" class="primary" data-history-plan-review-queue-retest>\u6279\u91cf\u590d\u6d4b\u5f85\u6838\u67e5\u9879</button>` : ""}
+                    ${queueFilter.pendingQueue === "review" && items.length ? `<button type="button" data-history-plan-review-queue-review>\u6279\u91cf\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba</button>` : ""}
+                    ${queueFilter.statusQueue === "ROLLED_BACK" && items.length ? `<button type="button" class="primary" data-history-plan-selection-preview>\u6279\u91cf\u91cd\u65b0\u9884\u68c0</button>` : ""}
+                    ${queueFilter.readyOnly && items.length ? `<button type="button" class="primary" data-history-plan-selection-preview>\u6279\u91cf\u5199\u5165\u5b89\u5168\u9884\u68c0</button>` : ""}
+                    ${queueFilter.printQueue === "PRINTED_READY" && items.length ? `<button type="button" class="primary" data-history-plan-print-queue-write>\u9884\u68c0\u5e76\u5199\u5165\u786e\u8ba4</button>` : ""}
+                    ${queueFilter.printQueue === "UNPRINTED_BLOCKED" && items.length ? `<button type="button" class="primary" data-history-plan-print-queue-print>\u6279\u91cf\u6253\u5370\u9009\u4e2d\u5ba1\u6279\u8868</button>` : ""}
+                    ${items.length ? `<button type="button" data-history-plan-queue-autoselect>\u9009\u4e2d\u961f\u5217</button>` : ""}
+                    ${workbenchSourceAction}
+                    ${sourceBatchAction}
+                    <button type="button" data-history-ledger-clear-queue-filter>\u6e05\u9664\u961f\u5217</button>
+                </div>
+            </div>`;
+        }
         const selectedCount = state.historyPlanSelected.size;
         const maintainCount = items.filter((plan) => WorkbenchPanel.historyWriteWorkflow(plan).actionCode === "MAINTAIN_AND_RETEST").length;
         const retestCount = items.filter((plan) => WorkbenchPanel.historyWriteWorkflow(plan).actionCode === "RETEST_FIRST").length;
@@ -1190,16 +6653,33 @@ const WorkbenchPanel = {
         const maintenanceTargets = WorkbenchPanel.selectedHistoryPlanMaintenanceTargets();
         return `<div class="history-plan-queue-panel">
             <span>
-                <strong>\u5f53\u524d\u5904\u7406\u961f\u5217</strong>
+                <strong>${Format.html(queueLabel)}</strong>
                 <em>\u603b\u6570 ${Format.html(queueFilter.caseNos.length)} | \u5f53\u524d\u53ef\u89c1 ${Format.html(items.length)} | \u5df2\u9009 ${Format.html(selectedCount)} | \u5f85\u7ef4\u62a4 ${Format.html(maintainCount)} | \u5f85\u590d\u6d4b ${Format.html(retestCount)} | \u5f85\u901a\u8fc7 ${Format.html(approveCount)}</em>
+                ${sourceLabel ? `<small>${Format.html(sourceLabel)}</small>` : ""}
             </span>
             <div>
                 ${maintenanceTargets.map((target) => `<button type="button" data-history-plan-selection-maintenance="${Format.html(target)}">\u7ef4\u62a4${Format.html(WorkbenchPanel.maintenanceTargetText(target))}</button>`).join("")}
                 ${retestCount ? `<button type="button" data-history-plan-selection-retest>\u590d\u6d4b\u961f\u5217</button>` : ""}
                 ${approveCount ? `<button type="button" data-history-plan-selection-approve>\u901a\u8fc7\u961f\u5217</button>` : ""}
                 <button type="button" data-history-plan-queue-autoselect>\u91cd\u65b0\u9009\u4e2d\u961f\u5217</button>
+                ${workbenchSourceAction}
+                ${sourceBatchAction}
                 <button type="button" data-history-ledger-clear-queue-filter>\u6e05\u9664\u961f\u5217</button>
             </div>
+        </div>`;
+    },
+    historyPlanPrintQueueSummaryHtml(summary) {
+        const buttons = [
+            ["PRINTED_READY", "\u5df2\u6253\u5370\u53ef\u5199\u5165", summary.executable],
+            ["UNPRINTED_BLOCKED", "\u672a\u6253\u5370\u963b\u65ad", summary.unprintedBlocked],
+            ["REPRINTED_REVIEW", "\u5df2\u91cd\u6253\u5f85\u590d\u6838", summary.reprintedReview],
+            ["PRINTED_BLOCKED", "\u5df2\u6253\u5370\u4ecd\u963b\u65ad", summary.printedBlocked]
+        ];
+        return `<div class="history-plan-print-queues">
+            ${buttons
+                .filter(([, , count]) => Number(count || 0) > 0)
+                .map(([queue, label, count]) => `<button type="button" data-history-plan-print-queue="${Format.html(queue)}">${Format.html(label)} ${Format.html(count)}</button>`)
+                .join("")}
         </div>`;
     },
     selectedHistoryPlans() {
@@ -1208,6 +6688,24 @@ const WorkbenchPanel = {
     },
     selectedHistoryPlanCaseNos() {
         return Array.from(state.historyPlanSelected.keys()).filter(Boolean);
+    },
+    selectedHistoryPlanReviewableCount() {
+        return WorkbenchPanel.selectedHistoryPlans()
+            .filter((plan) => WorkbenchPanel.historyPlanWritten(plan)
+                && plan.comparisonStatus === "MISMATCHED"
+                && plan.comparisonReviewStatus !== "REVIEWED")
+            .length;
+    },
+    selectedHistoryPlanSpecialCount() {
+        return WorkbenchPanel.selectedHistoryPlans()
+            .filter((plan) => plan.comparisonReviewStatus !== "REVIEWED")
+            .filter((plan) => {
+                const blocked = WorkbenchPanel.historyPlanBlocked(plan);
+                const mismatched = WorkbenchPanel.historyPlanWritten(plan)
+                    && plan.comparisonStatus === "MISMATCHED";
+                return blocked || mismatched;
+            })
+            .length;
     },
     selectedHistoryPlanMaintenanceTargets() {
         const allowed = ["base", "post", "education", "assessment"];
@@ -1239,37 +6737,53 @@ const WorkbenchPanel = {
         const workflow = WorkbenchPanel.historyWriteWorkflow(plan);
         const selectable = WorkbenchPanel.historyPlanSelectable(plan, workflow);
         const selected = state.historyPlanSelected.has(plan.caseNo || "");
+        const selectionActionCode = plan.planStatus === "ROLLED_BACK" || plan.executionResult === "ROLLED_BACK"
+            ? "REPREVIEW_HISTORY"
+            : WorkbenchPanel.historyPlanBlocked(plan)
+            ? "REPREVIEW_HISTORY"
+            : plan.planStatus === "PREPARED" && (plan.writable === true || plan.previewStatus === "WARNING" || plan.previewStatus === "READY")
+            ? "WRITE_HISTORY"
+            : (WorkbenchPanel.historyPlanWritten(plan) ? "ROLLBACK_HISTORY" : (workflow.actionCode || ""));
         const workflowHtml = plan.comparisonStatus === "MISMATCHED"
             ? `<span class="work-item-trial ${Format.html(Format.historyWritePriorityClass(workflow.priority))}">\u4f18\u5148\u7ea7 ${Format.html(Format.historyWritePriorityText(workflow.priority))}</span>`
             : "";
         const maintenanceHtml = WorkbenchPanel.historyPlanMaintenanceHtml(plan, retestStatus);
         const nextActionsHtml = WorkbenchPanel.historyPlanNextActionsHtml(plan, workflow, retestStatus);
+        const blockedReviewHtml = WorkbenchPanel.historyPlanBlocked(plan) && plan.comparisonReviewStatus !== "REVIEWED"
+            ? `<button type="button" class="history-plan-approve" data-history-write-blocked-review-case-no="${Format.html(plan.caseNo)}">\u540e\u671f\u6838\u67e5</button>`
+            : "";
         return `
             <div class="history-plan-row ${plan.comparisonStatus === "MISMATCHED" ? "mismatched" : ""} ${selected ? "selected" : ""}">
                 ${selectable ? `<label class="history-plan-select" title="\u9009\u62e9\u6b64\u8ba1\u5212">
-                    <input type="checkbox" data-history-plan-select-case-no="${Format.html(plan.caseNo || "")}" data-history-plan-select-person-code="${Format.html(plan.personCode || "")}" data-history-plan-select-action-code="${Format.html(workflow.actionCode || "")}" ${selected ? "checked" : ""}>
+                    <input type="checkbox" data-history-plan-select-case-no="${Format.html(plan.caseNo || "")}" data-history-plan-select-person-code="${Format.html(plan.personCode || "")}" data-history-plan-select-action-code="${Format.html(selectionActionCode)}" ${selected ? "checked" : ""}>
                 </label>` : `<span class="history-plan-select placeholder"></span>`}
                 <button type="button" class="history-plan-item" data-history-write-plan-case-no="${Format.html(plan.caseNo)}">
-                    <span class="history-plan-main">
+                    <span class="history-plan-cell history-plan-person">
                         <strong>${Format.html(plan.personCode || "-")}</strong>
-                        <span>${Format.html(plan.businessType || "-")} | ${Format.html(period)}</span>
+                        <small>${Format.html(plan.planNo || plan.caseNo || "-")}</small>
                     </span>
-                    <span class="history-plan-meta">
+                    <span class="history-plan-cell history-plan-business">
+                        <strong>${Format.html(period)}</strong>
+                        <small>${Format.html(plan.businessType || "-")}</small>
+                    </span>
+                    <span class="history-plan-cell history-plan-status">
                         <span>${Format.html(WorkbenchPanel.planStatusText(plan.planStatus))}</span>
-                        <small>${Format.html(plan.planNo || "-")}</small>
                     </span>
-                    <span class="history-plan-flags">
+                    <span class="history-plan-cell history-plan-flags">
                         <span class="work-item-trial ${Format.html(comparisonClass)}">${Format.html(Format.historyWriteComparisonText(plan.comparisonStatus))}</span>
                         ${mismatchHtml}
                         ${retestHtml}
-                        ${workflowHtml}
                         ${reviewHtml}
                     </span>
-                    <span class="history-plan-sub">${Format.html(workflow.action || plan.executionMessage || plan.rollbackMessage || plan.workItemId || "-")}</span>
+                    <span class="history-plan-cell history-plan-next">
+                        ${workflowHtml}
+                        <small>${Format.html(workflow.action || plan.executionMessage || plan.rollbackMessage || plan.workItemId || "-")}</small>
+                    </span>
                 </button>
                 <div class="history-plan-actions">
                     <button type="button" class="history-plan-compare" data-history-write-comparison-case-no="${Format.html(plan.caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>
                     ${nextActionsHtml}
+                    ${blockedReviewHtml}
                     ${maintenanceHtml}
                 </div>
             </div>
@@ -1285,6 +6799,84 @@ const WorkbenchPanel = {
         } catch (_) {
             return 0;
         }
+    },
+    historyPlanIssues(plan) {
+        if (!plan || !plan.issuesJson) {
+            return [];
+        }
+        try {
+            const issues = JSON.parse(plan.issuesJson);
+            return Array.isArray(issues) ? issues.map((issue) => String(issue || "")).filter(Boolean) : [];
+        } catch (_) {
+            return [];
+        }
+    },
+    historyPlanBlockedIssueCategory(issue) {
+        const text = String(issue || "").toLowerCase();
+        if (text.includes("sid") || text.includes("referenced") || text.includes("next history") || text.includes("previous history")) {
+            return "chain";
+        }
+        if (text.includes("no hisbase column") || text.includes("snapshot item") || text.includes("current item")) {
+            return "mapping";
+        }
+        if (text.includes("hj2") || text.includes("total field")) {
+            return "total";
+        }
+        if (text.includes("template") || text.includes("adjacent history")) {
+            return "template";
+        }
+        if (text.includes("cancelled") || text.includes("trial risk")) {
+            return "business";
+        }
+        return "other";
+    },
+    historyPlanBlockedIssueCategoryText(category) {
+        return {
+            chain: "\u5386\u53f2\u94fe",
+            mapping: "\u5b57\u6bb5\u6620\u5c04",
+            total: "\u5408\u8ba1\u5b57\u6bb5",
+            template: "\u6a21\u677f/\u76f8\u90bb\u5386\u53f2",
+            business: "\u4e1a\u52a1\u72b6\u6001",
+            other: "\u5176\u4ed6"
+        }[category] || "\u5176\u4ed6";
+    },
+    historyPlanBlockedIssueCategoryHint(category) {
+        return {
+            chain: "\u68c0\u67e5 hisbase sid \u94fe\u3001\u4e0a\u4e00\u6761/\u4e0b\u4e00\u6761\u5386\u53f2\u5173\u7cfb",
+            mapping: "\u68c0\u67e5\u5de5\u8d44\u9879\u4e0e hisbase \u5b57\u6bb5\u6620\u5c04",
+            total: "\u68c0\u67e5 hisbase hj2 \u5408\u8ba1\u5b57\u6bb5\u6216\u6807\u51c6\u9879",
+            template: "\u68c0\u67e5\u53ef\u4f5c\u4e3a\u5199\u5165\u6a21\u677f\u7684\u76f8\u90bb\u5386\u53f2\u884c",
+            business: "\u5148\u5904\u7406\u4e1a\u52a1\u590d\u6838\u3001\u64a4\u56de\u6216\u72b6\u6001\u95ee\u9898",
+            other: "\u6253\u5f00\u8ba1\u5212\u8be6\u60c5\u67e5\u770b issues_json"
+        }[category] || "\u6253\u5f00\u8ba1\u5212\u8be6\u60c5\u67e5\u770b issues_json";
+    },
+    historyPlanBlockedCategories(plan) {
+        return Array.from(new Set(WorkbenchPanel.historyPlanIssues(plan).map(WorkbenchPanel.historyPlanBlockedIssueCategory)));
+    },
+    historyPlanBlockedIssueSummaryHtml(plans = []) {
+        const blockedPlans = (plans || []).filter((plan) => WorkbenchPanel.historyPlanBlocked(plan));
+        if (!blockedPlans.length) {
+            return "";
+        }
+        const counts = new Map();
+        for (const plan of blockedPlans) {
+            const categories = WorkbenchPanel.historyPlanBlockedCategories(plan);
+            for (const category of (categories.length ? categories : ["other"])) {
+                counts.set(category, (counts.get(category) || 0) + 1);
+            }
+        }
+        const order = ["chain", "mapping", "total", "template", "business", "other"];
+        const active = state.historyPlanBlockedIssueCategory || "";
+        const buttons = order
+            .filter((category) => counts.has(category))
+            .map((category) => `<button type="button" class="${active === category ? "active" : ""}" title="${Format.html(WorkbenchPanel.historyPlanBlockedIssueCategoryHint(category))}" data-history-plan-blocked-category="${Format.html(category)}">${Format.html(WorkbenchPanel.historyPlanBlockedIssueCategoryText(category))} ${Format.html(counts.get(category))}</button>`)
+            .join("");
+        return `<div class="history-blocked-board">
+            <strong>\u963b\u65ad\u539f\u56e0</strong>
+            ${active ? `<button type="button" data-history-plan-blocked-category="">\u5168\u90e8 ${Format.html(blockedPlans.length)}</button>` : `<span>\u5168\u90e8 ${Format.html(blockedPlans.length)}</span>`}
+            ${buttons}
+            <small>\u5904\u7406\u540e\u9009\u4e2d\u8bb0\u5f55\u53ef\u91cd\u65b0\u9884\u68c0</small>
+        </div>`;
     },
     downloadCsv(filename, rows) {
         const csv = `\uFEFF${rows.map((row) => row.map(Format.csv).join(",")).join("\n")}`;
@@ -1333,9 +6925,10 @@ const WorkbenchPanel = {
         return rows;
     },
     batchExecuteCsvRows(result) {
-        const rows = [["办理编号", "写入计划号", "人员编码", "单位编码", "历史行ID", "状态", "是否调整sid", "说明"]];
+        const rows = [["批次号", "办理编号", "写入计划号", "人员编码", "单位编码", "历史行ID", "状态", "是否调整sid", "说明"]];
         for (const item of result.items || []) {
             rows.push([
+                result.batchNo || "",
                 item.caseNo,
                 item.writePlanId,
                 item.personCode,
@@ -1348,22 +6941,102 @@ const WorkbenchPanel = {
         }
         return rows;
     },
+    historyWriteBatchClosureText(item = {}) {
+        const action = item.action || "";
+        const failed = Number(item.failed || 0);
+        const skipped = Number(item.skipped || 0);
+        const mismatched = Number(item.mismatched || 0);
+        if (failed > 0 || skipped > 0 || mismatched > 0) {
+            return "\u4ecd\u5f85\u5904\u7406";
+        }
+        if (action.includes("rollback")) {
+            return "\u5df2\u64a4\u9500";
+        }
+        if (action.includes("retest-approve")) {
+            return "\u5df2\u901a\u8fc7\u5f52\u6863";
+        }
+        if (action.includes("retest-preview")) {
+            return "\u5df2\u590d\u6d4b";
+        }
+        if (action.includes("execute")) {
+            return "\u5df2\u5199\u5165";
+        }
+        return "\u5df2\u8bb0\u5f55";
+    },
+    historyWriteBatchClosureClass(item = {}) {
+        const text = WorkbenchPanel.historyWriteBatchClosureText(item);
+        return {
+            "\u4ecd\u5f85\u5904\u7406": "error",
+            "\u5df2\u64a4\u9500": "skipped",
+            "\u5df2\u901a\u8fc7\u5f52\u6863": "reviewed",
+            "\u5df2\u590d\u6d4b": "different",
+            "\u5df2\u5199\u5165": "pending",
+            "\u5df2\u8bb0\u5f55": "pending"
+        }[text] || "pending";
+    },
+    historyWriteBatchClosureStats(items = []) {
+        return (items || []).reduce((stats, item) => {
+            const text = WorkbenchPanel.historyWriteBatchClosureText(item);
+            stats[text] = (stats[text] || 0) + 1;
+            return stats;
+        }, {});
+    },
+    historyWriteBatchLedgerQueueLabel(metricCode) {
+        return {
+            SALARY_NEXT_EXECUTE_WRITE: "\u53ef\u5199\u5165",
+            SALARY_NEXT_REVIEW_DIFFERENCE: "\u5f85\u6838\u67e5",
+            HISTORY_PLAN_ROLLED_BACK: "\u5df2\u56de\u6eda",
+            SALARY_CLOSURE_CLOSED: "\u5df2\u95ed\u73af"
+        }[metricCode] || "";
+    },
+    historyWriteBatchLedgerQueueHint(metricCode) {
+        return {
+            SALARY_NEXT_EXECUTE_WRITE: "\u4ec5\u663e\u793a\u5386\u53f2\u5199\u5165\u548c\u9009\u4e2d\u5199\u5165\u6279\u6b21\uff0c\u7528\u4e8e\u8ffd\u6eaf\u53ef\u5199\u5165\u961f\u5217\u7684\u5b9e\u9645\u843d\u5e93\u7ed3\u679c\u3002",
+            SALARY_NEXT_REVIEW_DIFFERENCE: "\u4ec5\u663e\u793a\u590d\u6d4b\u3001\u5dee\u5f02\u6838\u67e5\u548c\u7279\u6b8a\u60c5\u51b5\u6807\u8bb0\u6279\u6b21\uff0c\u7528\u4e8e\u8ffd\u6eaf\u5f85\u6838\u67e5\u961f\u5217\u7684\u5904\u7406\u7ed3\u8bba\u3002",
+            HISTORY_PLAN_ROLLED_BACK: "\u4ec5\u663e\u793a\u6279\u91cf\u64a4\u9500\u548c\u9009\u4e2d\u64a4\u9500\u6279\u6b21\uff0c\u7528\u4e8e\u8ffd\u6eaf\u5df2\u56de\u6eda\u8ba1\u5212\u7684\u6062\u590d\u548c\u590d\u6838\u961f\u5217\u3002",
+            SALARY_CLOSURE_CLOSED: "\u663e\u793a\u5df2\u5f62\u6210\u6279\u6b21\u7ed3\u8bba\u4e14\u65e0\u5f85\u5904\u7406\u9879\u7684\u53f0\u8d26\uff0c\u7528\u4e8e\u95ed\u73af\u62bd\u67e5\u548c\u5f52\u6863\u3002"
+        }[metricCode] || "\u663e\u793a\u6700\u8fd1\u5386\u53f2\u5199\u5165\u6279\u6b21\uff0c\u6309\u6279\u6b21\u52a8\u4f5c\u548c\u95ed\u73af\u72b6\u6001\u6c47\u603b\u3002";
+    },
+    historyWriteBatchLedgerEmptyText(metricCode) {
+        return {
+            SALARY_NEXT_EXECUTE_WRITE: "\u6682\u65e0\u5199\u5165\u6279\u6b21\uff0c\u8bf7\u5148\u5728\u53ef\u5199\u5165\u961f\u5217\u6267\u884c\u5b89\u5168\u9884\u68c0\u548c\u786e\u8ba4\u5199\u5165\u3002",
+            SALARY_NEXT_REVIEW_DIFFERENCE: "\u6682\u65e0\u590d\u6d4b\u6216\u6838\u67e5\u6279\u6b21\uff0c\u8bf7\u5148\u5728\u5f85\u6838\u67e5\u961f\u5217\u6267\u884c\u6279\u91cf\u590d\u6d4b\u6216\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba\u3002",
+            HISTORY_PLAN_ROLLED_BACK: "\u6682\u65e0\u56de\u6eda\u6279\u6b21\uff0c\u5df2\u56de\u6eda\u961f\u5217\u53ef\u5148\u91cd\u65b0\u9884\u68c0\u6216\u6838\u5bf9\u5355\u4eba\u64a4\u9500\u8bb0\u5f55\u3002",
+            SALARY_CLOSURE_CLOSED: "\u6682\u65e0\u5df2\u95ed\u73af\u6279\u6b21\uff0c\u8bf7\u5148\u5b8c\u6210\u6253\u5370\u5f52\u6863\u3001\u5386\u53f2\u5199\u5165\u548c\u5dee\u5f02\u590d\u6838\u3002"
+        }[metricCode] || "\u6682\u65e0\u6279\u6b21\u53f0\u8d26\u3002";
+    },
     batchResultStatusText(status) {
         return {
             REVIEWED: "\u5df2\u6807\u8bb0",
+            READY: "\u53ef\u5199",
+            WARNING: "\u8b66\u544a",
+            BLOCKED: "\u963b\u65ad",
             EXECUTED: "\u6210\u529f",
             ROLLED_BACK: "\u5df2\u64a4\u9500",
             FAILED: "\u5931\u8d25",
-            SKIPPED: "\u8df3\u8fc7"
+            SKIPPED: "\u8df3\u8fc7",
+            MATCHED: "\u5df2\u4e00\u81f4",
+            MISMATCHED: "\u4e0d\u4e00\u81f4",
+            RETEST: "\u590d\u6d4b",
+            SUMMARY: "\u6279\u6b21\u6c47\u603b",
+            PERSON: "\u4eba\u5458\u6d41\u6c34"
         }[status] || status || "-";
     },
     batchResultStatusClass(status) {
         return {
             REVIEWED: "matched",
+            READY: "matched",
+            WARNING: "warning",
+            BLOCKED: "blocked",
             EXECUTED: "matched",
             ROLLED_BACK: "matched",
             FAILED: "blocked",
-            SKIPPED: "warning"
+            SKIPPED: "warning",
+            MATCHED: "matched",
+            MISMATCHED: "blocked",
+            RETEST: "warning",
+            SUMMARY: "",
+            PERSON: ""
         }[status] || "";
     },
     batchResultStats(items) {
@@ -1373,9 +7046,306 @@ const WorkbenchPanel = {
             return stats;
         }, {});
     },
+    batchPreviewGroupCounts(items, keyFn, limit = 6) {
+        const counts = new Map();
+        for (const item of items || []) {
+            const key = keyFn(item) || "-";
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+        return Array.from(counts.entries())
+            .sort((left, right) => right[1] - left[1] || String(left[0]).localeCompare(String(right[0])))
+            .slice(0, limit)
+            .map(([key, count]) => ({ key, count }));
+    },
+    batchPreviewIssueCounts(items, limit = 5) {
+        const counts = new Map();
+        for (const item of items || []) {
+            for (const issue of item.issues || []) {
+                const key = issue || "-";
+                counts.set(key, (counts.get(key) || 0) + 1);
+            }
+        }
+        return Array.from(counts.entries())
+            .sort((left, right) => right[1] - left[1] || String(left[0]).localeCompare(String(right[0])))
+            .slice(0, limit)
+            .map(([key, count]) => ({ key, count }));
+    },
+    batchPreviewItemExecutable(item) {
+        const status = item?.status || "";
+        const issues = item?.issues || [];
+        const printMissing = issues.some((issue) => String(issue || "").includes("approval report has not been printed"));
+        return item?.writable === true && ["READY", "WARNING"].includes(status) && !printMissing;
+    },
+    batchPreviewScopeHtml(result) {
+        const items = result.items || [];
+        const writableItems = items.filter((item) => WorkbenchPanel.batchPreviewItemExecutable(item));
+        const periodCounts = WorkbenchPanel.batchPreviewGroupCounts(writableItems, (item) => item.year ? `${item.year}-${String(item.month || 1).padStart(2, "0")}` : "-");
+        const typeCounts = WorkbenchPanel.batchPreviewGroupCounts(writableItems, (item) => item.businessType || "-");
+        const orgCounts = WorkbenchPanel.batchPreviewGroupCounts(writableItems, (item) => item.orgCode || "-");
+        const issueCounts = WorkbenchPanel.batchPreviewIssueCounts(items.filter((item) => item.status === "BLOCKED"));
+        const chips = (title, values) => `<div class="batch-confirm-group"><span>${Format.html(title)}</span>${values.length
+            ? values.map((item) => `<em>${Format.html(item.key)} ${Format.html(item.count)}</em>`).join("")
+            : `<small>\u6682\u65e0</small>`}</div>`;
+        return `
+            <div class="batch-confirm-scope">
+                ${chips("\u53ef\u5199\u6708\u4efd", periodCounts)}
+                ${chips("\u53d8\u52a8\u7c7b\u522b", typeCounts)}
+                ${chips("\u5355\u4f4d\u5206\u5e03", orgCounts)}
+                ${chips("\u963b\u65ad\u539f\u56e0", issueCounts)}
+            </div>
+        `;
+    },
+    batchFinalConfirmGateHtml(result) {
+        const items = result.items || [];
+        const executableItems = items.filter((item) => WorkbenchPanel.batchPreviewItemExecutable(item));
+        const allIssues = items.flatMap((item) => item.issues || []);
+        const blockedIssues = allIssues.filter((issue) => String(issue || "").startsWith("BLOCKED"));
+        const warningIssues = allIssues.filter((issue) => String(issue || "").startsWith("WARNING"));
+        const printIssues = allIssues.filter((issue) => {
+            const safeIssue = String(issue || "");
+            return safeIssue.includes("approval report") || safeIssue.includes("report print archive");
+        });
+        const sidUpdateCount = executableItems.filter((item) => item.sidUpdateRequired === true).length;
+        const existingHistoryCount = executableItems.filter((item) => item.existingHistoryId).length;
+        const fieldCount = executableItems.reduce((sum, item) => sum + (item.fields || []).length, 0);
+        const mappedFieldCount = executableItems.reduce((sum, item) => sum + (item.fields || []).filter((field) => field.mapped === true).length, 0);
+        const fieldIssueCount = executableItems.reduce((sum, item) => sum + (item.fields || []).filter((field) => field.mapped !== true || field.issue).length, 0);
+        const issueCounts = WorkbenchPanel.batchPreviewIssueCounts(items, 6);
+        const card = (label, value, hint, tone = "") => `
+            <div class="batch-final-card ${Format.html(tone)}">
+                <span>${Format.html(label)}</span>
+                <strong>${Format.html(value)}</strong>
+                <small>${Format.html(hint)}</small>
+            </div>
+        `;
+        return `
+            <div class="batch-final-confirm">
+                ${card("\u5199\u5165\u4eba\u6570", executableItems.length, `\u603b\u9884\u68c0 ${items.length} \u6761\uff0c\u5176\u4f59\u5c06\u8df3\u8fc7`, executableItems.length ? "ready" : "blocked")}
+                ${card("\u5b57\u6bb5\u6620\u5c04", `${mappedFieldCount}/${fieldCount}`, fieldIssueCount ? `\u5b57\u6bb5\u95ee\u9898 ${fieldIssueCount} \u9879` : "\u5f85\u5199\u5165\u5b57\u6bb5\u5df2\u6620\u5c04", fieldIssueCount ? "warning" : "ready")}
+                ${card("SID \u94fe\u5904\u7406", sidUpdateCount, existingHistoryCount ? `\u5df2\u5b58\u5728\u5386\u53f2 ${existingHistoryCount} \u6761` : "\u6309\u9884\u68c0\u94fe\u63a5\u65b9\u6848\u5904\u7406", "ready")}
+                ${card("\u6253\u5370\u95e8\u7981", printIssues.length ? printIssues.length : "\u5df2\u901a\u8fc7", printIssues.length ? "\u672a\u6ee1\u8db3\u5ba1\u6279\u8868\u5f52\u6863\u7684\u8bb0\u5f55\u5df2\u963b\u65ad" : "\u5df2\u6253\u5370\u6216\u65e0\u6253\u5370\u963b\u65ad", printIssues.length ? "blocked" : "ready")}
+                ${card("\u963b\u65ad/\u8b66\u544a", `${blockedIssues.length}/${warningIssues.length}`, blockedIssues.length ? "\u963b\u65ad\u9879\u4e0d\u4f1a\u5199\u5165" : "\u65e0\u963b\u65ad\u9879", blockedIssues.length ? "blocked" : (warningIssues.length ? "warning" : "ready"))}
+                <div class="batch-final-issues">
+                    <span>\u4e3b\u8981\u6821\u9a8c\u7ed3\u679c</span>
+                    ${issueCounts.length
+                        ? issueCounts.map((item) => `<em>${Format.html(item.key)} ${Format.html(item.count)}</em>`).join("")
+                        : `<small>\u672a\u53d1\u73b0\u963b\u65ad\u6216\u8b66\u544a</small>`}
+                </div>
+            </div>
+        `;
+    },
+    batchSafetyTokenHtml(preview = {}) {
+        const token = preview.safetyToken || "";
+        const expiresAt = preview.safetyExpiresAt || "";
+        const shortToken = token.length > 18 ? `${token.slice(0, 8)}...${token.slice(-6)}` : token || "-";
+        const tokenReady = Boolean(token);
+        return `
+            <div class="batch-safety-token">
+                <div class="${tokenReady ? "ready" : "blocked"}">
+                    <span>\u9884\u68c0\u4ee4\u724c</span>
+                    <strong>${Format.html(shortToken)}</strong>
+                    <small>${tokenReady ? "\u6267\u884c\u5199\u5165\u65f6\u5c06\u643a\u5e26\u6b64\u4ee4\u724c" : "\u672a\u751f\u6210\u4ee4\u724c\uff0c\u4e0d\u5e94\u7ee7\u7eed\u5199\u5165"}</small>
+                </div>
+                <div class="${expiresAt ? "ready" : "warning"}">
+                    <span>\u8fc7\u671f\u65f6\u95f4</span>
+                    <strong>${Format.html(expiresAt || "-")}</strong>
+                    <small>${expiresAt ? "\u8d85\u8fc7\u8be5\u65f6\u95f4\u9700\u91cd\u65b0\u9884\u68c0" : "\u672a\u8fd4\u56de\u8fc7\u671f\u65f6\u95f4"}</small>
+                </div>
+                <div>
+                    <span>\u9884\u68c0\u6458\u8981</span>
+                    <p>${Format.html(preview.safetySummary || "\u672c\u6b21\u5199\u5165\u5fc5\u987b\u4f7f\u7528\u521a\u751f\u6210\u7684\u9884\u68c0\u4ee4\u724c\u3002")}</p>
+                </div>
+            </div>
+        `;
+    },
+    batchSafetyExpiresAtMillis(expiresAt) {
+        const text = String(expiresAt || "").trim();
+        if (!text) {
+            return 0;
+        }
+        const normalized = text.includes("T") ? text : text.replace(" ", "T");
+        const parsed = Date.parse(normalized);
+        return Number.isFinite(parsed) ? parsed : 0;
+    },
+    batchSafetyTokenExpired(preview = {}) {
+        const expiresAtMillis = WorkbenchPanel.batchSafetyExpiresAtMillis(preview.safetyExpiresAt);
+        return Boolean(expiresAtMillis && Date.now() >= expiresAtMillis);
+    },
+    singleFinalConfirmGateHtml(preview = {}) {
+        const fields = preview.fields || [];
+        const issues = preview.issues || [];
+        const executable = preview.executable ?? preview.writable;
+        const mappedFieldCount = fields.filter((field) => field.mapped === true).length;
+        const fieldIssueCount = fields.filter((field) => field.mapped !== true || field.issue).length;
+        const blockedIssues = issues.filter((issue) => String(issue || "").startsWith("BLOCKED"));
+        const warningIssues = issues.filter((issue) => String(issue || "").startsWith("WARNING"));
+        const printIssues = issues.filter((issue) => {
+            const safeIssue = String(issue || "");
+            return safeIssue.includes("approval report") || safeIssue.includes("report print archive");
+        });
+        const card = (label, value, hint, tone = "") => `
+            <div class="batch-final-card ${Format.html(tone)}">
+                <span>${Format.html(label)}</span>
+                <strong>${Format.html(value)}</strong>
+                <small>${Format.html(hint)}</small>
+            </div>
+        `;
+        return `
+            <div class="batch-final-confirm">
+                ${card("\u5199\u5165\u95e8\u7981", executable ? "\u53ef\u5199\u5165" : "\u5df2\u963b\u65ad", executable ? "\u6ee1\u8db3\u5199\u5165\u524d\u6761\u4ef6" : "\u4e0d\u4f1a\u6267\u884c\u5386\u53f2\u5199\u5165", executable ? "ready" : "blocked")}
+                ${card("\u5b57\u6bb5\u6620\u5c04", `${mappedFieldCount}/${fields.length}`, fieldIssueCount ? `\u5b57\u6bb5\u95ee\u9898 ${fieldIssueCount} \u9879` : "\u5f85\u5199\u5165\u5b57\u6bb5\u5df2\u6620\u5c04", fieldIssueCount ? "warning" : "ready")}
+                ${card("SID \u94fe\u5904\u7406", preview.sidUpdateRequired ? "\u9700\u66f4\u65b0" : "\u65e0\u9700\u66f4\u65b0", preview.sidPlan || "\u6309\u9884\u68c0\u94fe\u63a5\u65b9\u6848\u5904\u7406", "ready")}
+                ${card("\u6253\u5370\u95e8\u7981", printIssues.length ? "\u672a\u901a\u8fc7" : "\u5df2\u901a\u8fc7", printIssues.length ? "\u9700\u5148\u5b8c\u6210\u5ba1\u6279\u8868\u6253\u5370\u5f52\u6863" : "\u672a\u53d1\u73b0\u6253\u5370\u963b\u65ad", printIssues.length ? "blocked" : "ready")}
+                ${card("\u963b\u65ad/\u8b66\u544a", `${blockedIssues.length}/${warningIssues.length}`, blockedIssues.length ? "\u963b\u65ad\u9879\u9700\u5148\u5904\u7406" : "\u65e0\u963b\u65ad\u9879", blockedIssues.length ? "blocked" : (warningIssues.length ? "warning" : "ready"))}
+                <div class="batch-final-issues">
+                    <span>\u4e3b\u8981\u6821\u9a8c\u7ed3\u679c</span>
+                    ${issues.length
+                        ? issues.slice(0, 6).map((issue) => `<em>${Format.html(issue)}</em>`).join("")
+                        : `<small>\u672a\u53d1\u73b0\u963b\u65ad\u6216\u8b66\u544a</small>`}
+                </div>
+            </div>
+        `;
+    },
+    batchResultNextStep(item = {}) {
+        const status = item.status || "";
+        const message = item.message || "";
+        if (status === "EXECUTED") {
+            return "\u5df2\u5199\u5165\uff0c\u53ef\u8fdb\u5165\u5b57\u6bb5\u5bf9\u7167\u6216\u5fc5\u8981\u65f6\u64a4\u9500\u5199\u5165\u3002";
+        }
+        if (status === "FAILED") {
+            return "\u9700\u67e5\u770b\u9519\u8bef\u539f\u56e0\uff0c\u4fee\u6b63\u540e\u91cd\u65b0\u6267\u884c\u3002";
+        }
+        if (status !== "SKIPPED") {
+            return "\u53ef\u5b9a\u4f4d\u5230\u5199\u5165\u8ba1\u5212\u67e5\u770b\u540e\u7eed\u52a8\u4f5c\u3002";
+        }
+        if (message.includes("CANCELLED")) {
+            return "\u4e1a\u52a1\u5df2\u64a4\u56de\uff0c\u9700\u91cd\u65b0\u529e\u7406\u540e\u518d\u751f\u6210\u5199\u5165\u8ba1\u5212\u3002";
+        }
+        if (message.includes("trial risk must be reviewed")) {
+            return "\u5148\u5b8c\u6210\u5de5\u8d44\u4e1a\u52a1\u590d\u6838\uff0c\u518d\u6267\u884c\u5199\u5165\u3002";
+        }
+        if (message.includes("already executed")) {
+            return "\u8be5\u8ba1\u5212\u5df2\u5199\u5165\uff0c\u65e0\u9700\u91cd\u590d\u6267\u884c\u3002";
+        }
+        if (message.includes("rolled back")) {
+            return "\u8be5\u8ba1\u5212\u5df2\u64a4\u9500\uff0c\u9700\u91cd\u65b0\u751f\u6210\u540e\u518d\u5199\u5165\u3002";
+        }
+        if (message.includes("blocked") || message.includes("BLOCKED")) {
+            return "\u5148\u5b9a\u4f4d\u8ba1\u5212\u5e76\u5904\u7406\u963b\u65ad\u539f\u56e0\u3002";
+        }
+        return "\u5b9a\u4f4d\u5230\u8ba1\u5212\u67e5\u770b\u539f\u56e0\u548c\u4e0b\u4e00\u6b65\u52a8\u4f5c\u3002";
+    },
+    batchResultRowHtml(item = {}, detailLabel = "\u8bf4\u660e") {
+        const status = item.status || "UNKNOWN";
+        return `
+            <div class="case-history-field batch-result-row ${Format.html(WorkbenchPanel.batchResultStatusClass(status))}" data-batch-result-status="${Format.html(status)}">
+                <strong>${Format.html(item.personCode || "-")}</strong>
+                <span>${Format.html(WorkbenchPanel.batchResultStatusText(status))}</span>
+                <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.writePlanId || "-")} | ${Format.html(item.historyId || "-")}</small>
+                <small class="batch-result-message">${Format.html(detailLabel)}：${Format.html(item.message || "-")}</small>
+                <small class="batch-result-next">\u4e0b\u4e00\u6b65：${Format.html(WorkbenchPanel.batchResultNextStep(item))}</small>
+                <button type="button" class="batch-result-locate" data-batch-result-locate data-person-code="${Format.html(item.personCode || "")}" data-case-no="${Format.html(item.caseNo || "")}" data-write-plan-id="${Format.html(item.writePlanId || "")}" data-result-status="${Format.html(status)}">\u5b9a\u4f4d</button>
+            </div>
+        `;
+    },
+    batchExecuteFollowupQueue(result = {}) {
+        const items = result.items || [];
+        const successful = items.filter((item) => item.status === "EXECUTED" && item.caseNo);
+        const failed = items.filter((item) => item.status === "FAILED" && item.caseNo);
+        const skipped = items.filter((item) => item.status === "SKIPPED" && item.caseNo);
+        return { successful, failed, skipped };
+    },
+    batchExecuteFollowupHtml(result = {}) {
+        const queue = WorkbenchPanel.batchExecuteFollowupQueue(result);
+        const action = (type, title, desc, items) => `
+            <div class="batch-followup-card">
+                <span>${Format.html(title)}</span>
+                <strong>${Format.html(items.length)}</strong>
+                <small>${Format.html(desc)}</small>
+                ${items.length ? `<button type="button" data-batch-followup-queue="${Format.html(type)}">${Format.html(title)}</button>` : ""}
+            </div>
+        `;
+        const firstSuccess = queue.successful[0]?.caseNo || "";
+        return `<div class="batch-followup-grid">
+            ${action("SUCCESS", "\u5b57\u6bb5\u5bf9\u7167\u961f\u5217", "\u5df2\u5199\u5165\u7684\u8ba1\u5212\uff0c\u8fdb\u5165\u5bf9\u7167/\u590d\u6d4b", queue.successful)}
+            ${action("FAILED", "\u5931\u8d25\u5904\u7406\u961f\u5217", "\u6267\u884c\u5931\u8d25\u7684\u8ba1\u5212\uff0c\u5b9a\u4f4d\u67e5\u539f\u56e0", queue.failed)}
+            ${action("SKIPPED", "\u8df3\u8fc7\u5904\u7406\u961f\u5217", "\u88ab\u8df3\u8fc7\u7684\u8ba1\u5212\uff0c\u56de\u5230\u5199\u5165\u8ba1\u5212", queue.skipped)}
+            ${firstSuccess ? `<div class="batch-followup-card">
+                <span>\u5199\u5165\u540e\u590d\u6838</span>
+                <strong>${Format.html(queue.successful.length)}</strong>
+                <small>\u6253\u5f00\u9996\u6761\u5df2\u5199\u5165\u8bb0\u5f55\u505a\u5b57\u6bb5\u5bf9\u7167\u6216\u64a4\u9500\u9884\u89c8</small>
+                <div class="batch-followup-actions">
+                    <button type="button" data-batch-followup-comparison="${Format.html(firstSuccess)}">\u9996\u6761\u5b57\u6bb5\u5bf9\u7167</button>
+                    <button type="button" data-batch-followup-rollback="${Format.html(firstSuccess)}">\u9996\u6761\u64a4\u9500\u9884\u89c8</button>
+                </div>
+            </div>` : ""}
+        </div>`;
+    },
+    batchRetestFollowupQueue(result = {}) {
+        const items = result.items || [];
+        const matched = items.filter((item) => item.status === "MATCHED" && item.caseNo);
+        const mismatched = items.filter((item) => item.status === "MISMATCHED" && item.caseNo);
+        const failed = items.filter((item) => item.status === "FAILED" && item.caseNo);
+        return { matched, mismatched, failed };
+    },
+    batchRetestFollowupHtml(result = {}) {
+        const queue = WorkbenchPanel.batchRetestFollowupQueue(result);
+        const action = (type, title, desc, items) => `
+            <div class="batch-followup-card">
+                <span>${Format.html(title)}</span>
+                <strong>${Format.html(items.length)}</strong>
+                <small>${Format.html(desc)}</small>
+                ${items.length ? `<button type="button" data-batch-retest-followup-queue="${Format.html(type)}">${Format.html(title)}</button>` : ""}
+            </div>
+        `;
+        return `<div class="batch-followup-grid">
+            ${action("MATCHED", "\u901a\u8fc7\u961f\u5217", "\u590d\u6d4b\u5df2\u4e00\u81f4\uff0c\u53ef\u6279\u91cf\u6807\u8bb0\u901a\u8fc7", queue.matched)}
+            ${action("MISMATCHED", "\u7ef4\u62a4\u590d\u6d4b\u961f\u5217", "\u590d\u6d4b\u4ecd\u4e0d\u4e00\u81f4\uff0c\u5148\u7ef4\u62a4\u57fa\u7840\u4fe1\u606f", queue.mismatched)}
+            ${action("FAILED", "\u590d\u6d4b\u5931\u8d25\u961f\u5217", "\u590d\u6d4b\u5931\u8d25\uff0c\u5b9a\u4f4d\u67e5\u539f\u56e0", queue.failed)}
+        </div>`;
+    },
+    batchApproveFollowupQueue(result = {}) {
+        const items = result.items || [];
+        const reviewed = items.filter((item) => item.status === "REVIEWED" && item.caseNo);
+        const failed = items.filter((item) => item.status === "FAILED" && item.caseNo);
+        const skipped = items.filter((item) => item.status === "SKIPPED" && item.caseNo);
+        return { reviewed, failed, skipped };
+    },
+    batchApproveFollowupHtml(result = {}) {
+        const queue = WorkbenchPanel.batchApproveFollowupQueue(result);
+        const action = (type, title, desc, items) => `
+            <div class="batch-followup-card">
+                <span>${Format.html(title)}</span>
+                <strong>${Format.html(items.length)}</strong>
+                <small>${Format.html(desc)}</small>
+                ${items.length ? `<button type="button" data-batch-approve-followup-queue="${Format.html(type)}">${Format.html(title)}</button>` : ""}
+            </div>
+        `;
+        return `<div class="batch-followup-grid">
+            ${action("REVIEWED", "\u5df2\u901a\u8fc7\u5f52\u6863", "\u590d\u6d4b\u901a\u8fc7\u5df2\u6807\u8bb0\uff0c\u4ece\u5f85\u5904\u7406\u961f\u5217\u6536\u62e2", queue.reviewed)}
+            ${action("FAILED", "\u901a\u8fc7\u5931\u8d25\u961f\u5217", "\u6807\u8bb0\u5931\u8d25\uff0c\u5b9a\u4f4d\u67e5\u539f\u56e0", queue.failed)}
+            ${action("SKIPPED", "\u672a\u901a\u8fc7\u5904\u7406\u961f\u5217", "\u88ab\u8df3\u8fc7\u6216\u4ecd\u6709\u5dee\u5f02\uff0c\u56de\u5230\u5f85\u5904\u7406", queue.skipped)}
+        </div>`;
+    },
+    batchReviewFollowupHtml(result = {}) {
+        const queue = WorkbenchPanel.batchApproveFollowupQueue(result);
+        const action = (type, title, desc, items) => `
+            <div class="batch-followup-card">
+                <span>${Format.html(title)}</span>
+                <strong>${Format.html(items.length)}</strong>
+                <small>${Format.html(desc)}</small>
+                ${items.length ? `<button type="button" data-batch-review-followup-queue="${Format.html(type)}">${Format.html(title)}</button>` : ""}
+            </div>
+        `;
+        return `<div class="batch-followup-grid">
+            ${action("REVIEWED", "\u5df2\u95ed\u73af\u961f\u5217", "\u5df2\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba\uff0c\u53ef\u56de\u5230\u5df2\u95ed\u73af\u5217\u8868", queue.reviewed)}
+            ${action("FAILED", "\u6838\u67e5\u5931\u8d25\u961f\u5217", "\u767b\u8bb0\u5931\u8d25\u7684\u8ba1\u5212\uff0c\u5b9a\u4f4d\u67e5\u539f\u56e0", queue.failed)}
+            ${action("SKIPPED", "\u4ecd\u5f85\u5904\u7406\u961f\u5217", "\u88ab\u8df3\u8fc7\u7684\u8ba1\u5212\uff0c\u56de\u5230\u5f85\u6838\u67e5\u5217\u8868", queue.skipped)}
+        </div>`;
+    },
     batchResultFilterHtml(stats) {
         const total = Object.values(stats || {}).reduce((sum, value) => sum + Number(value || 0), 0);
-        const order = ["ALL", "REVIEWED", "EXECUTED", "ROLLED_BACK", "SKIPPED", "FAILED"];
+        const order = ["ALL", "READY", "WARNING", "BLOCKED", "REVIEWED", "EXECUTED", "ROLLED_BACK", "SKIPPED", "FAILED"];
         const filters = order
             .map((status) => [status, status === "ALL" ? "\u5168\u90e8" : WorkbenchPanel.batchResultStatusText(status), status === "ALL" ? total : (stats[status] || 0)])
             .filter(([status, , count]) => status === "ALL" || Number(count || 0) > 0);
@@ -1392,11 +7362,14 @@ const WorkbenchPanel = {
             els.historyPlanMaintenanceSelect?.value || "",
             els.historyPlanPrioritySelect?.value || "",
             els.historyPlanActionSelect?.value || "",
-            state.historyPlanMismatchField || ""
+            state.historyPlanMismatchField || "",
+            state.historyPlanBlockedIssueCategory || ""
         ].filter(Boolean).length;
     },
     updateHistoryPlanActionState(summary = state.historyPlanSummary) {
         const canUsePlans = Permissions.has("SALARY_DONE");
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
         if (els.historyPlanClearFiltersButton) {
             els.historyPlanClearFiltersButton.disabled = !canUsePlans || !WorkbenchPanel.historyPlanFilterCount();
         }
@@ -1409,11 +7382,17 @@ const WorkbenchPanel = {
         if (els.historyPlanBatchRetestApproveButton) {
             els.historyPlanBatchRetestApproveButton.disabled = !canUsePlans || !Number(summary.total || 0);
         }
+        if (els.historyPlanBatchReviewButton) {
+            els.historyPlanBatchReviewButton.disabled = !canUsePlans || !Number(summary.pendingReview || 0);
+        }
+        if (els.historyPlanBatchSpecialButton) {
+            els.historyPlanBatchSpecialButton.disabled = !canUsePlans || !(Number(summary.pendingReview || 0) + Number(summary.blocked || 0));
+        }
         if (els.historyPlanBatchExecuteButton) {
-            els.historyPlanBatchExecuteButton.disabled = !canUsePlans || !Number(summary.executable || 0);
+            els.historyPlanBatchExecuteButton.disabled = !canUsePlans || !canHistoryWrite || !Number(summary.executable || 0);
         }
         if (els.historyPlanBatchRollbackButton) {
-            els.historyPlanBatchRollbackButton.disabled = !canUsePlans || !Number(summary.executed || 0);
+            els.historyPlanBatchRollbackButton.disabled = !canUsePlans || !canHistoryRollback || !Number(summary.executed || 0);
         }
         if (els.historyPlanExportButton) {
             els.historyPlanExportButton.disabled = !canUsePlans || !Permissions.has("SALARY_EXPORT") || !Number(summary.total || 0);
@@ -1427,10 +7406,13 @@ const WorkbenchPanel = {
         const summary = items.reduce((acc, plan) => {
             const status = plan.planStatus || "";
             const issues = WorkbenchPanel.historyPlanIssueCount(plan);
+            const printArchive = plan.reportPrintArchive || {};
+            const printReady = printArchive.printed === true;
+            const reprinted = printArchive.reprinted === true;
             acc.total += 1;
             acc.prepared += status === "PREPARED" ? 1 : 0;
-            acc.executable += status === "PREPARED" && plan.writable === true ? 1 : 0;
-            acc.blocked += status === "BLOCKED" || plan.writable === false ? 1 : 0;
+            acc.executable += status === "PREPARED" && plan.writable === true && printReady ? 1 : 0;
+            acc.blocked += WorkbenchPanel.historyPlanBlocked(plan) ? 1 : 0;
             acc.executed += status === "EXECUTED" ? 1 : 0;
             acc.rolledBack += status === "ROLLED_BACK" ? 1 : 0;
             acc.matched += plan.comparisonStatus === "MATCHED" ? 1 : 0;
@@ -1441,13 +7423,24 @@ const WorkbenchPanel = {
             acc.highPriority += workflow.priority === "HIGH" ? 1 : 0;
             acc.mediumPriority += workflow.priority === "MEDIUM" ? 1 : 0;
             acc.issues += issues;
+            if (status === "PREPARED" && plan.writable === true && !printReady) {
+                acc.unprintedBlocked += 1;
+            }
+            if (status === "PREPARED" && plan.writable === false && printReady) {
+                acc.printedBlocked += 1;
+            }
+            if (reprinted && plan.comparisonStatus === "MISMATCHED" && plan.comparisonReviewStatus !== "REVIEWED") {
+                acc.reprintedReview += 1;
+            }
             return acc;
-        }, { total: 0, prepared: 0, executable: 0, blocked: 0, executed: 0, rolledBack: 0, matched: 0, mismatched: 0, pendingReview: 0, retestMismatched: 0, highPriority: 0, mediumPriority: 0, issues: 0 });
+        }, { total: 0, prepared: 0, executable: 0, blocked: 0, executed: 0, rolledBack: 0, matched: 0, mismatched: 0, pendingReview: 0, retestMismatched: 0, highPriority: 0, mediumPriority: 0, issues: 0, unprintedBlocked: 0, printedBlocked: 0, reprintedReview: 0 });
         state.historyPlanSummary = summary;
         WorkbenchPanel.updateHistoryPlanActionState(summary);
         els.historyPlanSummary.innerHTML = `
             ${WorkbenchPanel.historyPlanQueuePanelHtml(items)}
             ${WorkbenchPanel.historyPlanSelectionSummaryHtml()}
+            ${WorkbenchPanel.historyPlanBlockedIssueSummaryHtml(items)}
+            ${WorkbenchPanel.historyPlanPrintQueueSummaryHtml(summary)}
             <span>\u5f53\u524d ${summary.total} \u6761</span>
             <span>\u5f85\u6267\u884c ${summary.prepared}</span>
             <span>\u53ef\u5199\u5165 ${summary.executable}</span>
@@ -1570,9 +7563,12 @@ const WorkbenchPanel = {
         const action = els.historyPlanActionSelect?.value || "";
         const locate = state.historyPlanLocate;
         const queueFilter = state.historyPlanQueueFilter;
+        const queueLabel = queueFilter?.label || "\u5904\u7406\u961f\u5217";
+        const blockedCategory = state.historyPlanBlockedIssueCategory || "";
         return [
             locate ? `<button type="button" class="history-plan-locate-chip" data-history-ledger-clear-locate>\u6279\u91cf\u7ed3\u679c\u5b9a\u4f4d ${Format.html(locate.keyword || "-")} ${Format.html(locate.statusText || "")} \u00d7</button>` : "",
-            queueFilter ? `<button type="button" class="history-plan-locate-chip" data-history-ledger-clear-queue-filter>\u961f\u5217\u4ecd\u6709\u5dee\u5f02 ${Format.html(queueFilter.caseNos?.length || 0)} \u00d7</button>` : "",
+            queueFilter ? `<button type="button" class="history-plan-locate-chip" data-history-ledger-clear-queue-filter>${Format.html(queueLabel)}${queueFilter.caseNos?.length ? ` ${Format.html(queueFilter.caseNos.length)}` : ""} \u00d7</button>` : "",
+            blockedCategory ? `<button type="button" class="history-plan-locate-chip" data-history-ledger-clear-blocked-category>\u963b\u65ad ${Format.html(WorkbenchPanel.historyPlanBlockedIssueCategoryText(blockedCategory))} \u00d7</button>` : "",
             WorkbenchPanel.historyPlanFilterChipHtml("status", "\u72b6\u6001", status, WorkbenchPanel.planStatusText(status)),
             WorkbenchPanel.historyPlanFilterChipHtml("comparison", "\u5bf9\u7167", comparison, Format.historyWriteComparisonText(comparison)),
             WorkbenchPanel.historyPlanFilterChipHtml("review", "\u6838\u67e5", review, WorkbenchPanel.historyReviewStatusText(review)),
@@ -1598,6 +7594,8 @@ const WorkbenchPanel = {
                 ${filterCount ? `<button type="button" data-history-ledger-clear-all>\u7b5b\u9009 ${Format.html(filterCount)} \u9879 \u00d7</button>` : ""}
                 ${WorkbenchPanel.historyPlanFilterChipsHtml()}
                 ${WorkbenchPanel.ledgerMetricHtml("\u5f85\u6838\u67e5", ledger.pending, "REVIEW", "PENDING")}
+                ${Number(ledger.pending || 0) ? `<button type="button" class="history-review-ledger-primary" data-history-ledger-batch-review>\u6279\u91cf\u6838\u67e5\u5f85\u6838\u67e5\u9879 ${Format.html(ledger.pending || 0)}</button>` : ""}
+                ${Number(ledger.pending || 0) ? `<button type="button" class="history-review-ledger-primary" data-history-ledger-batch-special>\u6807\u8bb0\u7279\u6b8a\u60c5\u51b5 ${Format.html(ledger.pending || 0)}</button>` : ""}
                 ${WorkbenchPanel.ledgerMetricHtml("\u5df2\u6838\u67e5", ledger.reviewed, "REVIEW", "REVIEWED")}
                 ${WorkbenchPanel.ledgerMetricHtml("\u4e0d\u4e00\u81f4", ledger.mismatched, "COMPARISON", "MISMATCHED")}
                 ${WorkbenchPanel.ledgerMetricHtml("\u5df2\u4e00\u81f4", ledger.matched, "COMPARISON", "MATCHED")}
@@ -1607,6 +7605,8 @@ const WorkbenchPanel = {
                 ${WorkbenchPanel.ledgerMetricHtml("\u5efa\u8bae\u5e26\u5165", ledger.suggestedReviewed, "SOURCE", "SUGGESTED")}
                 ${WorkbenchPanel.ledgerMetricHtml("\u590d\u6d4b\u901a\u8fc7", ledger.retestReviewed, "SOURCE", "RETEST")}
                 <span>\u4eba\u5de5\u6838\u67e5 ${Format.html(ledger.manualReviewed || 0)}</span>
+                ${WorkbenchPanel.ledgerMetricHtml("\u7279\u6b8a\u60c5\u51b5", ledger.specialReviewed, "CATEGORY", "HISTORY_SPECIAL")}
+                ${WorkbenchPanel.ledgerMetricHtml("\u963b\u65ad\u540e\u671f\u6838\u67e5", ledger.blockedReviewed, "COMPARISON", "BLOCKED")}
                 ${WorkbenchPanel.ledgerMetricHtml("\u5f85\u6279\u91cf\u590d\u6d4b", ledger.pendingRetestFirst, "ACTION", "RETEST_FIRST")}
                 ${Number(ledger.pendingRetestFirst || 0) ? `<button type="button" class="history-review-ledger-primary" data-history-ledger-batch-retest-approve>\u6279\u91cf\u590d\u6d4b\u5e76\u901a\u8fc7\u4e00\u81f4\u9879 ${Format.html(ledger.pendingRetestFirst || 0)}</button>` : ""}
                 ${WorkbenchPanel.ledgerMetricHtml("\u5f85\u7ef4\u62a4\u590d\u6d4b", ledger.pendingMaintainAndRetest, "ACTION", "MAINTAIN_AND_RETEST")}
@@ -1675,7 +7675,7 @@ const WorkbenchPanel = {
                 els.historyPlanComparisonSelect.value = safeValue === "-" ? "" : safeValue;
             }
             if (els.historyPlanStatusSelect) {
-                els.historyPlanStatusSelect.value = "EXECUTED";
+                els.historyPlanStatusSelect.value = safeValue === "BLOCKED" ? "" : "EXECUTED";
             }
             if (els.historyPlanReviewSelect && safeValue === "MATCHED") {
                 els.historyPlanReviewSelect.value = "";
@@ -1823,6 +7823,476 @@ const WorkbenchPanel = {
         els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
         setStatus(keyword ? `\u5df2\u5b9a\u4f4d ${keyword} \u7684\u5386\u53f2\u5199\u5165\u8ba1\u5212` : TEXT.workbenchReady);
     },
+    async openBatchExecuteFollowupQueue(result = {}, type = "") {
+        const queue = WorkbenchPanel.batchExecuteFollowupQueue(result);
+        const items = {
+            SUCCESS: queue.successful,
+            FAILED: queue.failed,
+            SKIPPED: queue.skipped
+        }[type] || [];
+        const caseNos = items.map((item) => item.caseNo).filter(Boolean);
+        if (!caseNos.length) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const label = {
+            SUCCESS: "\u5b57\u6bb5\u5bf9\u7167\u961f\u5217",
+            FAILED: "\u5931\u8d25\u5904\u7406\u961f\u5217",
+            SKIPPED: "\u8df3\u8fc7\u5904\u7406\u961f\u5217"
+        }[type] || "\u540e\u7eed\u5904\u7406\u961f\u5217";
+        state.historyPlanQueueFilter = {
+            caseNos,
+            autoSelect: true,
+            label,
+            queueActionCode: type === "SUCCESS" ? "COMPARE_RETEST" : ""
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = "";
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = type === "SUCCESS" ? "EXECUTED" : "";
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = type === "SUCCESS" ? "" : "";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = "";
+        }
+        if (els.historyPlanRetestSelect) {
+            els.historyPlanRetestSelect.value = "";
+        }
+        if (els.historyPlanMaintenanceSelect) {
+            els.historyPlanMaintenanceSelect.value = "";
+        }
+        if (els.historyPlanPrioritySelect) {
+            els.historyPlanPrioritySelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = type === "SUCCESS" ? "" : "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${caseNos.length} \u6761`);
+    },
+    async openBatchReviewFollowupQueue(result = {}, type = "") {
+        const queue = WorkbenchPanel.batchApproveFollowupQueue(result);
+        const items = {
+            REVIEWED: queue.reviewed,
+            FAILED: queue.failed,
+            SKIPPED: queue.skipped
+        }[type] || [];
+        const caseNos = items.map((item) => item.caseNo).filter(Boolean);
+        if (!caseNos.length) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const label = {
+            REVIEWED: "\u5df2\u95ed\u73af\u961f\u5217",
+            FAILED: "\u6838\u67e5\u5931\u8d25\u961f\u5217",
+            SKIPPED: "\u4ecd\u5f85\u5904\u7406\u961f\u5217"
+        }[type] || "\u6838\u67e5\u540e\u7eed\u961f\u5217";
+        state.historyPlanQueueFilter = {
+            caseNos,
+            autoSelect: true,
+            label,
+            queueActionCode: type === "REVIEWED" ? "REVIEWED" : "REVIEW_FIRST"
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = "";
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = "EXECUTED";
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = type === "REVIEWED" ? "" : "MISMATCHED";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = type === "REVIEWED" ? "REVIEWED" : "PENDING";
+        }
+        if (els.historyPlanRetestSelect) {
+            els.historyPlanRetestSelect.value = "";
+        }
+        if (els.historyPlanMaintenanceSelect) {
+            els.historyPlanMaintenanceSelect.value = "";
+        }
+        if (els.historyPlanPrioritySelect) {
+            els.historyPlanPrioritySelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${caseNos.length} \u6761`);
+    },
+    historyBatchAuditCaseNos(audits = [], type = "SUCCESS") {
+        const safeType = type || "SUCCESS";
+        return Array.from(new Set((audits || [])
+            .filter((audit) => {
+                const action = audit.action || "";
+                const targetCode = audit.targetCode || "";
+                if (!targetCode || targetCode === "BATCH") {
+                    return false;
+                }
+                const summary = audit.summary || "";
+                const status = (summary.match(/status=([^,\s]+)/)?.[1] || "").toUpperCase();
+                if (safeType === "SUCCESS") {
+                    return action.includes("execute-item") && status === "EXECUTED";
+                }
+                if (safeType === "FAILED") {
+                    return action.endsWith("-item") && status === "FAILED";
+                }
+                if (safeType === "SKIPPED") {
+                    return action.endsWith("-item") && status === "SKIPPED";
+                }
+                if (safeType === "RETEST") {
+                    return action.includes("retest-preview-item");
+                }
+                if (safeType === "ROLLBACK") {
+                    return action.includes("rollback-item") && status !== "SKIPPED";
+                }
+                return action.startsWith("history-write");
+            })
+            .map((audit) => audit.targetCode)
+            .filter(Boolean)));
+    },
+    historyBatchQueueTypeForStatus(status = "") {
+        const safeStatus = String(status || "").toUpperCase();
+        if (safeStatus === "EXECUTED" || safeStatus === "REVIEWED") {
+            return "SUCCESS";
+        }
+        if (safeStatus === "FAILED") {
+            return "FAILED";
+        }
+        if (safeStatus === "SKIPPED") {
+            return "SKIPPED";
+        }
+        if (safeStatus === "MATCHED" || safeStatus === "MISMATCHED" || safeStatus === "RETEST") {
+            return "RETEST";
+        }
+        if (safeStatus === "ROLLED_BACK" || safeStatus === "ROLLBACK") {
+            return "ROLLBACK";
+        }
+        return "ALL";
+    },
+    visibleHistoryBatchAuditCaseNos(overlay) {
+        return Array.from(new Set(Array.from(overlay.querySelectorAll("[data-history-batch-audit-status]"))
+            .filter((row) => !row.hidden)
+            .map((row) => row.dataset.caseNo || "")
+            .filter(Boolean)));
+    },
+    historyBatchAuditSummary(summary = "") {
+        const result = {};
+        for (const part of String(summary || "").split(",")) {
+            const [rawKey, ...rest] = part.trim().split("=");
+            const key = (rawKey || "").trim();
+            if (!key) {
+                continue;
+            }
+            result[key] = rest.join("=").trim();
+        }
+        return result;
+    },
+    historyBatchAuditStatus(audit = {}) {
+        const values = WorkbenchPanel.historyBatchAuditSummary(audit.summary || "");
+        const status = (values.status || "").toUpperCase();
+        if (status) {
+            return status;
+        }
+        const action = audit.action || "";
+        if (action.includes("retest-preview")) {
+            return "RETEST";
+        }
+        return (audit.targetCode && audit.targetCode !== "BATCH") ? "PERSON" : "SUMMARY";
+    },
+    historyBatchAuditFilterStats(audits = []) {
+        return (audits || []).reduce((stats, audit) => {
+            const status = WorkbenchPanel.historyBatchAuditStatus(audit);
+            stats[status] = (stats[status] || 0) + 1;
+            return stats;
+        }, {});
+    },
+    historyBatchAuditFilterHtml(audits = []) {
+        const stats = WorkbenchPanel.historyBatchAuditFilterStats(audits);
+        const total = (audits || []).length;
+        const order = ["ALL", "EXECUTED", "REVIEWED", "MATCHED", "MISMATCHED", "FAILED", "SKIPPED", "RETEST", "ROLLBACK", "SUMMARY", "PERSON"];
+        return `<div class="batch-result-filters">
+            ${order
+                .map((status) => [status, status === "ALL" ? total : (stats[status] || 0)])
+                .filter(([status, count]) => status === "ALL" || Number(count || 0) > 0)
+                .map(([status, count]) => `<button type="button" class="${status === "ALL" ? "active" : ""}" data-history-batch-audit-filter="${Format.html(status)}">${Format.html(status === "ALL" ? "\u5168\u90e8" : WorkbenchPanel.batchResultStatusText(status))} ${Format.html(count)}</button>`)
+                .join("")}
+        </div>`;
+    },
+    historyBatchAuditCsvRows(audits = []) {
+        const rows = [["流水ID", "动作", "人员/目标", "状态", "人员编码", "historyId", "摘要", "操作人", "时间"]];
+        for (const audit of audits || []) {
+            const values = WorkbenchPanel.historyBatchAuditSummary(audit.summary || "");
+            rows.push([
+                audit.id || "",
+                Format.auditActionText(audit.action),
+                audit.targetCode || "",
+                WorkbenchPanel.historyBatchAuditStatus(audit),
+                values.personCode || "",
+                values.historyId || "",
+                audit.summary || "",
+                audit.operator || "",
+                audit.createdAt || ""
+            ]);
+        }
+        return rows;
+    },
+    historyBatchAuditRowHtml(audit = {}) {
+        const values = WorkbenchPanel.historyBatchAuditSummary(audit.summary || "");
+        const caseNo = audit.targetCode || "";
+        const isPersonRow = caseNo && caseNo !== "BATCH" && (audit.action || "").endsWith("-item");
+        const status = WorkbenchPanel.historyBatchAuditStatus(audit);
+        if (!isPersonRow) {
+            return `
+                <div class="case-audit-row" data-history-batch-audit-status="${Format.html(status)}" data-case-no="${Format.html(isPersonRow ? caseNo : "")}">
+                    <strong>${Format.html(Format.auditActionText(audit.action))}</strong>
+                    <small>${Format.html(caseNo || "-")} | ${Format.html(audit.summary || "-")}</small>
+                    <span>${Format.html(audit.operator || "-")} | ${Format.html(audit.createdAt || "-")}</span>
+                </div>
+            `;
+        }
+        const historyId = values.historyId || "-";
+        const message = values.message || "-";
+        const canCompare = status === "EXECUTED" || status === "REVIEWED" || (audit.action || "").includes("retest");
+        const canRollback = status === "EXECUTED";
+        return `
+            <div class="case-audit-row batch-audit-person-row" data-history-batch-audit-status="${Format.html(status)}" data-case-no="${Format.html(caseNo)}">
+                <strong>${Format.html(values.personCode || caseNo)}</strong>
+                <small><b class="work-item-trial ${Format.html(WorkbenchPanel.batchResultStatusClass(status))}">${Format.html(WorkbenchPanel.batchResultStatusText(status))}</b> ${Format.html(caseNo)} | historyId ${Format.html(historyId)}</small>
+                <span>${Format.html(Format.auditActionText(audit.action))} | ${Format.html(audit.createdAt || "-")}</span>
+                <small>${Format.html(message)}</small>
+                <div class="case-row-actions">
+                    <button type="button" class="batch-result-locate" data-case-detail-no="${Format.html(caseNo)}">\u529e\u7406\u8be6\u60c5</button>
+                    ${canCompare ? `<button type="button" class="batch-result-locate" data-history-write-comparison-case-no="${Format.html(caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
+                    ${canRollback ? `<button type="button" class="batch-result-locate" data-history-write-rollback-case-no="${Format.html(caseNo)}">\u64a4\u9500\u9884\u89c8</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    async openHistoryBatchLedgerQueue(batchNo, type = "SUCCESS") {
+        const safeBatchNo = batchNo || "";
+        if (!safeBatchNo) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const audits = await Api.request(`/api/workbench/history-write-batches/${encodeURIComponent(safeBatchNo)}/audits`);
+        const caseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits || [], type);
+        if (!caseNos.length) {
+            setStatus("\u8be5\u6279\u6b21\u6d41\u6c34\u672a\u5305\u542b\u53ef\u5b9a\u4f4d\u4eba\u5458\uff0c\u8bf7\u5148\u67e5\u770b\u6279\u6b21\u6d41\u6c34");
+            return;
+        }
+        const label = {
+            SUCCESS: `\u6279\u6b21 ${safeBatchNo} \u6210\u529f\u590d\u6838\u961f\u5217`,
+            FAILED: `\u6279\u6b21 ${safeBatchNo} \u5931\u8d25\u5904\u7406\u961f\u5217`,
+            SKIPPED: `\u6279\u6b21 ${safeBatchNo} \u8df3\u8fc7\u5904\u7406\u961f\u5217`,
+            RETEST: `\u6279\u6b21 ${safeBatchNo} \u590d\u6d4b\u5904\u7406\u961f\u5217`,
+            ROLLBACK: `\u6279\u6b21 ${safeBatchNo} \u64a4\u9500\u590d\u6838\u961f\u5217`,
+            ALL: `\u6279\u6b21 ${safeBatchNo} \u6d41\u6c34\u961f\u5217`
+        }[type] || `\u6279\u6b21 ${safeBatchNo} \u5904\u7406\u961f\u5217`;
+        state.historyPlanQueueFilter = {
+            caseNos,
+            autoSelect: true,
+            label,
+            queueActionCode: type === "SUCCESS" ? "COMPARE_RETEST" : ""
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = "";
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = type === "ROLLBACK" ? "ROLLED_BACK" : (["SUCCESS", "RETEST"].includes(type) ? "EXECUTED" : "");
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = "";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        document.querySelector(".case-detail-overlay")?.remove();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${caseNos.length} \u6761`);
+    },
+    async openHistoryBatchAuditVisibleQueue(batchNo, caseNos = [], type = "ALL") {
+        const safeCaseNos = Array.from(new Set((caseNos || []).filter(Boolean)));
+        if (!safeCaseNos.length) {
+            setStatus("\u5f53\u524d\u7b5b\u9009\u7ed3\u679c\u6ca1\u6709\u53ef\u9001\u5165\u961f\u5217\u7684\u4eba\u5458\u6d41\u6c34");
+            return;
+        }
+        const safeBatchNo = batchNo || "-";
+        const label = {
+            SUCCESS: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u6210\u529f\u590d\u6838\u961f\u5217`,
+            FAILED: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u5931\u8d25\u5904\u7406\u961f\u5217`,
+            SKIPPED: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u8df3\u8fc7\u5904\u7406\u961f\u5217`,
+            RETEST: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u590d\u6d4b\u5904\u7406\u961f\u5217`,
+            ROLLBACK: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u64a4\u9500\u590d\u6838\u961f\u5217`,
+            ALL: `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u961f\u5217`
+        }[type] || `\u6279\u6b21 ${safeBatchNo} \u5f53\u524d\u7b5b\u9009\u961f\u5217`;
+        state.historyPlanQueueFilter = {
+            caseNos: safeCaseNos,
+            autoSelect: true,
+            label,
+            queueActionCode: type === "SUCCESS" ? "COMPARE_RETEST" : ""
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = "";
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = type === "ROLLBACK" ? "ROLLED_BACK" : (["SUCCESS", "RETEST"].includes(type) ? "EXECUTED" : "");
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = "";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        document.querySelector(".case-detail-overlay")?.remove();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${safeCaseNos.length} \u6761`);
+    },
+    async openBatchRetestFollowupQueue(result = {}, type = "") {
+        const queue = WorkbenchPanel.batchRetestFollowupQueue(result);
+        const items = {
+            MATCHED: queue.matched,
+            MISMATCHED: queue.mismatched,
+            FAILED: queue.failed
+        }[type] || [];
+        const caseNos = items.map((item) => item.caseNo).filter(Boolean);
+        if (!caseNos.length) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const label = {
+            MATCHED: "\u590d\u6d4b\u901a\u8fc7\u961f\u5217",
+            MISMATCHED: "\u7ef4\u62a4\u590d\u6d4b\u961f\u5217",
+            FAILED: "\u590d\u6d4b\u5931\u8d25\u961f\u5217"
+        }[type] || "\u590d\u6d4b\u540e\u7eed\u961f\u5217";
+        state.historyPlanQueueFilter = {
+            caseNos,
+            autoSelect: true,
+            label,
+            queueActionCode: type === "MATCHED" ? "APPROVE_RETEST" : (type === "MISMATCHED" ? "MAINTAIN_AND_RETEST" : "RETEST_FIRST")
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = type === "MATCHED" ? "RETEST_MATCHED" : (type === "MISMATCHED" ? "RETEST_MISMATCHED" : "");
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = "EXECUTED";
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = "MISMATCHED";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = type === "MATCHED" ? "PENDING" : "";
+        }
+        if (els.historyPlanRetestSelect) {
+            els.historyPlanRetestSelect.value = state.historyPlanRetestStatus;
+        }
+        if (els.historyPlanMaintenanceSelect) {
+            els.historyPlanMaintenanceSelect.value = "";
+        }
+        if (els.historyPlanPrioritySelect) {
+            els.historyPlanPrioritySelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = type === "MATCHED" ? "APPROVE_RETEST" : "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${caseNos.length} \u6761`);
+    },
+    async openBatchApproveFollowupQueue(result = {}, type = "") {
+        const queue = WorkbenchPanel.batchApproveFollowupQueue(result);
+        const items = {
+            REVIEWED: queue.reviewed,
+            FAILED: queue.failed,
+            SKIPPED: queue.skipped
+        }[type] || [];
+        const caseNos = items.map((item) => item.caseNo).filter(Boolean);
+        if (!caseNos.length) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const label = {
+            REVIEWED: "\u5df2\u901a\u8fc7\u5f52\u6863",
+            FAILED: "\u901a\u8fc7\u5931\u8d25\u961f\u5217",
+            SKIPPED: "\u672a\u901a\u8fc7\u5904\u7406\u961f\u5217"
+        }[type] || "\u901a\u8fc7\u540e\u7eed\u961f\u5217";
+        state.historyPlanQueueFilter = {
+            caseNos,
+            autoSelect: type !== "REVIEWED",
+            label,
+            queueActionCode: type === "REVIEWED" ? "REVIEWED" : "RETEST_FIRST"
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        state.historyPlanLocate = null;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = "";
+        if (els.workbenchKeywordInput) {
+            els.workbenchKeywordInput.value = "";
+        }
+        if (els.historyPlanStatusSelect) {
+            els.historyPlanStatusSelect.value = "EXECUTED";
+        }
+        if (els.historyPlanComparisonSelect) {
+            els.historyPlanComparisonSelect.value = "MISMATCHED";
+        }
+        if (els.historyPlanReviewSelect) {
+            els.historyPlanReviewSelect.value = type === "REVIEWED" ? "REVIEWED" : "";
+        }
+        if (els.historyPlanRetestSelect) {
+            els.historyPlanRetestSelect.value = "";
+        }
+        if (els.historyPlanMaintenanceSelect) {
+            els.historyPlanMaintenanceSelect.value = "";
+        }
+        if (els.historyPlanPrioritySelect) {
+            els.historyPlanPrioritySelect.value = "";
+        }
+        if (els.historyPlanActionSelect) {
+            els.historyPlanActionSelect.value = type === "REVIEWED" ? "REVIEWED" : "";
+        }
+        await WorkbenchPanel.loadHistoryWritePlans();
+        els.historyReviewLedger?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u8fdb\u5165${label} ${caseNos.length} \u6761`);
+    },
     async clearHistoryPlanLocate() {
         state.historyPlanLocate = null;
         if (els.workbenchKeywordInput) {
@@ -1837,12 +8307,77 @@ const WorkbenchPanel = {
         await WorkbenchPanel.loadHistoryWritePlans();
     },
     async autoSelectHistoryPlanQueue() {
-        if (!state.historyPlanQueueFilter?.caseNos?.length) {
+        if (!state.historyPlanQueueFilter) {
             return;
         }
         state.historyPlanQueueFilter = { ...state.historyPlanQueueFilter, autoSelect: true };
         persistHistoryPlanQueueState();
         await WorkbenchPanel.loadHistoryWritePlans();
+    },
+    async executePrintedReadyHistoryQueue() {
+        if (!Permissions.has("SALARY_HISTORY_WRITE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        if (state.historyPlanQueueFilter?.printQueue !== "PRINTED_READY") {
+            await WorkbenchPanel.applyHistoryPlanPrintQueue("PRINTED_READY");
+        }
+        if (!WorkbenchPanel.selectedHistoryPlanCaseNos().length) {
+            await WorkbenchPanel.autoSelectHistoryPlanQueue();
+        }
+        if (!WorkbenchPanel.selectedHistoryPlanCaseNos().length) {
+            setStatus("\u5f53\u524d\u6ca1\u6709\u5df2\u6253\u5370\u53ef\u5199\u5165\u7684\u8bb0\u5f55");
+            return;
+        }
+        await WorkbenchPanel.batchExecuteSelectedHistoryWritePlans();
+    },
+    async printUnprintedBlockedHistoryQueue() {
+        if (!Permissions.has("SALARY_REPORT") && !Permissions.has("SALARY_EXPORT")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        if (state.historyPlanQueueFilter?.printQueue !== "UNPRINTED_BLOCKED") {
+            await WorkbenchPanel.applyHistoryPlanPrintQueue("UNPRINTED_BLOCKED");
+        }
+        if (!WorkbenchPanel.selectedHistoryPlanCaseNos().length) {
+            await WorkbenchPanel.autoSelectHistoryPlanQueue();
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            setStatus("\u5f53\u524d\u6ca1\u6709\u672a\u6253\u5370\u963b\u65ad\u8bb0\u5f55");
+            return;
+        }
+        const body = new URLSearchParams();
+        for (const caseNo of caseNos.slice(0, 500)) {
+            body.append("caseNo", caseNo);
+        }
+        const validation = await Api.request("/api/reports/salary-case-approvals/selected/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+            body: body.toString()
+        });
+        if (!validation.printable) {
+            const message = validation.message || "\u9009\u4e2d\u5ba1\u6279\u8868\u5b58\u5728\u963b\u65ad\u9879";
+            setStatus(message);
+            return;
+        }
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.target = "_blank";
+        form.action = "/api/reports/salary-case-approvals/selected/print";
+        form.style.display = "none";
+        for (const caseNo of caseNos.slice(0, 500)) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "caseNo";
+            input.value = caseNo;
+            form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
+        WorkbenchPanel.markBatchReportPrintRefresh();
+        setStatus(`\u5df2\u6253\u5f00\u9009\u4e2d ${caseNos.length} \u6761\u5ba1\u6279\u8868\u6279\u91cf\u6253\u5370\u9875`);
     },
     async clearHistoryPlanFilter(type) {
         const selectByType = {
@@ -1876,6 +8411,7 @@ const WorkbenchPanel = {
         state.historyPlanRetestStatus = "";
         state.historyPlanLocate = null;
         state.historyPlanQueueFilter = null;
+        state.historyPlanBlockedIssueCategory = "";
         state.historyPlanSelected.clear();
         persistHistoryPlanQueueState();
         if (els.workbenchKeywordInput) {
@@ -1901,10 +8437,11 @@ const WorkbenchPanel = {
             for (const plan of plans || []) {
                 const workflow = WorkbenchPanel.historyWriteWorkflow(plan);
                 if (WorkbenchPanel.historyPlanSelectable(plan, workflow)) {
+                    const queueActionCode = state.historyPlanQueueFilter?.queueActionCode || "";
                     state.historyPlanSelected.set(plan.caseNo || "", {
                         caseNo: plan.caseNo || "",
                         personCode: plan.personCode || "",
-                        actionCode: workflow.actionCode || ""
+                        actionCode: queueActionCode || workflow.actionCode || ""
                     });
                 }
             }
@@ -1919,7 +8456,18 @@ const WorkbenchPanel = {
             els.historyWritePlans.innerHTML = `<div class="loading">${TEXT.noWorkItems}</div>`;
             return;
         }
-        els.historyWritePlans.innerHTML = plans.map((plan) => WorkbenchPanel.historyPlanHtml(plan)).join("");
+        els.historyWritePlans.innerHTML = `
+            <div class="history-plan-header" aria-hidden="true">
+                <span></span>
+                <span>\u4eba\u5458 / \u8ba1\u5212</span>
+                <span>\u5e74\u6708 / \u7c7b\u578b</span>
+                <span>\u72b6\u6001</span>
+                <span>\u5bf9\u7167 / \u6838\u67e5</span>
+                <span>\u4e0b\u4e00\u6b65</span>
+                <span>\u64cd\u4f5c</span>
+            </div>
+            ${plans.map((plan) => WorkbenchPanel.historyPlanHtml(plan)).join("")}
+        `;
     },
     historyPlanParams(defaultStatus = "") {
         const filters = WorkbenchPanel.filters();
@@ -1933,6 +8481,9 @@ const WorkbenchPanel = {
             retestStatus: els.historyPlanRetestSelect?.value || state.historyPlanRetestStatus || "",
             priority: els.historyPlanPrioritySelect?.value || "",
             actionCode: els.historyPlanActionSelect?.value || "",
+            pendingQueue: state.historyPlanQueueFilter?.pendingQueue || "",
+            printQueue: state.historyPlanQueueFilter?.printQueue || "",
+            statusQueue: state.historyPlanQueueFilter?.statusQueue || "",
             limit: 50
         });
     },
@@ -1961,11 +8512,64 @@ const WorkbenchPanel = {
     },
     applyHistoryPlanQueueFilter(plans) {
         const filter = state.historyPlanQueueFilter;
+        let visiblePlans = plans || [];
+        if (filter?.readyOnly) {
+            visiblePlans = visiblePlans.filter((plan) => plan.planStatus === "PREPARED" && plan.writable === true);
+        }
+        if (filter?.printQueue) {
+            visiblePlans = visiblePlans.filter((plan) => WorkbenchPanel.historyPlanMatchesPrintQueue(plan, filter.printQueue));
+        }
+        if (state.historyPlanBlockedIssueCategory) {
+            visiblePlans = visiblePlans.filter((plan) => WorkbenchPanel.historyPlanBlocked(plan)
+                && WorkbenchPanel.historyPlanBlockedCategories(plan).includes(state.historyPlanBlockedIssueCategory));
+        }
         if (!filter?.caseNos?.length) {
-            return plans;
+            return visiblePlans;
         }
         const caseNos = new Set(filter.caseNos);
-        return (plans || []).filter((plan) => caseNos.has(plan.caseNo || ""));
+        return visiblePlans.filter((plan) => caseNos.has(plan.caseNo || ""));
+    },
+    historyPlanMatchesPrintQueue(plan, queue) {
+        const status = plan?.planStatus || "";
+        const archive = plan?.reportPrintArchive || {};
+        const printed = archive.printed === true;
+        const reprinted = archive.reprinted === true;
+        if (queue === "PRINTED_READY") {
+            return status === "PREPARED" && plan.writable === true && printed;
+        }
+        if (queue === "UNPRINTED_BLOCKED") {
+            return status === "PREPARED" && plan.writable === true && !printed;
+        }
+        if (queue === "PRINTED_BLOCKED") {
+            return status === "PREPARED" && plan.writable === false && printed;
+        }
+        if (queue === "REPRINTED_REVIEW") {
+            return reprinted && plan.comparisonStatus === "MISMATCHED" && plan.comparisonReviewStatus !== "REVIEWED";
+        }
+        return true;
+    },
+    historyPlanPrintQueueText(queue) {
+        return {
+            PRINTED_READY: "\u5df2\u6253\u5370\u53ef\u5199\u5165",
+            UNPRINTED_BLOCKED: "\u672a\u6253\u5370\u963b\u65ad",
+            PRINTED_BLOCKED: "\u5df2\u6253\u5370\u4ecd\u963b\u65ad",
+            REPRINTED_REVIEW: "\u5df2\u91cd\u6253\u5f85\u590d\u6838"
+        }[queue] || "\u5f52\u6863\u961f\u5217";
+    },
+    async applyHistoryPlanPrintQueue(queue) {
+        const safeQueue = queue || "";
+        if (!safeQueue) {
+            return;
+        }
+        state.historyPlanSelected.clear();
+        state.historyPlanQueueFilter = {
+            printQueue: safeQueue,
+            label: WorkbenchPanel.historyPlanPrintQueueText(safeQueue),
+            autoSelect: safeQueue === "PRINTED_READY",
+            queueActionCode: safeQueue === "PRINTED_READY" ? "WRITE_HISTORY" : ""
+        };
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.loadHistoryWritePlans();
     },
     async batchPreviewHistoryWritePlans() {
         if (!Permissions.has("SALARY_DONE")) {
@@ -1980,6 +8584,67 @@ const WorkbenchPanel = {
         WorkbenchPanel.showHistoryWriteBatchPreview(result);
         await WorkbenchPanel.loadHistoryWritePlans();
         setStatus(TEXT.caseDetail);
+    },
+    async loadHistoryWriteBatchLedger(metricCode = "") {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const params = new URLSearchParams({ limit: "80" });
+        if (metricCode) {
+            params.set("queue", metricCode);
+        }
+        const allItems = await Api.request(`/api/workbench/history-write-batches?${params.toString()}`);
+        const label = WorkbenchPanel.historyWriteBatchLedgerQueueLabel(metricCode);
+        const items = allItems || [];
+        WorkbenchPanel.showHistoryWriteBatchLedger(items, label, metricCode);
+        setStatus(label ? `\u5df2\u6253\u5f00${label}\u6279\u6b21\u53f0\u8d26` : TEXT.caseDetail);
+    },
+    async loadHistoryWritePendingQueues() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        setStatus("\u6b63\u5728\u8bfb\u53d6\u5386\u53f2\u5199\u5165\u5f85\u5904\u7406\u961f\u5217...");
+        try {
+            const keyword = WorkbenchPanel.filters().keyword;
+            const params = new URLSearchParams({ keyword });
+            const items = await Api.request(`/api/workbench/history-write-pending-queues?${params.toString()}`);
+            els.migrationToolResult.innerHTML = `<strong>\u5386\u53f2\u5199\u5165\u5f85\u5904\u7406</strong> ${(items || []).map((item) => `
+                <button type="button" class="link-button" data-history-pending-queue="${Format.html(item.code)}">
+                    ${Format.html(item.title)} ${Format.html(String(item.count || 0))}
+                </button>
+            `).join(" ")}`;
+            setStatus("\u5386\u53f2\u5199\u5165\u5f85\u5904\u7406\u961f\u5217\u5df2\u8bfb\u53d6");
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    async applyHistoryPendingQueue(queueCode) {
+        const queue = {
+            blocked: { status: "", comparisonStatus: "", reviewStatus: "", retestStatus: "", actionCode: "VIEW_PLAN", label: "\u5199\u5165\u963b\u65ad" },
+            prepared: { status: "PREPARED", comparisonStatus: "", reviewStatus: "", retestStatus: "", actionCode: "WRITE_HISTORY", label: "\u5f85\u5199\u5165" },
+            review: { status: "EXECUTED", comparisonStatus: "MISMATCHED", reviewStatus: "PENDING", retestStatus: "", actionCode: "", label: "\u5199\u5165\u540e\u5f85\u6838\u67e5" },
+            retest: { status: "EXECUTED", comparisonStatus: "MISMATCHED", reviewStatus: "", retestStatus: "RETEST_MISMATCHED", actionCode: "", label: "\u590d\u6d4b\u4ecd\u6709\u5dee\u5f02" }
+        }[queueCode];
+        if (!queue) {
+            return;
+        }
+        if (els.historyPlanStatusSelect) els.historyPlanStatusSelect.value = queue.status;
+        if (els.historyPlanComparisonSelect) els.historyPlanComparisonSelect.value = queue.comparisonStatus;
+        if (els.historyPlanReviewSelect) els.historyPlanReviewSelect.value = queue.reviewStatus;
+        if (els.historyPlanRetestSelect) els.historyPlanRetestSelect.value = queue.retestStatus;
+        if (els.historyPlanMaintenanceSelect) els.historyPlanMaintenanceSelect.value = "";
+        if (els.historyPlanPrioritySelect) els.historyPlanPrioritySelect.value = "";
+        if (els.historyPlanActionSelect) els.historyPlanActionSelect.value = queue.actionCode;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = queue.retestStatus;
+        state.historyPlanQueueFilter = { pendingQueue: queueCode, label: queue.label };
+        state.historyPlanBlockedIssueCategory = "";
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.loadHistoryWritePlans();
     },
     async batchRetestHistoryWritePlans() {
         if (!Permissions.has("SALARY_DONE")) {
@@ -2019,6 +8684,70 @@ const WorkbenchPanel = {
         state.historyPlanSelected.clear();
         persistHistoryPlanQueueState();
         await WorkbenchPanel.loadHistoryWritePlans();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchPreviewSelectedHistoryWritePlans() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const result = await Api.request("/api/workbench/history-write-plans/selected-preview", {
+            method: "POST",
+            body: JSON.stringify({ caseNos })
+        });
+        WorkbenchPanel.showHistoryWriteBatchPreview(result, {
+            executeSelected: true,
+            caseNos
+        });
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.loadHistoryWritePlans();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchExecuteSelectedHistoryWritePlans() {
+        if (!Permissions.has("SALARY_HISTORY_WRITE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const preview = await Api.request("/api/workbench/history-write-plans/selected-preview", {
+            method: "POST",
+            body: JSON.stringify({ caseNos })
+        });
+        const executableCount = Number(preview.ready || 0) + Number(preview.warning || 0);
+        if (!executableCount) {
+            WorkbenchPanel.showHistoryWriteBatchPreview(preview);
+            await WorkbenchPanel.loadHistoryWritePlans();
+            setStatus(TEXT.caseDetail);
+            return;
+        }
+        const confirmedPreview = await WorkbenchPanel.confirmHistoryWriteBatchExecute(preview, "\u9009\u4e2d\u9879\u5199\u5165\u786e\u8ba4", {
+            refreshPreview: () => Api.request("/api/workbench/history-write-plans/selected-preview", {
+                method: "POST",
+                body: JSON.stringify({ caseNos })
+            })
+        });
+        if (!confirmedPreview) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const result = await Api.request("/api/workbench/history-write-plans/selected-execute", {
+            method: "POST",
+            body: JSON.stringify({ caseNos, safetyToken: confirmedPreview.safetyToken || "" })
+        });
+        WorkbenchPanel.showHistoryWriteBatchExecute(result);
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.load();
         setStatus(TEXT.caseDetail);
     },
     async batchApproveRetestHistoryWritePlans() {
@@ -2093,6 +8822,139 @@ const WorkbenchPanel = {
         await WorkbenchPanel.load();
         setStatus(TEXT.caseDetail);
     },
+    historyWriteReviewPayloadFromPrompt(scopeText = "\u5dee\u5f02") {
+        const category = window.prompt("\u8bf7\u586b\u5199\u6838\u67e5\u7c7b\u522b\uff1aBASE_CHANGED / POLICY_DIFF / MANUAL_INPUT / HISTORY_SPECIAL / OTHER", "HISTORY_SPECIAL");
+        if (category === null) {
+            return null;
+        }
+        const safeCategory = category.trim().toUpperCase();
+        const allowed = ["BASE_CHANGED", "POLICY_DIFF", "MANUAL_INPUT", "HISTORY_SPECIAL", "OTHER"];
+        if (!allowed.includes(safeCategory)) {
+            window.alert("\u6838\u67e5\u7c7b\u522b\u4e0d\u6b63\u786e");
+            return null;
+        }
+        const reason = window.prompt(`\u8bf7\u586b\u5199${scopeText}\u6838\u67e5\u8bf4\u660e`, "\u5df2\u6838\u5bf9\u5dee\u5f02\u539f\u56e0\uff0c\u6309\u540e\u671f\u6838\u67e5\u5f52\u6863");
+        if (reason === null) {
+            return null;
+        }
+        const safeReason = reason.trim();
+        if (!safeReason) {
+            window.alert("\u6838\u67e5\u8bf4\u660e\u4e0d\u80fd\u4e3a\u7a7a");
+            return null;
+        }
+        return { reviewCategory: safeCategory, reviewReason: safeReason };
+    },
+    historyWriteSpecialPayloadFromPrompt(scopeText = "\u5f53\u524d\u5199\u5165\u8ba1\u5212") {
+        const reason = window.prompt(`\u8bf7\u586b\u5199${scopeText}\u7279\u6b8a\u60c5\u51b5\u8bf4\u660e`, "\u57fa\u7840\u4fe1\u606f\u53d8\u66f4\u3001\u5386\u53f2\u94fe\u6216\u624b\u5de5\u5904\u7406\u5bfc\u81f4\u4e0e\u8fc1\u79fb\u6f14\u7b97\u4e0d\u4e00\u81f4\uff0c\u6682\u6309\u540e\u671f\u6838\u67e5\u5f52\u6863");
+        if (reason === null) {
+            return null;
+        }
+        const safeReason = reason.trim();
+        if (!safeReason) {
+            window.alert("\u7279\u6b8a\u60c5\u51b5\u8bf4\u660e\u4e0d\u80fd\u4e3a\u7a7a");
+            return null;
+        }
+        return { reviewCategory: "HISTORY_SPECIAL", reviewReason: safeReason };
+    },
+    async batchReviewHistoryWriteComparisons() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const payload = WorkbenchPanel.historyWriteReviewPayloadFromPrompt("\u5f53\u524d\u7b5b\u9009\u5199\u5165\u5dee\u5f02");
+        if (!payload) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const params = WorkbenchPanel.historyPlanParams("EXECUTED");
+        if (!params.get("comparisonStatus")) {
+            params.set("comparisonStatus", "MISMATCHED");
+        }
+        if (!params.get("reviewStatus")) {
+            params.set("reviewStatus", "PENDING");
+        }
+        const result = await Api.request(`/api/workbench/history-write-plans/batch-review?${params.toString()}`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        WorkbenchPanel.showHistoryWriteBatchExecute(result);
+        await WorkbenchPanel.refreshAfterHistoryWriteReview();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchReviewSelectedHistoryWriteComparisons() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            return;
+        }
+        const payload = WorkbenchPanel.historyWriteReviewPayloadFromPrompt("\u9009\u4e2d\u5199\u5165\u5dee\u5f02");
+        if (!payload) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const result = await Api.request("/api/workbench/history-write-plans/selected-review", {
+            method: "POST",
+            body: JSON.stringify({ ...payload, caseNos })
+        });
+        WorkbenchPanel.showHistoryWriteBatchExecute(result);
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.refreshAfterHistoryWriteReview();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchMarkSpecialHistoryWritePlans() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const payload = WorkbenchPanel.historyWriteSpecialPayloadFromPrompt("\u5f53\u524d\u7b5b\u9009");
+        if (!payload) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const params = WorkbenchPanel.historyPlanParams("");
+        if (!params.get("reviewStatus")) {
+            params.set("reviewStatus", "PENDING");
+        }
+        const result = await Api.request(`/api/workbench/history-write-plans/batch-special-review?${params.toString()}`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        WorkbenchPanel.showHistoryWriteBatchExecute(result);
+        await WorkbenchPanel.load();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchMarkSelectedSpecialHistoryWritePlans() {
+        if (!Permissions.has("SALARY_DONE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            return;
+        }
+        const payload = WorkbenchPanel.historyWriteSpecialPayloadFromPrompt("\u9009\u4e2d\u8ba1\u5212");
+        if (!payload) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const result = await Api.request("/api/workbench/history-write-plans/selected-special-review", {
+            method: "POST",
+            body: JSON.stringify({ ...payload, caseNos })
+        });
+        WorkbenchPanel.showHistoryWriteBatchExecute(result);
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.load();
+        setStatus(TEXT.caseDetail);
+    },
     selectedHistoryPlanMaintenanceSource(plan, target, queue) {
         const suggestion = WorkbenchPanel.historyPlanMaintenanceSuggestions(plan)
             .find((item) => item.target === target) || {};
@@ -2123,7 +8985,7 @@ const WorkbenchPanel = {
         );
     },
     async batchExecuteHistoryWritePlans() {
-        if (!Permissions.has("SALARY_DONE")) {
+        if (!Permissions.has("SALARY_HISTORY_WRITE")) {
             setStatus(TEXT.menuPlaceholder);
             return;
         }
@@ -2132,70 +8994,131 @@ const WorkbenchPanel = {
         const preview = await Api.request(`/api/workbench/history-write-plans/batch-preview?${params.toString()}`, {
             method: "POST"
         });
-        if (!Number(preview.ready || 0)) {
+        const executableCount = Number(preview.ready || 0) + Number(preview.warning || 0);
+        if (!executableCount) {
             WorkbenchPanel.showHistoryWriteBatchPreview(preview);
             await WorkbenchPanel.loadHistoryWritePlans();
             setStatus(TEXT.caseDetail);
             return;
         }
-        if (!window.confirm(Format.text(TEXT.historyWriteBatchExecuteConfirm, {
-            total: preview.total || 0,
-            ready: preview.ready || 0,
-            blocked: preview.blocked || 0,
-            warning: preview.warning || 0
-        }))) {
+        const confirmedPreview = await WorkbenchPanel.confirmHistoryWriteBatchExecute(preview, "\u6279\u91cf\u5199\u5165\u786e\u8ba4", {
+            refreshPreview: () => Api.request(`/api/workbench/history-write-plans/batch-preview?${params.toString()}`, {
+                method: "POST"
+            })
+        });
+        if (!confirmedPreview) {
             setStatus(TEXT.workbenchReady);
             return;
         }
         const result = await Api.request(`/api/workbench/history-write-plans/batch-execute?${params.toString()}`, {
-            method: "POST"
+            method: "POST",
+            body: JSON.stringify({ safetyToken: confirmedPreview.safetyToken || "" })
         });
         WorkbenchPanel.showHistoryWriteBatchExecute(result);
         await WorkbenchPanel.load();
         setStatus(TEXT.caseDetail);
     },
     async batchRollbackHistoryWritePlans() {
-        if (!Permissions.has("SALARY_DONE")) {
+        if (!Permissions.has("SALARY_HISTORY_ROLLBACK")) {
             setStatus(TEXT.menuPlaceholder);
             return;
         }
         setStatus(TEXT.loadingCaseDetail);
         const selectedStatus = els.historyPlanStatusSelect?.value || "";
         const params = WorkbenchPanel.historyPlanParams(selectedStatus || "EXECUTED");
-        const plans = await Api.request(`/api/workbench/history-write-plans?${params.toString()}`);
-        const eligible = (plans || []).filter((plan) => plan.planStatus === "EXECUTED" && plan.executionResult === "SUCCESS").length;
+        const preview = await Api.request(`/api/workbench/history-write-plans/batch-rollback-preview?${params.toString()}`, {
+            method: "POST"
+        });
+        const items = preview.items || [];
+        const eligible = Number(preview.rollbackable || 0);
         if (!eligible) {
             WorkbenchPanel.showHistoryWriteBatchRollback({
-                total: (plans || []).length,
+                batchNo: "",
+                total: Number(preview.total || items.length),
                 success: 0,
                 failed: 0,
-                skipped: (plans || []).length,
-                items: (plans || []).map((plan) => ({
-                    caseNo: plan.caseNo,
-                    workItemId: plan.workItemId,
-                    personCode: plan.personCode,
-                    orgCode: plan.orgCode,
-                    writePlanId: plan.planNo,
-                    historyId: plan.insertedHistoryId,
+                skipped: Number(preview.total || items.length),
+                items: items.map((item) => ({
+                    caseNo: item.caseNo,
+                    workItemId: item.workItemId,
+                    personCode: item.personCode,
+                    orgCode: item.orgCode,
+                    writePlanId: item.writePlanId,
+                    historyId: item.historyId,
                     status: "SKIPPED",
-                    sidUpdateRequired: Boolean(plan.previousHistoryId || plan.nextHistoryId),
-                    message: `Skipped because plan status is ${plan.planStatus || "-"}`
+                    sidUpdateRequired: Boolean(item.sidUpdateRequired),
+                    message: (item.issues || []).join("; ") || `Skipped because rollback status is ${item.status || "-"}`
                 }))
             });
             setStatus(TEXT.caseDetail);
             return;
         }
         if (!window.confirm(Format.text(TEXT.historyWriteBatchRollbackConfirm, {
-            total: (plans || []).length,
+            total: Number(preview.total || items.length),
             eligible
         }))) {
             setStatus(TEXT.workbenchReady);
             return;
         }
         const result = await Api.request(`/api/workbench/history-write-plans/batch-rollback?${params.toString()}`, {
-            method: "POST"
+            method: "POST",
+            body: JSON.stringify({ safetyToken: preview.safetyToken })
         });
         WorkbenchPanel.showHistoryWriteBatchRollback(result);
+        await WorkbenchPanel.load();
+        setStatus(TEXT.caseDetail);
+    },
+    async batchRollbackSelectedHistoryWritePlans() {
+        if (!Permissions.has("SALARY_HISTORY_ROLLBACK")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const caseNos = WorkbenchPanel.selectedHistoryPlanCaseNos();
+        if (!caseNos.length) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const preview = await Api.request("/api/workbench/history-write-plans/selected-rollback-preview", {
+            method: "POST",
+            body: JSON.stringify({ caseNos })
+        });
+        const eligible = Number(preview.rollbackable || 0);
+        if (!eligible) {
+            WorkbenchPanel.showHistoryWriteBatchRollback({
+                batchNo: "",
+                total: Number(preview.total || caseNos.length),
+                success: 0,
+                failed: 0,
+                skipped: Number(preview.total || caseNos.length),
+                items: (preview.items || []).map((item) => ({
+                    caseNo: item.caseNo,
+                    workItemId: item.workItemId,
+                    personCode: item.personCode,
+                    orgCode: item.orgCode,
+                    writePlanId: item.writePlanId,
+                    historyId: item.historyId,
+                    status: "SKIPPED",
+                    sidUpdateRequired: Boolean(item.sidUpdateRequired),
+                    message: (item.issues || []).join("; ") || `Skipped because rollback status is ${item.status || "-"}`
+                }))
+            });
+            setStatus(TEXT.caseDetail);
+            return;
+        }
+        if (!window.confirm(Format.text(TEXT.historyWriteBatchRollbackConfirm, {
+            total: Number(preview.total || caseNos.length),
+            eligible
+        }))) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
+        const result = await Api.request("/api/workbench/history-write-plans/selected-rollback", {
+            method: "POST",
+            body: JSON.stringify({ caseNos, safetyToken: preview.safetyToken })
+        });
+        WorkbenchPanel.showHistoryWriteBatchRollback(result);
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
         await WorkbenchPanel.load();
         setStatus(TEXT.caseDetail);
     },
@@ -2210,6 +9133,7 @@ const WorkbenchPanel = {
     },
     async load() {
         const requestId = ++state.workbenchRequestId;
+        WorkbenchPanel.syncHistoryQueueWithWorkbenchFilters();
         if (state.activeView === "workbench") {
             setStatus(TEXT.loadingWorkbench);
         }
@@ -2261,6 +9185,9 @@ const WorkbenchPanel = {
         if (requestId !== state.workbenchRequestId) {
             return;
         }
+        if (state.activeMenuCode === "SALARY_DELIVERY_ARCHIVE") {
+            await WorkbenchPanel.showHistoryDeliveryArchive();
+        }
         if (state.activeView === "workbench") {
             setStatus(TEXT.workbenchReady);
         }
@@ -2269,10 +9196,26 @@ const WorkbenchPanel = {
         return {
             keyword: (els.workbenchKeywordInput.value || "").trim(),
             changeType: els.workbenchChangeTypeSelect.value || "",
+            source: els.workbenchSourceSelect.value || "",
             caseStatus: els.workbenchCaseStatusSelect.value || "DONE",
             trialStatus: els.workbenchTrialStatusSelect.value || "",
-            reviewStatus: els.workbenchReviewStatusSelect.value || ""
+            reviewStatus: els.workbenchReviewStatusSelect.value || "",
+            workflowStatus: els.workbenchWorkflowStatusSelect.value || "",
+            closureStatus: els.workbenchClosureStatusSelect.value || "",
+            nextAction: els.workbenchNextActionSelect.value || ""
         };
+    },
+    syncHistoryQueueWithWorkbenchFilters() {
+        const linkedFilter = state.historyPlanQueueFilter;
+        if (linkedFilter?.source !== "workbench-next-action") {
+            return;
+        }
+        const currentNextAction = els.workbenchNextActionSelect?.value || "";
+        if (!currentNextAction || currentNextAction !== linkedFilter.nextAction) {
+            state.historyPlanQueueFilter = null;
+            state.historyPlanSelected.clear();
+            persistHistoryPlanQueueState();
+        }
     },
     renderFilterSummary() {
         const filters = WorkbenchPanel.filters();
@@ -2283,6 +9226,9 @@ const WorkbenchPanel = {
         if (filters.changeType) {
             parts.push(`\u53d8\u52a8\uff1a${filters.changeType}`);
         }
+        if (filters.source) {
+            parts.push(`\u6765\u6e90\uff1a${Format.sourceText(filters.source)}`);
+        }
         parts.push(`\u5df2\u529e\u72b6\u6001\uff1a${Format.businessStatusText(filters.caseStatus)}`);
         if (filters.trialStatus) {
             parts.push(`\u8bd5\u7b97\uff1a${Format.statusText(filters.trialStatus)}`);
@@ -2290,7 +9236,115 @@ const WorkbenchPanel = {
         if (filters.reviewStatus) {
             parts.push(`\u590d\u6838\uff1a${Format.reviewStatusText(filters.reviewStatus)}`);
         }
-        els.workbenchFilterSummary.textContent = parts.length ? parts.join(" | ") : "\u5168\u90e8\u4e1a\u52a1";
+        if (filters.workflowStatus) {
+            parts.push(`\u8fdb\u5ea6\uff1a${Format.workflowStatusText(filters.workflowStatus)}`);
+        }
+        if (filters.closureStatus) {
+            parts.push(`\u95ed\u73af\uff1a${Format.closureStatusText(filters.closureStatus)}`);
+        }
+        if (filters.nextAction) {
+            parts.push(`\u4e0b\u4e00\u6b65\uff1a${Format.nextActionText(filters.nextAction)}`);
+        }
+        if (filters.closureStatus || filters.nextAction) {
+            parts.push("\u6392\u5e8f\uff1a\u95ed\u73af\u5904\u7406\u987a\u5e8f");
+        }
+        const summaryText = parts.length ? parts.join(" | ") : "\u5168\u90e8\u4e1a\u52a1";
+        const queueButtonText = filters.nextAction === "REVIEW_TRIAL" ? "\u5b9a\u4f4d\u5df2\u529e\u5217\u8868" : "\u6253\u5f00\u5386\u53f2\u5199\u5165\u961f\u5217";
+        const actionHtml = filters.nextAction ? `
+            <span class="workbench-filter-summary-actions">
+                <button type="button" data-workbench-queue-history>${Format.html(queueButtonText)}</button>
+                <button type="button" data-workbench-queue-export>\u5bfc\u51fa\u5f53\u524d\u961f\u5217</button>
+            </span>
+        ` : "";
+        els.workbenchFilterSummary.innerHTML = `
+            <span>${Format.html(summaryText)}</span>
+            ${actionHtml}
+        `;
+    },
+    async applyWorkbenchNextActionToHistoryQueue() {
+        const filters = WorkbenchPanel.filters();
+        const nextAction = filters.nextAction || "";
+        if (nextAction === "REVIEW_TRIAL") {
+            WorkbenchPanel.jumpToWorkspace("done");
+            setStatus("\u590d\u6838\u8bd5\u7b97\u9700\u5728\u5df2\u529e\u5217\u8868\u6253\u5f00\u529e\u7406\u8be6\u60c5\u5904\u7406");
+            return;
+        }
+        const queue = {
+            EXECUTE_HISTORY_WRITE: {
+                status: "PREPARED",
+                comparisonStatus: "",
+                reviewStatus: "",
+                retestStatus: "",
+                actionCode: "WRITE_HISTORY",
+                queueFilter: { readyOnly: true, autoSelect: true, queueActionCode: "WRITE_HISTORY", label: "\u53ef\u5199\u5165\u5386\u53f2" }
+            },
+            REVIEW_DIFFERENCE: {
+                status: "EXECUTED",
+                comparisonStatus: "MISMATCHED",
+                reviewStatus: "PENDING",
+                retestStatus: "",
+                actionCode: "",
+                queueFilter: { pendingQueue: "review", label: "\u5199\u5165\u540e\u5f85\u6838\u67e5" }
+            },
+            VIEW_HISTORY_PLAN: {
+                status: "",
+                comparisonStatus: "",
+                reviewStatus: "",
+                retestStatus: "",
+                actionCode: "VIEW_PLAN",
+                queueFilter: { pendingQueue: "blocked", label: "\u67e5\u770b\u5199\u5165\u8ba1\u5212" }
+            },
+            PRINT_OR_CREATE_HISTORY_PLAN: {
+                status: "PREPARED",
+                comparisonStatus: "",
+                reviewStatus: "",
+                retestStatus: "",
+                actionCode: "",
+                queueFilter: { printQueue: "UNPRINTED_BLOCKED", label: "\u5f85\u6253\u5370/\u9884\u68c0" }
+            }
+        }[nextAction];
+        if (!queue) {
+            WorkbenchPanel.jumpToWorkspace("history");
+            return;
+        }
+        if (els.historyPlanStatusSelect) els.historyPlanStatusSelect.value = queue.status;
+        if (els.historyPlanComparisonSelect) els.historyPlanComparisonSelect.value = queue.comparisonStatus;
+        if (els.historyPlanReviewSelect) els.historyPlanReviewSelect.value = queue.reviewStatus;
+        if (els.historyPlanRetestSelect) els.historyPlanRetestSelect.value = queue.retestStatus;
+        if (els.historyPlanMaintenanceSelect) els.historyPlanMaintenanceSelect.value = "";
+        if (els.historyPlanPrioritySelect) els.historyPlanPrioritySelect.value = "";
+        if (els.historyPlanActionSelect) els.historyPlanActionSelect.value = queue.actionCode;
+        state.historyPlanMismatchField = "";
+        state.historyPlanRetestStatus = queue.retestStatus;
+        state.historyPlanQueueFilter = { ...queue.queueFilter, source: "workbench-next-action", nextAction };
+        state.historyPlanBlockedIssueCategory = "";
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        await WorkbenchPanel.loadHistoryWritePlans();
+        WorkbenchPanel.jumpToWorkspace("history");
+        setStatus(`已按工作台下一步打开历史写入队列：${Format.nextActionText(nextAction)}`);
+    },
+    async returnToWorkbenchNextActionFilter() {
+        const queueFilter = state.historyPlanQueueFilter;
+        const nextAction = queueFilter?.source === "workbench-next-action" ? (queueFilter.nextAction || "") : "";
+        if (!nextAction) {
+            WorkbenchPanel.jumpToWorkspace("done");
+            return;
+        }
+        els.workbenchKeywordInput.value = "";
+        els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
+        els.workbenchCaseStatusSelect.value = "DONE";
+        els.workbenchTrialStatusSelect.value = "";
+        els.workbenchReviewStatusSelect.value = "";
+        els.workbenchWorkflowStatusSelect.value = "";
+        els.workbenchClosureStatusSelect.value = "PENDING";
+        els.workbenchNextActionSelect.value = nextAction;
+        state.workbenchDoneLoaded = 0;
+        WorkbenchPanel.renderFilterSummary();
+        await WorkbenchPanel.loadPage("DONE", true);
+        WorkbenchPanel.jumpToWorkspace("done");
+        setStatus(`\u5df2\u56de\u5230\u5de5\u4f5c\u53f0\u4e0b\u4e00\u6b65\uff1a${Format.nextActionText(nextAction)}`);
     },
     updateMoreButtons(todoTotal = Number(els.todoCount.textContent || 0), doneTotal = Number(els.doneCount.textContent || 0)) {
         els.loadMoreTodoButton.disabled = state.workbenchTodoLoaded >= todoTotal;
@@ -2313,9 +9367,13 @@ const WorkbenchPanel = {
             limit: 12,
             keyword: filters.keyword,
             changeType: filters.changeType,
+            source: filters.source,
             caseStatus: isDone ? filters.caseStatus : "",
             trialStatus: isDone ? filters.trialStatus : "",
-            reviewStatus: isDone ? filters.reviewStatus : ""
+            reviewStatus: isDone ? filters.reviewStatus : "",
+            workflowStatus: isDone ? filters.workflowStatus : "",
+            closureStatus: isDone ? filters.closureStatus : "",
+            nextAction: isDone ? filters.nextAction : ""
         });
         const page = await Api.request(`/api/workbench/items?${params.toString()}`);
         if (requestId !== state.workbenchRequestId) {
@@ -2370,17 +9428,36 @@ const WorkbenchPanel = {
             status,
             keyword: filters.keyword,
             changeType: filters.changeType,
+            source: filters.source,
             caseStatus: isDone ? filters.caseStatus : "",
             trialStatus: isDone ? filters.trialStatus : "",
             reviewStatus: isDone ? filters.reviewStatus : "",
+            workflowStatus: isDone ? filters.workflowStatus : "",
+            closureStatus: isDone ? filters.closureStatus : "",
+            nextAction: isDone ? filters.nextAction : "",
             limit: 5000
         });
         window.location.href = `/api/workbench/items.csv?${params.toString()}`;
     },
+    isSalaryTodoSource(source) {
+        return ["SALARY_EVENT", "dryzwbh", "dndkh", "dxl", "hjxx"].includes(source || "");
+    },
+    governanceMaintenanceTarget(businessType, summary = "") {
+        const text = `${businessType || ""} ${summary || ""}`;
+        if (text.includes("学历")) {
+            return "education";
+        }
+        if (text.includes("任职")) {
+            return "post";
+        }
+        return "base";
+    },
     workItemRequest(item) {
+        const originalSource = item.dataset.source || "";
+        const summary = item.dataset.summary || "";
         return {
             workItemId: item.dataset.workId,
-            source: item.dataset.source,
+            source: WorkbenchPanel.isSalaryTodoSource(originalSource) ? "SALARY_EVENT" : originalSource,
             businessType: item.dataset.changeType,
             personCode: item.dataset.personCode,
             personName: item.dataset.personName,
@@ -2388,7 +9465,9 @@ const WorkbenchPanel = {
             year: Number(item.dataset.year || 0) || null,
             month: Number(item.dataset.month || 0) || null,
             title: item.dataset.title,
-            summary: item.dataset.summary
+            summary: originalSource && originalSource !== "SALARY_EVENT"
+                ? `${summary}${summary ? "；" : ""}\u6765\u6e90=${originalSource}`
+                : summary
         };
     },
     async completeWorkItem(button) {
@@ -2429,6 +9508,23 @@ const WorkbenchPanel = {
     async openCaseDetail(caseNo) {
         setStatus(TEXT.loadingCaseDetail);
         const detail = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}`);
+        const plan = detail.historyWritePlan || {};
+        if (WorkbenchPanel.historyPlanWritten(plan)) {
+            try {
+                detail.historyWriteComparison = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-comparison`);
+            } catch (error) {
+                detail.historyWriteComparisonError = error.message || TEXT.requestFail;
+            }
+            if (Permissions.has("SALARY_HISTORY_ROLLBACK")) {
+                try {
+                    detail.historyWriteRollbackPreview = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-rollback-preview`, {
+                        method: "POST"
+                    });
+                } catch (error) {
+                    detail.historyWriteRollbackPreviewError = error.message || TEXT.requestFail;
+                }
+            }
+        }
         WorkbenchPanel.showCaseDetail(detail);
         setStatus(TEXT.caseDetail);
     },
@@ -2458,30 +9554,75 @@ const WorkbenchPanel = {
         WorkbenchPanel.showSnapshotDetail(snapshot);
         setStatus(TEXT.caseDetail);
     },
-    async openHistoryWritePreview(caseNo) {
+    async openHistoryWritePreview(caseNo, options = {}) {
         setStatus(TEXT.loadingCaseDetail);
-        const preview = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-preview`, {
+        const preview = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-confirm`, {
             method: "POST"
         });
+        await WorkbenchPanel.refreshAfterClosureAction();
+        if (options.refreshDetail) {
+            await WorkbenchPanel.openCaseDetail(caseNo);
+            setStatus(preview.executable || preview.writable ? "\u5199\u5165\u9884\u68c0\u5df2\u66f4\u65b0\uff0c\u5df2\u56de\u5230\u529e\u7406\u8be6\u60c5" : "\u5199\u5165\u9884\u68c0\u672a\u901a\u8fc7\uff0c\u5df2\u66f4\u65b0\u963b\u65ad\u5904\u7406\u4fe1\u606f");
+            return preview;
+        }
         WorkbenchPanel.showHistoryWritePreview(preview);
         setStatus(TEXT.caseDetail);
+        return preview;
     },
     async executeHistoryWrite(caseNo) {
+        if (!Permissions.has("SALARY_HISTORY_WRITE")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
         setStatus(TEXT.loadingCaseDetail);
+        const preview = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-confirm`, {
+            method: "POST"
+        });
+        const executable = preview.executable ?? preview.writable;
+        if (!executable) {
+            WorkbenchPanel.showHistoryWritePreview(preview);
+            setStatus("\u6700\u65b0\u9884\u68c0\u672a\u901a\u8fc7\uff0c\u5df2\u963b\u65ad\u5386\u53f2\u5199\u5165");
+            return;
+        }
+        if (!await WorkbenchPanel.confirmSingleHistoryWriteExecute(preview)) {
+            setStatus(TEXT.workbenchReady);
+            return;
+        }
         const result = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-execute`, {
             method: "POST"
         });
-        await WorkbenchPanel.load();
+        await WorkbenchPanel.refreshAfterClosureAction();
+        if (result.historyId) {
+            await WorkbenchPanel.openCaseDetail(caseNo);
+            setStatus("\u5386\u53f2\u5df2\u5199\u5165\uff0c\u5df2\u56de\u5230\u529e\u7406\u8be6\u60c5\uff0c\u53ef\u5728\u5199\u5165\u7ed3\u679c\u4e2d\u67e5\u770b\u5b57\u6bb5\u5bf9\u7167");
+            return;
+        }
         WorkbenchPanel.showHistoryWriteExecuteResult(result);
         setStatus(TEXT.caseDetail);
     },
     async rollbackHistoryWrite(caseNo) {
+        if (!Permissions.has("SALARY_HISTORY_ROLLBACK")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
         setStatus(TEXT.loadingCaseDetail);
         const result = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-rollback`, {
             method: "POST"
         });
-        await WorkbenchPanel.load();
-        WorkbenchPanel.showHistoryWriteExecuteResult(result);
+        await WorkbenchPanel.refreshAfterClosureAction();
+        await WorkbenchPanel.openCaseDetail(caseNo);
+        setStatus("\u5386\u53f2\u5199\u5165\u5df2\u64a4\u9500\uff0c\u5df2\u56de\u5230\u529e\u7406\u8be6\u60c5\u5e76\u5c55\u793a\u56de\u6eda\u7ed3\u679c");
+    },
+    async openHistoryWriteRollbackPreview(caseNo) {
+        if (!Permissions.has("SALARY_HISTORY_ROLLBACK")) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const preview = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-rollback-preview`, {
+            method: "POST"
+        });
+        WorkbenchPanel.showHistoryWriteRollbackPreview(preview);
         setStatus(TEXT.caseDetail);
     },
     async openHistoryWritePlan(caseNo) {
@@ -2505,7 +9646,7 @@ const WorkbenchPanel = {
             method: "POST"
         });
         WorkbenchPanel.showHistoryWriteComparison(comparison, true);
-        await WorkbenchPanel.load();
+        await WorkbenchPanel.refreshAfterClosureAction();
         setStatus(TEXT.caseDetail);
     },
     async approveRetestPassedHistoryWriteComparison(caseNo) {
@@ -2513,9 +9654,9 @@ const WorkbenchPanel = {
         const comparison = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-comparison-retest-approve`, {
             method: "POST"
         });
-        WorkbenchPanel.showHistoryWriteComparison(comparison);
-        await WorkbenchPanel.loadHistoryWritePlans();
-        setStatus(TEXT.caseDetail);
+        await WorkbenchPanel.refreshAfterClosureAction();
+        await WorkbenchPanel.openCaseDetail(caseNo);
+        setStatus("\u590d\u6d4b\u5df2\u6807\u8bb0\u901a\u8fc7\uff0c\u5df2\u56de\u5230\u529e\u7406\u8be6\u60c5");
     },
     async reviewHistoryWriteComparison(caseNo, reviewCategory, reviewReason) {
         setStatus(TEXT.loadingCaseDetail);
@@ -2523,9 +9664,46 @@ const WorkbenchPanel = {
             method: "POST",
             body: JSON.stringify({ reviewCategory, reviewReason })
         });
-        WorkbenchPanel.showHistoryWriteComparison(comparison);
-        await WorkbenchPanel.loadHistoryWritePlans();
-        setStatus(TEXT.caseDetail);
+        await WorkbenchPanel.refreshAfterClosureAction();
+        await WorkbenchPanel.openCaseDetail(caseNo);
+        setStatus("\u5199\u5165\u5dee\u5f02\u5df2\u6838\u67e5\uff0c\u5df2\u56de\u5230\u529e\u7406\u8be6\u60c5");
+    },
+    async refreshAfterHistoryWriteReview() {
+        return WorkbenchPanel.refreshAfterClosureAction();
+    },
+    async refreshAfterClosureAction() {
+        const requestId = ++state.workbenchRequestId;
+        const tasks = [Api.request("/api/workbench/summary").then((summary) => {
+            if (requestId !== state.workbenchRequestId) {
+                return;
+            }
+            state.workbench = { ...summary, metrics: summary.metrics || [] };
+            WorkbenchPanel.renderMetrics(summary.metrics || []);
+        })];
+        if (Permissions.has("SALARY_DONE") || Permissions.has("APPLICATION_DONE")) {
+            tasks.push(WorkbenchPanel.loadPage("DONE", true, requestId));
+        }
+        if (Permissions.has("SALARY_DONE")) {
+            tasks.push(WorkbenchPanel.loadHistoryWritePlans(requestId));
+        }
+        await Promise.all(tasks);
+        Permissions.applyWorkbench();
+    },
+    async reviewBlockedHistoryWritePlan(caseNo, reviewReason = "") {
+        const safeCaseNo = caseNo || "";
+        if (!safeCaseNo) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const reason = reviewReason || "阻断项暂按后期核查处理";
+        const plan = await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(safeCaseNo)}/history-write-blocked-review`, {
+            method: "POST",
+            body: JSON.stringify({ reviewCategory: "HISTORY_SPECIAL", reviewReason: reason })
+        });
+        await WorkbenchPanel.refreshAfterClosureAction();
+        await WorkbenchPanel.openCaseDetail(safeCaseNo);
+        setStatus("阻断项已标记后期核查，已回到办理详情");
+        return plan;
     },
     historyWriteFieldSuggestion(field, comparison = {}) {
         const code = String(field?.itemCode || field?.historyField || "").toUpperCase();
@@ -2615,14 +9793,10 @@ const WorkbenchPanel = {
         const cancelReasonHtml = canCancel
             ? `<label class="case-cancel-reason"><span>\u64a4\u56de\u529e\u7406\u8bf4\u660e</span><textarea data-cancel-reason rows="3" maxlength="1000" placeholder="\u8bf7\u8bf4\u660e\u64a4\u56de\u8be5\u529e\u7406\u8bb0\u5f55\u7684\u539f\u56e0"></textarea></label>`
             : "";
-        const historyWriteAction = detail.snapshotExists
-            ? (detail.historyWritePlan
-                ? `<button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(detail.caseNo)}">\u5199\u5165\u8ba1\u5212</button>`
-                : `<button type="button" class="case-snapshot-button" data-history-write-preview-case-no="${Format.html(detail.caseNo)}">\u751f\u6210\u5199\u5165\u9884\u68c0</button>`)
-            : "";
         const actionButtons = [
+            (Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT")) ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${Format.html(detail.caseNo)}">\u6253\u5370\u5ba1\u6279\u8868</button>` : "",
             detail.snapshotExists ? `<button type="button" class="case-snapshot-button" data-snapshot-case-no="${Format.html(detail.caseNo)}">\u67e5\u770b\u5feb\u7167</button>` : "",
-            historyWriteAction,
+            WorkbenchPanel.caseHistoryWriteActionsHtml(detail),
             canReview ? `<button type="button" class="case-review-button" data-review-case-no="${Format.html(detail.caseNo)}">\u6807\u8bb0\u5df2\u590d\u6838</button>` : "",
             canCancel ? `<button type="button" class="case-cancel-button" data-cancel-case-no="${Format.html(detail.caseNo)}">\u64a4\u56de\u529e\u7406</button>` : ""
         ].filter(Boolean).join("");
@@ -2633,6 +9807,30 @@ const WorkbenchPanel = {
             warningHtml: `${reviewReasonHtml}${cancelReasonHtml}`,
             actionsHtml: actionButtons
         });
+    },
+    caseHistoryWriteActionsHtml(detail) {
+        if (!detail.snapshotExists) {
+            return "";
+        }
+        const caseNo = Format.html(detail.caseNo || "");
+        const plan = detail.historyWritePlan;
+        if (!plan) {
+            return `<button type="button" class="case-snapshot-button" data-history-write-preview-case-no="${caseNo}">\u751f\u6210\u5199\u5165\u9884\u68c0</button>`;
+        }
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
+        const printArchive = detail.reportPrintArchive || plan.reportPrintArchive || {};
+        const printReady = printArchive.printed === true;
+        const writable = plan.writable === true && plan.planStatus !== "EXECUTED" && printReady;
+        const written = plan.planStatus === "EXECUTED" && plan.executionResult === "SUCCESS";
+        return [
+            `<button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${caseNo}">\u5199\u5165\u8ba1\u5212</button>`,
+            !printReady && (Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT")) ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${caseNo}">\u5148\u6253\u5370\u5ba1\u6279\u8868</button>` : "",
+            writable && canHistoryWrite ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${caseNo}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : "",
+            written ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${caseNo}">\u5b57\u6bb5\u5bf9\u7167</button>` : "",
+            written && canHistoryRollback ? `<button type="button" class="case-snapshot-button" data-history-write-rollback-preview-case-no="${caseNo}">\u56de\u6eda\u9884\u68c0</button>` : "",
+            written && canHistoryRollback ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${caseNo}">\u64a4\u9500\u5199\u5165</button>` : ""
+        ].filter(Boolean).join("");
     },
     showSnapshotDetail(snapshot) {
         const fields = [
@@ -2693,17 +9891,98 @@ const WorkbenchPanel = {
             </div>
         `;
     },
+    confirmSingleHistoryWriteExecute(preview = {}) {
+        return new Promise((resolve) => {
+            document.querySelector(".case-detail-overlay")?.remove();
+            const fields = preview.fields || [];
+            const issues = preview.issues || [];
+            const overlay = document.createElement("div");
+            let settled = false;
+            const finish = (value) => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                overlay.remove();
+                resolve(value);
+            };
+            overlay.className = "case-detail-overlay";
+            overlay.innerHTML = `
+                <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5355\u6761\u5386\u53f2\u5199\u5165\u6700\u7ec8\u786e\u8ba4">
+                    <header class="case-detail-head">
+                        <div>
+                            <strong>\u5355\u6761\u5386\u53f2\u5199\u5165\u6700\u7ec8\u786e\u8ba4</strong>
+                            <span>${Format.html(preview.caseNo || "-")} | ${Format.html(preview.personCode || "-")}</span>
+                        </div>
+                        <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                    </header>
+                    <div class="case-detail-section">
+                        <span>\u5199\u5165\u524d\u6700\u7ec8\u6821\u9a8c</span>
+                        ${WorkbenchPanel.singleFinalConfirmGateHtml(preview)}
+                    </div>
+                    <dl class="case-detail-grid">
+                        ${[
+                            ["\u529e\u7406\u7f16\u53f7", preview.caseNo],
+                            ["\u4eba\u5458\u7f16\u7801", preview.personCode],
+                            ["\u5355\u4f4d\u7f16\u7801", preview.orgCode],
+                            ["\u6267\u884c\u5e74\u6708", preview.year ? `${preview.year}-${String(preview.month || 1).padStart(2, "0")}` : "-"],
+                            ["\u53d8\u52a8\u7c7b\u522b", preview.businessType],
+                            ["\u5199\u5165\u5408\u8ba1", Format.optionalAmount(preview.totalAmount)],
+                            ["\u6620\u5c04\u5b57\u6bb5", fields.length],
+                            ["\u95ee\u9898\u63d0\u793a", issues.length]
+                        ].map(([label, value]) => `
+                            <div>
+                                <dt>${Format.html(label)}</dt>
+                                <dd>${Format.html(value || "-")}</dd>
+                            </div>
+                        `).join("")}
+                    </dl>
+                    <div class="case-detail-section">
+                        <span>\u5b89\u5168\u786e\u8ba4</span>
+                        <p>${Format.html(preview.confirmMessage || "\u8bf7\u786e\u8ba4\u6700\u65b0\u9884\u68c0\u7ed3\u679c\u4ecd\u7b26\u5408\u5199\u5165\u8981\u6c42\u3002")}</p>
+                        <label class="case-review-reason">
+                            <span>\u786e\u8ba4\u8bed</span>
+                            <input data-single-execute-confirm-text maxlength="20" placeholder="\u8bf7\u8f93\u5165\uff1a\u786e\u8ba4\u5199\u5165">
+                        </label>
+                    </div>
+                    <div class="case-error hidden" data-case-error></div>
+                    <footer class="case-detail-actions">
+                        <button type="button" class="case-detail-close">\u53d6\u6d88</button>
+                        <button type="button" class="case-confirm-button" data-single-execute-confirm>\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>
+                    </footer>
+                </section>
+            `;
+            overlay.addEventListener("click", (event) => {
+                if (event.target.closest("button[data-single-execute-confirm]")) {
+                    const confirmText = overlay.querySelector("[data-single-execute-confirm-text]")?.value?.trim() || "";
+                    if (confirmText !== "\u786e\u8ba4\u5199\u5165") {
+                        WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), "\u8bf7\u8f93\u5165\u786e\u8ba4\u8bed\uff1a\u786e\u8ba4\u5199\u5165");
+                        return;
+                    }
+                    finish(true);
+                    return;
+                }
+                if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                    finish(false);
+                }
+            });
+            document.body.appendChild(overlay);
+            overlay.querySelector("[data-single-execute-confirm-text]")?.focus();
+        });
+    },
     showHistoryWritePreview(preview) {
         document.querySelector(".case-detail-overlay")?.remove();
         const fields = preview.fields || [];
         const issues = preview.issues || [];
+        const executable = preview.executable ?? preview.writable;
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
         const overlay = document.createElement("div");
         overlay.className = "case-detail-overlay";
         overlay.innerHTML = `
-            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u9884\u89c8">
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u786e\u8ba4">
                 <header class="case-detail-head">
                     <div>
-                        <strong>\u5386\u53f2\u5199\u5165\u9884\u89c8</strong>
+                        <strong>\u5386\u53f2\u5199\u5165\u786e\u8ba4</strong>
                         <span>${Format.html(preview.businessType || "-")} | ${Format.html(preview.personCode || "-")}</span>
                     </div>
                     <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
@@ -2719,7 +9998,9 @@ const WorkbenchPanel = {
                         ["\u5355\u4f4d\u7f16\u7801", preview.orgCode],
                         ["\u6267\u884c\u5e74\u6708", preview.year ? `${preview.year}-${String(preview.month || 1).padStart(2, "0")}` : "-"],
                         ["\u53d8\u52a8\u7c7b\u522b", preview.businessType],
-                        ["\u5df2\u6709\u5386\u53f2", preview.existingHistoryId || "-"]
+                        ["\u5df2\u6709\u5386\u53f2", preview.existingHistoryId || "-"],
+                        ["\u5199\u5165\u5408\u8ba1", Format.optionalAmount(preview.totalAmount)],
+                        ["\u6620\u5c04\u5b57\u6bb5", preview.fieldCount ?? fields.length]
                     ].map(([label, value]) => `
                         <div>
                             <dt>${Format.html(label)}</dt>
@@ -2729,7 +10010,15 @@ const WorkbenchPanel = {
                 </dl>
                 <div class="case-history-status ${Format.html((preview.status || "").toLowerCase())}">
                     <strong>${Format.html(preview.status || "-")}</strong>
-                    <span>${preview.writable ? "\u53ef\u8fdb\u5165\u5199\u5165\u786e\u8ba4\u524d\u590d\u6838" : "\u5b58\u5728\u963b\u65ad\u9879\uff0c\u6682\u4e0d\u5efa\u8bae\u5199\u5165"}</span>
+                    <span>${executable ? "\u5df2\u901a\u8fc7\u5199\u5165\u524d\u786e\u8ba4\u9884\u68c0" : "\u5b58\u5728\u963b\u65ad\u9879\uff0c\u6682\u4e0d\u5efa\u8bae\u5199\u5165"}</span>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u5199\u5165\u524d\u6700\u7ec8\u6821\u9a8c</span>
+                    ${WorkbenchPanel.singleFinalConfirmGateHtml(preview)}
+                </div>
+                <div class="case-detail-section">
+                    <span>\u5199\u5165\u786e\u8ba4</span>
+                    <p>${Format.html(preview.confirmMessage || "\u8bf7\u590d\u6838\u5b57\u6bb5\u6620\u5c04\u3001\u5408\u8ba1\u91d1\u989d\u548c sid \u94fe\u8c03\u6574\u3002")}</p>
                 </div>
                 <div class="case-detail-section">
                     <span>sid \u8c03\u6574\u9884\u6848</span>
@@ -2762,13 +10051,26 @@ const WorkbenchPanel = {
                 </div>
                 <div class="case-error hidden" data-case-error></div>
                 <footer class="case-detail-actions">
+                    <button type="button" class="case-snapshot-button" data-case-detail-no="${Format.html(preview.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
                     <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(preview.caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>
-                    ${preview.writable ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${Format.html(preview.caseNo)}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
+                    ${executable && canHistoryWrite ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${Format.html(preview.caseNo)}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
                     <button type="button" class="case-detail-close">\u5173\u95ed</button>
                 </footer>
             </section>
         `;
         overlay.addEventListener("click", async (event) => {
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo);
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
             const planButton = event.target.closest("button[data-history-write-plan-case-no]");
             if (planButton) {
                 planButton.disabled = true;
@@ -2804,9 +10106,137 @@ const WorkbenchPanel = {
         document.body.appendChild(overlay);
         overlay.querySelector(".case-detail-close").focus();
     },
+    showHistoryWriteRollbackPreview(preview) {
+        document.querySelector(".case-detail-overlay")?.remove();
+        const issues = preview.issues || [];
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u64a4\u9500\u786e\u8ba4">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u64a4\u9500\u5199\u5165\u786e\u8ba4</strong>
+                        <span>${Format.html(preview.businessType || "-")} | ${Format.html(preview.personCode || "-")}</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <dl class="case-detail-grid">
+                    ${[
+                        ["\u529e\u7406\u7f16\u53f7", preview.caseNo],
+                        ["\u5199\u5165\u8ba1\u5212\u53f7", preview.writePlanId],
+                        ["\u5f85\u5220\u9664\u884c", preview.historyId],
+                        ["\u9884\u68c0\u72b6\u6001", preview.status],
+                        ["\u662f\u5426\u53ef\u64a4\u9500", preview.rollbackable ? "\u662f" : "\u5426"],
+                        ["\u4eba\u5458\u7f16\u7801", preview.personCode],
+                        ["\u5355\u4f4d\u7f16\u7801", preview.orgCode],
+                        ["\u6267\u884c\u5e74\u6708", preview.year ? `${preview.year}-${String(preview.month || 1).padStart(2, "0")}` : "-"],
+                        ["sid\u662f\u5426\u6062\u590d", preview.sidUpdateRequired ? "\u662f" : "\u5426"]
+                    ].map(([label, value]) => `
+                        <div>
+                            <dt>${Format.html(label)}</dt>
+                            <dd>${Format.html(value || "-")}</dd>
+                        </div>
+                    `).join("")}
+                </dl>
+                <div class="case-history-status ${Format.html((preview.status || "").toLowerCase())}">
+                    <strong>${Format.html(preview.status || "-")}</strong>
+                    <span>${preview.rollbackable ? "\u5df2\u901a\u8fc7\u64a4\u9500\u524d\u9884\u68c0" : "\u5b58\u5728\u963b\u65ad\u9879\uff0c\u4e0d\u80fd\u64a4\u9500"}</span>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u64a4\u9500\u786e\u8ba4</span>
+                    <p>${Format.html(preview.confirmMessage || "-")}</p>
+                </div>
+                <div class="case-detail-section">
+                    <span>sid \u6062\u590d\u9884\u6848</span>
+                    <p>${Format.html(preview.sidPlan || "-")}</p>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u64a4\u9500\u94fe\u4f4d\u7f6e</span>
+                    <div class="case-history-list">
+                        ${WorkbenchPanel.historyRowHtml("\u524d\u4e00\u6761", preview.previousHistory)}
+                        ${WorkbenchPanel.historyRowHtml("\u5f85\u5220\u9664\u884c", preview.insertedHistory)}
+                        ${WorkbenchPanel.historyRowHtml("\u540e\u4e00\u6761", preview.nextHistory)}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u95ee\u9898\u548c\u63d0\u793a</span>
+                    <div class="case-history-issue-list">
+                        ${issues.length ? issues.map((issue) => `<p>${Format.html(issue)}</p>`).join("") : `<p class="muted">\u672a\u53d1\u73b0\u963b\u65ad\u9879</p>`}
+                    </div>
+                </div>
+                <div class="case-error hidden" data-case-error></div>
+                <footer class="case-detail-actions">
+                    <button type="button" class="case-snapshot-button" data-case-detail-no="${Format.html(preview.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
+                    <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(preview.caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>
+                    <button type="button" class="case-snapshot-button" data-history-write-rollback-preview-export-case-no="${Format.html(preview.caseNo)}">\u5bfc\u51fa\u9884\u68c0</button>
+                    ${preview.rollbackable && canHistoryRollback ? `<button type="button" class="case-cancel-button" data-history-write-rollback-confirm-case-no="${Format.html(preview.caseNo)}">\u786e\u8ba4\u64a4\u9500\u5199\u5165</button>` : ""}
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo);
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const planButton = event.target.closest("button[data-history-write-plan-case-no]");
+            if (planButton) {
+                planButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWritePlan(planButton.dataset.historyWritePlanCaseNo);
+                } catch (error) {
+                    planButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const exportButton = event.target.closest("button[data-history-write-rollback-preview-export-case-no]");
+            if (exportButton) {
+                window.location.href = `/api/workbench/salary-cases/${encodeURIComponent(exportButton.dataset.historyWriteRollbackPreviewExportCaseNo || "")}/history-write-rollback-preview.csv`;
+                return;
+            }
+            const rollbackButton = event.target.closest("button[data-history-write-rollback-confirm-case-no]");
+            if (rollbackButton) {
+                const caseNo = rollbackButton.dataset.historyWriteRollbackConfirmCaseNo;
+                if (!window.confirm(Format.text(TEXT.historyWriteRollbackConfirm, { caseNo }))) {
+                    return;
+                }
+                rollbackButton.disabled = true;
+                try {
+                    await WorkbenchPanel.rollbackHistoryWrite(caseNo);
+                } catch (error) {
+                    rollbackButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+    },
     showHistoryWritePlan(plan) {
         document.querySelector(".case-detail-overlay")?.remove();
         const audits = plan.audits || [];
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
+        const canReviewBlocked = WorkbenchPanel.historyPlanBlocked(plan) && plan.comparisonReviewStatus !== "REVIEWED";
+        const printArchive = plan.reportPrintArchive || {};
+        const printReady = printArchive.printed === true;
+        const printBatch = printArchive.latestBatchNo || (printArchive.latestTargetType === "REPORT_PRINT_BATCH" ? printArchive.latestTargetCode : "");
         const overlay = document.createElement("div");
         overlay.className = "case-detail-overlay";
         overlay._auditExportUrl = `/api/workbench/salary-cases/${encodeURIComponent(plan.caseNo || "")}/history-write-audits.csv`;
@@ -2848,6 +10278,10 @@ const WorkbenchPanel = {
                     `).join("")}
                 </dl>
                 <div class="case-detail-section">
+                    <span>\u5ba1\u6279\u8868\u5f52\u6863</span>
+                    <p>${Format.html(printArchive.message || (printReady ? "\u5df2\u5f52\u6863" : "\u672a\u6253\u5370"))}${printBatch ? ` | \u6279\u6b21 ${Format.html(printBatch)}` : ""}${printArchive.latestPrintedAt ? ` | ${Format.html(printArchive.latestPrintedAt)}` : ""}</p>
+                </div>
+                <div class="case-detail-section">
                     <span>\u6267\u884c\u8bf4\u660e</span>
                     <p>${Format.html(plan.executionMessage || plan.rollbackMessage || "-")}</p>
                 </div>
@@ -2868,8 +10302,11 @@ const WorkbenchPanel = {
                     </div>
                 </div>
                 <footer class="case-detail-actions">
-                    ${plan.planStatus !== "EXECUTED" && plan.writable ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${Format.html(plan.caseNo)}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
-                    ${plan.planStatus === "EXECUTED" && plan.executionResult === "SUCCESS" ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${Format.html(plan.caseNo)}">\u64a4\u9500\u5199\u5165</button>` : ""}
+                    ${!printReady && (Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT")) ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${Format.html(plan.caseNo)}">\u5148\u6253\u5370\u5ba1\u6279\u8868</button>` : ""}
+                    ${plan.planStatus !== "EXECUTED" && plan.writable && printReady && canHistoryWrite ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${Format.html(plan.caseNo)}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
+                    ${plan.planStatus === "EXECUTED" && plan.executionResult === "SUCCESS" && canHistoryRollback ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${Format.html(plan.caseNo)}">\u64a4\u9500\u5199\u5165</button>` : ""}
+                    ${canReviewBlocked ? `<button type="button" class="case-review-button" data-history-write-blocked-review-case-no="${Format.html(plan.caseNo)}">\u6807\u8bb0\u540e\u671f\u6838\u67e5</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-case-detail-no="${Format.html(plan.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
                     <button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(plan.caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>
                     <button type="button" class="case-snapshot-button" data-open-person-maintenance="base" data-person-code="${Format.html(plan.personCode || "")}" data-maintenance-case-no="${Format.html(plan.caseNo || "")}">\u57fa\u672c\u4fe1\u606f</button>
                     <button type="button" class="case-snapshot-button" data-open-person-maintenance="post" data-person-code="${Format.html(plan.personCode || "")}" data-maintenance-case-no="${Format.html(plan.caseNo || "")}">\u4efb\u804c</button>
@@ -2886,9 +10323,49 @@ const WorkbenchPanel = {
                 window.location.href = overlay._auditExportUrl;
                 return;
             }
+            const approvalPrintButton = event.target.closest("button[data-salary-case-approval-print]");
+            if (approvalPrintButton) {
+                approvalPrintButton.disabled = true;
+                try {
+                    await WorkbenchPanel.printSalaryCaseApprovalAndRefreshDetail(approvalPrintButton.dataset.salaryCaseApprovalPrint || "", null);
+                    await WorkbenchPanel.openHistoryWritePlan(approvalPrintButton.dataset.salaryCaseApprovalPrint || "");
+                } catch (error) {
+                    approvalPrintButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo);
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
             const comparisonButton = event.target.closest("button[data-history-write-comparison-case-no]");
             if (comparisonButton) {
                 WorkbenchPanel.openHistoryWriteComparison(comparisonButton.dataset.historyWriteComparisonCaseNo);
+                return;
+            }
+            const blockedReviewButton = event.target.closest("button[data-history-write-blocked-review-case-no]");
+            if (blockedReviewButton) {
+                const caseNo = blockedReviewButton.dataset.historyWriteBlockedReviewCaseNo || "";
+                const reason = window.prompt("\u8bf7\u586b\u5199\u963b\u65ad\u9879\u540e\u671f\u6838\u67e5\u8bf4\u660e", "\u57fa\u7840\u6570\u636e\u6216\u5386\u53f2\u94fe\u7279\u6b8a\u60c5\u51b5\uff0c\u540e\u671f\u6838\u67e5");
+                if (reason === null) {
+                    return;
+                }
+                blockedReviewButton.disabled = true;
+                try {
+                    await WorkbenchPanel.reviewBlockedHistoryWritePlan(caseNo, reason.trim());
+                    await WorkbenchPanel.openHistoryWritePlan(caseNo);
+                } catch (error) {
+                    blockedReviewButton.disabled = false;
+                    setStatus(error.message);
+                }
                 return;
             }
             const executeButton = event.target.closest("button[data-history-write-execute-case-no]");
@@ -2909,12 +10386,9 @@ const WorkbenchPanel = {
             const rollbackButton = event.target.closest("button[data-history-write-rollback-case-no]");
             if (rollbackButton) {
                 const caseNo = rollbackButton.dataset.historyWriteRollbackCaseNo;
-                if (!window.confirm(Format.text(TEXT.historyWriteRollbackConfirm, { caseNo }))) {
-                    return;
-                }
                 rollbackButton.disabled = true;
                 try {
-                    await WorkbenchPanel.rollbackHistoryWrite(caseNo);
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(caseNo);
                 } catch (error) {
                     rollbackButton.disabled = false;
                     setStatus(error.message);
@@ -3061,6 +10535,7 @@ const WorkbenchPanel = {
                 </div>
                 <footer class="case-detail-actions">
                     <div class="case-error hidden" data-case-error></div>
+                    <button type="button" class="case-snapshot-button" data-case-detail-no="${Format.html(comparison.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
                     <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(comparison.caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>
                     <button type="button" class="case-snapshot-button" data-history-write-comparison-retest-case-no="${Format.html(comparison.caseNo)}">\u6309\u5f53\u524d\u57fa\u7840\u590d\u6d4b</button>
                     ${retested && !hasMismatch && !reviewed ? `<button type="button" class="case-review-button" data-history-write-retest-approve-case-no="${Format.html(comparison.caseNo)}">\u6807\u8bb0\u590d\u6d4b\u901a\u8fc7</button>` : ""}
@@ -3076,6 +10551,18 @@ const WorkbenchPanel = {
             </section>
         `;
         overlay.addEventListener("click", async (event) => {
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo);
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                    setStatus(error.message);
+                }
+                return;
+            }
             const planButton = event.target.closest("button[data-history-write-plan-case-no]");
             if (planButton) {
                 WorkbenchPanel.openHistoryWritePlan(planButton.dataset.historyWritePlanCaseNo);
@@ -3223,6 +10710,7 @@ const WorkbenchPanel = {
     },
     showHistoryWriteExecuteResult(result) {
         document.querySelector(".case-detail-overlay")?.remove();
+        const canHistoryRollback = Permissions.has("SALARY_HISTORY_ROLLBACK");
         const overlay = document.createElement("div");
         overlay.className = "case-detail-overlay";
         overlay.innerHTML = `
@@ -3256,14 +10744,27 @@ const WorkbenchPanel = {
                 </div>
                 <div class="case-error hidden" data-case-error></div>
                 <footer class="case-detail-actions">
+                    <button type="button" class="case-snapshot-button" data-case-detail-no="${Format.html(result.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
                     <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(result.caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>
                     ${result.historyId ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(result.caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
-                    ${result.status === "EXECUTED" ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${Format.html(result.caseNo)}">\u64a4\u9500\u5199\u5165</button>` : ""}
+                    ${result.status === "EXECUTED" && canHistoryRollback ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${Format.html(result.caseNo)}">\u64a4\u9500\u5199\u5165</button>` : ""}
                     <button type="button" class="case-detail-close">\u5173\u95ed</button>
                 </footer>
             </section>
         `;
         overlay.addEventListener("click", async (event) => {
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo);
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
             const planButton = event.target.closest("button[data-history-write-plan-case-no]");
             if (planButton) {
                 planButton.disabled = true;
@@ -3291,12 +10792,9 @@ const WorkbenchPanel = {
             const rollbackButton = event.target.closest("button[data-history-write-rollback-case-no]");
             if (rollbackButton) {
                 const caseNo = rollbackButton.dataset.historyWriteRollbackCaseNo;
-                if (!window.confirm(Format.text(TEXT.historyWriteRollbackConfirm, { caseNo }))) {
-                    return;
-                }
                 rollbackButton.disabled = true;
                 try {
-                    await WorkbenchPanel.rollbackHistoryWrite(caseNo);
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(caseNo);
                 } catch (error) {
                     rollbackButton.disabled = false;
                     setStatus(error.message);
@@ -3311,9 +10809,17 @@ const WorkbenchPanel = {
         document.body.appendChild(overlay);
         overlay.querySelector(".case-detail-close").focus();
     },
-    showHistoryWriteBatchPreview(result) {
+    showHistoryWriteBatchPreview(result, options = {}) {
         document.querySelector(".case-detail-overlay")?.remove();
         const items = result.items || [];
+        const stats = WorkbenchPanel.batchResultStats(items);
+        const reviewBatch = items.some((item) => item.status === "REVIEWED");
+        const executableCount = Number(result.executable ?? (Number(result.ready || 0) + Number(result.warning || 0)));
+        const canExecuteSelected = Boolean(options.executeSelected)
+            && executableCount > 0
+            && Permissions.has("SALARY_HISTORY_WRITE")
+            && Array.isArray(options.caseNos)
+            && options.caseNos.length > 0;
         const overlay = document.createElement("div");
         overlay.className = "case-detail-overlay";
         overlay._batchExport = {
@@ -3325,15 +10831,20 @@ const WorkbenchPanel = {
                 <header class="case-detail-head">
                     <div>
                         <strong>\u5386\u53f2\u5199\u5165\u6279\u91cf\u9884\u68c0</strong>
-                        <span>\u5171 ${Format.html(result.total || 0)} \u6761 | \u53ef\u5199 ${Format.html(result.ready || 0)} | \u963b\u65ad ${Format.html(result.blocked || 0)} | \u8b66\u544a ${Format.html(result.warning || 0)}</span>
+                        <span>\u5171 ${Format.html(result.total || 0)} \u6761 | \u53ef\u5199 ${Format.html(result.executable || 0)} | \u963b\u65ad ${Format.html(result.blocked || 0)} | \u8b66\u544a ${Format.html(result.warning || 0)}</span>
                     </div>
                     <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
                 </header>
                 <div class="history-plan-summary batch-preview-summary">
                     <span>\u5f53\u524d ${Format.html(result.total || 0)} \u6761</span>
-                    <span>\u53ef\u5199\u5165 ${Format.html(result.ready || 0)}</span>
+                    <span>\u53ef\u5199\u5165 ${Format.html(result.executable || 0)}</span>
+                    <span>\u76f4\u63a5\u901a\u8fc7 ${Format.html(result.ready || 0)}</span>
                     <span>\u5df2\u963b\u65ad ${Format.html(result.blocked || 0)}</span>
                     <span>\u6709\u8b66\u544a ${Format.html(result.warning || 0)}</span>
+                </div>
+                <div class="case-detail-section compact">
+                    <span>\u9884\u68c0\u7b5b\u9009</span>
+                    ${WorkbenchPanel.batchResultFilterHtml(stats)}
                 </div>
                 <div class="case-detail-section">
                     <span>\u9884\u68c0\u660e\u7ec6</span>
@@ -3342,11 +10853,12 @@ const WorkbenchPanel = {
                             const period = item.year ? `${item.year}-${String(item.month || 1).padStart(2, "0")}` : "-";
                             const issues = item.issues || [];
                             return `
-                                <div class="case-history-field ${item.writable ? "" : "blocked"}">
+                                <div class="case-history-field ${Format.html(WorkbenchPanel.batchResultStatusClass(item.status))}" data-batch-result-status="${Format.html(item.status || "UNKNOWN")}">
                                     <strong>${Format.html(item.personCode || "-")}</strong>
-                                    <span>${Format.html(item.status || "-")} | ${item.writable ? "\u53ef\u5199" : "\u4e0d\u53ef\u5199"}</span>
+                                    <span>${Format.html(WorkbenchPanel.batchResultStatusText(item.status))} | ${WorkbenchPanel.batchPreviewItemExecutable(item) ? "\u53ef\u5199" : "\u4e0d\u53ef\u5199"}</span>
                                     <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.businessType || "-")} | ${Format.html(period)}</small>
                                     <small>${issues.length ? Format.html(issues.join(" | ")) : "\u672a\u53d1\u73b0\u963b\u65ad\u6216\u8b66\u544a"}</small>
+                                    <button type="button" class="batch-result-locate" data-batch-result-locate data-person-code="${Format.html(item.personCode || "")}" data-case-no="${Format.html(item.caseNo || "")}" data-write-plan-id="${Format.html(item.writePlanId || "")}" data-result-status="${Format.html(item.status || "")}">\u5b9a\u4f4d</button>
                                 </div>
                             `;
                         }).join("") : `<p class="muted">\u6682\u65e0\u9700\u9884\u68c0\u7684\u5199\u5165\u8ba1\u5212</p>`}
@@ -3355,13 +10867,70 @@ const WorkbenchPanel = {
                 <div class="case-error hidden" data-case-error></div>
                 <footer class="case-detail-actions">
                     <button type="button" class="case-snapshot-button" data-batch-result-export>\u5bfc\u51fa\u7ed3\u679c</button>
+                    ${canExecuteSelected ? `<button type="button" class="case-confirm-button" data-batch-preview-selected-execute>\u5b89\u5168\u786e\u8ba4\u540e\u5199\u5165</button>` : ""}
                     <button type="button" class="case-detail-close">\u5173\u95ed</button>
                 </footer>
             </section>
         `;
         overlay.addEventListener("click", async (event) => {
+            const filterButton = event.target.closest("button[data-batch-result-filter]");
+            if (filterButton) {
+                const filter = filterButton.dataset.batchResultFilter || "ALL";
+                overlay.querySelectorAll("[data-batch-result-filter]").forEach((button) => button.classList.toggle("active", button === filterButton));
+                overlay.querySelectorAll("[data-batch-result-status]").forEach((row) => {
+                    row.hidden = filter !== "ALL" && row.dataset.batchResultStatus !== filter;
+                });
+                return;
+            }
+            const locateButton = event.target.closest("button[data-batch-result-locate]");
+            if (locateButton) {
+                locateButton.disabled = true;
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.locateBatchResult({
+                        personCode: locateButton.dataset.personCode,
+                        caseNo: locateButton.dataset.caseNo,
+                        writePlanId: locateButton.dataset.writePlanId,
+                        status: locateButton.dataset.resultStatus
+                    });
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
             if (event.target.closest("button[data-batch-result-export]")) {
                 WorkbenchPanel.downloadCsv(overlay._batchExport.filename, overlay._batchExport.rows);
+                return;
+            }
+            const executeButton = event.target.closest("button[data-batch-preview-selected-execute]");
+            if (executeButton) {
+                executeButton.disabled = true;
+                try {
+                    const selectedCaseNos = Array.from(new Set((options.caseNos || []).filter(Boolean)));
+                    const confirmedPreview = await WorkbenchPanel.confirmHistoryWriteBatchExecute(result, "\u9009\u4e2d\u9879\u5199\u5165\u786e\u8ba4", {
+                        refreshPreview: () => Api.request("/api/workbench/history-write-plans/selected-preview", {
+                            method: "POST",
+                            body: JSON.stringify({ caseNos: selectedCaseNos })
+                        })
+                    });
+                    if (!confirmedPreview) {
+                        setStatus(TEXT.workbenchReady);
+                        return;
+                    }
+                    const executeResult = await Api.request("/api/workbench/history-write-plans/selected-execute", {
+                        method: "POST",
+                        body: JSON.stringify({ caseNos: selectedCaseNos, safetyToken: confirmedPreview.safetyToken || "" })
+                    });
+                    WorkbenchPanel.showHistoryWriteBatchExecute(executeResult);
+                    state.historyPlanSelected.clear();
+                    persistHistoryPlanQueueState();
+                    await WorkbenchPanel.load();
+                    setStatus(TEXT.caseDetail);
+                } catch (error) {
+                    executeButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
                 return;
             }
             if (event.target === overlay || event.target.closest(".case-detail-close")) {
@@ -3370,6 +10939,181 @@ const WorkbenchPanel = {
         });
         document.body.appendChild(overlay);
         overlay.querySelector(".case-detail-close").focus();
+    },
+    confirmHistoryWriteBatchExecute(preview, title = "\u6279\u91cf\u5199\u5165\u786e\u8ba4", options = {}) {
+        return new Promise((resolve) => {
+            document.querySelector(".case-detail-overlay")?.remove();
+            const items = preview.items || [];
+            const executableCount = Number(preview.executable ?? (Number(preview.ready || 0) + Number(preview.warning || 0)));
+            const stats = WorkbenchPanel.batchResultStats(items);
+            const overlay = document.createElement("div");
+            let expiryTimer = null;
+            let settled = false;
+            const finish = (value) => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                if (expiryTimer) {
+                    window.clearInterval(expiryTimer);
+                    expiryTimer = null;
+                }
+                overlay.remove();
+                resolve(value);
+            };
+            const refreshTokenExpiryState = () => {
+                const confirmButton = overlay.querySelector("[data-batch-execute-confirm]");
+                const expired = WorkbenchPanel.batchSafetyTokenExpired(preview);
+                if (confirmButton) {
+                    confirmButton.disabled = expired || !preview.safetyToken;
+                }
+                overlay.querySelectorAll("[data-batch-preview-refresh]").forEach((button) => {
+                    button.hidden = !expired && Boolean(preview.safetyToken);
+                    button.disabled = typeof options.refreshPreview !== "function";
+                });
+                overlay.querySelectorAll("[data-batch-safety-expiry-status]").forEach((node) => {
+                    node.textContent = expired
+                        ? "\u9884\u68c0\u4ee4\u724c\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u9884\u68c0"
+                        : "\u9884\u68c0\u4ee4\u724c\u5728\u6709\u6548\u671f\u5185";
+                    node.classList.toggle("blocked", expired);
+                    node.classList.toggle("ready", !expired);
+                });
+                return expired;
+            };
+            overlay.className = "case-detail-overlay";
+            overlay._batchExport = {
+                filename: "history-write-batch-confirm-preview.csv",
+                rows: WorkbenchPanel.batchPreviewCsvRows(preview)
+            };
+            overlay.innerHTML = `
+                <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="${Format.html(title)}">
+                    <header class="case-detail-head">
+                        <div>
+                            <strong>${Format.html(title)}</strong>
+                            <span>\u5171 ${Format.html(preview.total || 0)} \u6761 | \u53ef\u5199 ${Format.html(executableCount)} | \u6709\u8b66\u544a ${Format.html(preview.warning || 0)} | \u963b\u65ad ${Format.html(preview.blocked || 0)}</span>
+                        </div>
+                        <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                    </header>
+                    <div class="history-plan-summary batch-preview-summary">
+                        <span>\u5c06\u5199\u5165 ${Format.html(executableCount)} \u6761</span>
+                        <span>\u76f4\u63a5\u901a\u8fc7 ${Format.html(preview.ready || 0)}</span>
+                        <span>\u6709\u8b66\u544a ${Format.html(preview.warning || 0)}</span>
+                        <span>\u963b\u65ad\u8df3\u8fc7 ${Format.html(preview.blocked || 0)}</span>
+                    </div>
+                    <div class="case-detail-section">
+                        <span>\u5199\u5165\u524d\u6700\u7ec8\u6821\u9a8c</span>
+                        ${WorkbenchPanel.batchFinalConfirmGateHtml(preview)}
+                    </div>
+                    <div class="case-detail-section">
+                        <span>\u5199\u5165\u8303\u56f4</span>
+                        ${WorkbenchPanel.batchPreviewScopeHtml(preview)}
+                    </div>
+                    <div class="case-detail-section">
+                        <span>\u5b89\u5168\u786e\u8ba4</span>
+                        ${WorkbenchPanel.batchSafetyTokenHtml(preview)}
+                        <p class="batch-safety-expiry-status" data-batch-safety-expiry-status></p>
+                        <button type="button" class="case-snapshot-button batch-preview-refresh" data-batch-preview-refresh>\u91cd\u65b0\u9884\u68c0</button>
+                        <label class="case-review-reason">
+                            <span>\u786e\u8ba4\u8bed</span>
+                            <input data-batch-execute-confirm-text maxlength="20" placeholder="\u8bf7\u8f93\u5165\uff1a\u786e\u8ba4\u5199\u5165">
+                        </label>
+                    </div>
+                    <div class="case-detail-section compact">
+                        <span>\u9884\u68c0\u7b5b\u9009</span>
+                        ${WorkbenchPanel.batchResultFilterHtml(stats)}
+                    </div>
+                    <div class="case-detail-section">
+                        <span>\u786e\u8ba4\u660e\u7ec6</span>
+                        <div class="case-history-field-list">
+                        ${items.length ? items.map((item) => {
+                            const period = item.year ? `${item.year}-${String(item.month || 1).padStart(2, "0")}` : "-";
+                            const issues = item.issues || [];
+                            const fields = item.fields || [];
+                            const mappedFields = fields.filter((field) => field.mapped === true).length;
+                            const sidText = item.sidUpdateRequired ? (item.sidPlan || "\u9700\u66f4\u65b0 SID \u94fe") : "\u4e0d\u9700\u66f4\u65b0 SID \u94fe";
+                            return `
+                                <div class="case-history-field ${Format.html(WorkbenchPanel.batchResultStatusClass(item.status))}" data-batch-result-status="${Format.html(item.status || "UNKNOWN")}">
+                                    <strong>${Format.html(item.personCode || "-")}</strong>
+                                    <span>${Format.html(WorkbenchPanel.batchResultStatusText(item.status))} | ${WorkbenchPanel.batchPreviewItemExecutable(item) ? "\u5c06\u5199\u5165" : "\u5c06\u8df3\u8fc7"}</span>
+                                    <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.businessType || "-")} | ${Format.html(period)} | ${Format.html(item.orgCode || "-")}</small>
+                                    <small>\u5b57\u6bb5 ${Format.html(mappedFields)}/${Format.html(fields.length)} | ${Format.html(sidText)}</small>
+                                    <small>${issues.length ? Format.html(issues.join(" | ")) : "\u672a\u53d1\u73b0\u963b\u65ad\u6216\u8b66\u544a"}</small>
+                                </div>
+                            `;
+                            }).join("") : `<p class="muted">\u6682\u65e0\u53ef\u786e\u8ba4\u7684\u5199\u5165\u8ba1\u5212</p>`}
+                        </div>
+                    </div>
+                    <div class="case-error hidden" data-case-error></div>
+                    <footer class="case-detail-actions">
+                        <button type="button" class="case-snapshot-button" data-batch-result-export>\u5bfc\u51fa\u9884\u68c0\u660e\u7ec6</button>
+                        <button type="button" class="case-detail-close">\u53d6\u6d88</button>
+                        ${executableCount ? `<button type="button" class="case-confirm-button" data-batch-execute-confirm>\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
+                    </footer>
+                </section>
+            `;
+            overlay.addEventListener("click", (event) => {
+                const filterButton = event.target.closest("button[data-batch-result-filter]");
+                if (filterButton) {
+                    const filter = filterButton.dataset.batchResultFilter || "ALL";
+                    overlay.querySelectorAll("[data-batch-result-filter]").forEach((button) => button.classList.toggle("active", button === filterButton));
+                    overlay.querySelectorAll("[data-batch-result-status]").forEach((row) => {
+                        row.hidden = filter !== "ALL" && row.dataset.batchResultStatus !== filter;
+                    });
+                    return;
+                }
+                if (event.target.closest("button[data-batch-result-export]")) {
+                    WorkbenchPanel.downloadCsv(overlay._batchExport.filename, overlay._batchExport.rows);
+                    return;
+                }
+                const refreshButton = event.target.closest("button[data-batch-preview-refresh]");
+                if (refreshButton) {
+                    if (typeof options.refreshPreview !== "function") {
+                        WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), "\u5f53\u524d\u573a\u666f\u6682\u4e0d\u652f\u6301\u5feb\u6377\u91cd\u65b0\u9884\u68c0");
+                        return;
+                    }
+                    refreshButton.disabled = true;
+                    setStatus(TEXT.loadingCaseDetail);
+                    options.refreshPreview()
+                        .then(async (nextPreview) => {
+                            if (expiryTimer) {
+                                window.clearInterval(expiryTimer);
+                                expiryTimer = null;
+                            }
+                            overlay.remove();
+                            const confirmed = await WorkbenchPanel.confirmHistoryWriteBatchExecute(nextPreview, title, options);
+                            settled = true;
+                            resolve(confirmed);
+                            setStatus(TEXT.caseDetail);
+                        })
+                        .catch((error) => {
+                            refreshButton.disabled = false;
+                            setStatus(error.message);
+                            WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                        });
+                    return;
+                }
+                if (event.target.closest("button[data-batch-execute-confirm]")) {
+                    if (refreshTokenExpiryState()) {
+                        WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), "\u9884\u68c0\u4ee4\u724c\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u9884\u68c0\u540e\u518d\u5199\u5165\u3002");
+                        return;
+                    }
+                    const confirmText = overlay.querySelector("[data-batch-execute-confirm-text]")?.value?.trim() || "";
+                    if (confirmText !== "\u786e\u8ba4\u5199\u5165") {
+                        WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), "\u8bf7\u8f93\u5165\u786e\u8ba4\u8bed\uff1a\u786e\u8ba4\u5199\u5165");
+                        return;
+                    }
+                    finish(preview);
+                    return;
+                }
+                if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                    finish(false);
+                }
+            });
+            document.body.appendChild(overlay);
+            refreshTokenExpiryState();
+            expiryTimer = window.setInterval(refreshTokenExpiryState, 10000);
+            (overlay.querySelector("[data-batch-execute-confirm]") || overlay.querySelector(".case-detail-close"))?.focus();
+        });
     },
     showHistoryWriteBatchRetest(result) {
         document.querySelector(".case-detail-overlay")?.remove();
@@ -3396,6 +11140,10 @@ const WorkbenchPanel = {
                     <span>\u5931\u8d25 ${Format.html(result.failed || 0)}</span>
                 </div>
                 <div class="case-detail-section">
+                    <span>\u540e\u7eed\u5904\u7406</span>
+                    ${WorkbenchPanel.batchRetestFollowupHtml(result)}
+                </div>
+                <div class="case-detail-section">
                     <span>\u590d\u6d4b\u660e\u7ec6</span>
                     <div class="case-history-field-list">
                         ${items.length ? items.map((item) => `
@@ -3415,8 +11163,273 @@ const WorkbenchPanel = {
             </section>
         `;
         overlay.addEventListener("click", async (event) => {
+            const followupButton = event.target.closest("button[data-batch-retest-followup-queue]");
+            if (followupButton) {
+                followupButton.disabled = true;
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.openBatchRetestFollowupQueue(result, followupButton.dataset.batchRetestFollowupQueue || "");
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
             if (event.target.closest("button[data-batch-result-export]")) {
                 WorkbenchPanel.downloadCsv(overlay._batchExport.filename, overlay._batchExport.rows);
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+    },
+    showHistoryWriteBatchLedger(items = [], contextLabel = "", metricCode = "") {
+        document.querySelector(".case-detail-overlay")?.remove();
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        const safeMetricCode = metricCode || "";
+        const queueHint = WorkbenchPanel.historyWriteBatchLedgerQueueHint(safeMetricCode);
+        const emptyText = WorkbenchPanel.historyWriteBatchLedgerEmptyText(safeMetricCode);
+        const exportParams = new URLSearchParams({ limit: "200" });
+        if (safeMetricCode) {
+            exportParams.set("queue", safeMetricCode);
+        }
+        overlay._batchExportUrl = `/api/workbench/history-write-batches.csv?${exportParams.toString()}`;
+        const grouped = items.reduce((acc, item) => {
+            const action = item.action || "UNKNOWN";
+            acc[action] = (acc[action] || 0) + 1;
+            return acc;
+        }, {});
+        const closureStats = WorkbenchPanel.historyWriteBatchClosureStats(items);
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u6279\u6b21\u53f0\u8d26">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>${contextLabel ? `${Format.html(contextLabel)} - ` : ""}\u5386\u53f2\u5199\u5165\u6279\u6b21\u53f0\u8d26</strong>
+                        <span>\u6700\u8fd1 ${Format.html(items.length)} \u4e2a\u6279\u6b21\u52a8\u4f5c</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <div class="batch-followup-grid">
+                    <div class="batch-followup-card ledger-context">
+                        <span>\u5f53\u524d\u53e3\u5f84</span>
+                        <strong>${Format.html(contextLabel || "\u5168\u90e8")}</strong>
+                        <small>${Format.html(queueHint)}</small>
+                    </div>
+                    ${Object.entries(closureStats).map(([status, count]) => `
+                        <div class="batch-followup-card">
+                            <span>${Format.html(status)}</span>
+                            <strong>${Format.html(count)}</strong>
+                            <small>\u95ed\u73af\u72b6\u6001</small>
+                        </div>
+                    `).join("")}
+                    ${Object.entries(grouped).map(([action, count]) => `
+                        <div class="batch-followup-card">
+                            <span>${Format.html(Format.auditActionText(action))}</span>
+                            <strong>${Format.html(count)}</strong>
+                            <small>${Format.html(action)}</small>
+                        </div>
+                    `).join("") || `<p class="muted">${Format.html(emptyText)}</p>`}
+                </div>
+                <div class="case-detail-section">
+                    <span>\u6279\u6b21\u660e\u7ec6</span>
+                    <div class="case-history-field-list">
+                        ${items.length ? items.map((item) => `
+                            <div class="case-history-field">
+                                <strong>${Format.html(item.batchNo || "-")}</strong>
+                                <span>${Format.html(Format.auditActionText(item.action))}</span>
+                                <small><b class="work-item-trial ${Format.html(WorkbenchPanel.historyWriteBatchClosureClass(item))}">${Format.html(WorkbenchPanel.historyWriteBatchClosureText(item))}</b></small>
+                                <small>\u603b\u6570 ${Format.html(item.total || 0)} | \u6210\u529f/\u6807\u8bb0 ${Format.html(item.success || 0)} | \u5931\u8d25 ${Format.html(item.failed || 0)} | \u8df3\u8fc7 ${Format.html(item.skipped || 0)} | \u4e00\u81f4 ${Format.html(item.matched || 0)} | \u4e0d\u4e00\u81f4 ${Format.html(item.mismatched || 0)}</small>
+                                <small>${Format.html(item.operator || "-")} | ${Format.html(item.createdAt || "-")}</small>
+                                <small>${Format.html(item.summary || "-")}</small>
+                                ${item.batchNo ? `<div class="case-row-actions">
+                                    <button type="button" class="batch-result-locate" data-history-batch-audits="${Format.html(item.batchNo)}">\u6279\u6b21\u6d41\u6c34</button>
+                                    ${Number(item.success || 0) > 0 ? `<button type="button" class="batch-result-locate" data-history-batch-ledger-queue="${Format.html(item.batchNo)}" data-history-batch-ledger-queue-type="SUCCESS">\u6210\u529f\u590d\u6838\u961f\u5217</button>` : ""}
+                                    ${Number(item.failed || 0) > 0 ? `<button type="button" class="batch-result-locate" data-history-batch-ledger-queue="${Format.html(item.batchNo)}" data-history-batch-ledger-queue-type="FAILED">\u5931\u8d25\u5904\u7406\u961f\u5217</button>` : ""}
+                                    ${Number(item.skipped || 0) > 0 ? `<button type="button" class="batch-result-locate" data-history-batch-ledger-queue="${Format.html(item.batchNo)}" data-history-batch-ledger-queue-type="SKIPPED">\u8df3\u8fc7\u5904\u7406\u961f\u5217</button>` : ""}
+                                    ${Number(item.matched || 0) + Number(item.mismatched || 0) > 0 ? `<button type="button" class="batch-result-locate" data-history-batch-ledger-queue="${Format.html(item.batchNo)}" data-history-batch-ledger-queue-type="RETEST">\u590d\u6d4b\u5904\u7406\u961f\u5217</button>` : ""}
+                                    ${String(item.action || "").includes("rollback") && Number(item.success || 0) > 0 ? `<button type="button" class="batch-result-locate" data-history-batch-ledger-queue="${Format.html(item.batchNo)}" data-history-batch-ledger-queue-type="ROLLBACK">\u64a4\u9500\u590d\u6838\u961f\u5217</button>` : ""}
+                                </div>` : ""}
+                            </div>
+                        `).join("") : `<p class="muted">${Format.html(emptyText)}</p>`}
+                    </div>
+                </div>
+                <footer class="case-detail-actions">
+                    <button type="button" class="case-snapshot-button" data-batch-result-export>\u5bfc\u51fa\u53f0\u8d26</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", (event) => {
+            const auditButton = event.target.closest("button[data-history-batch-audits]");
+            if (auditButton) {
+                WorkbenchPanel.openHistoryWriteBatchAudits(auditButton.dataset.historyBatchAudits || "");
+                return;
+            }
+            const queueButton = event.target.closest("button[data-history-batch-ledger-queue]");
+            if (queueButton) {
+                queueButton.disabled = true;
+                WorkbenchPanel.openHistoryBatchLedgerQueue(
+                    queueButton.dataset.historyBatchLedgerQueue || "",
+                    queueButton.dataset.historyBatchLedgerQueueType || "SUCCESS"
+                ).catch((error) => {
+                    queueButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            if (event.target.closest("button[data-batch-result-export]")) {
+                window.location.href = overlay._batchExportUrl;
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+    },
+    async openHistoryWriteBatchAudits(batchNo) {
+        const safeBatchNo = batchNo || "";
+        if (!safeBatchNo) {
+            return;
+        }
+        setStatus(TEXT.loadingCaseDetail);
+        const audits = await Api.request(`/api/workbench/history-write-batches/${encodeURIComponent(safeBatchNo)}/audits`);
+        WorkbenchPanel.showHistoryWriteBatchAudits(safeBatchNo, audits || []);
+        setStatus(TEXT.caseDetail);
+    },
+    showHistoryWriteBatchAudits(batchNo, audits = []) {
+        document.querySelector(".case-detail-overlay")?.remove();
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay._auditExportUrl = `/api/workbench/history-write-batches/${encodeURIComponent(batchNo || "")}/audits.csv`;
+        const successCaseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits, "SUCCESS");
+        const failedCaseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits, "FAILED");
+        const skippedCaseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits, "SKIPPED");
+        const retestCaseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits, "RETEST");
+        const rollbackCaseNos = WorkbenchPanel.historyBatchAuditCaseNos(audits, "ROLLBACK");
+        overlay._batchAuditRows = audits || [];
+        const initialVisibleCaseNos = audits
+            .map((audit) => audit.targetCode || "")
+            .filter((caseNo) => caseNo && caseNo !== "BATCH");
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5386\u53f2\u5199\u5165\u6279\u6b21\u6d41\u6c34">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u6279\u6b21\u6d41\u6c34</strong>
+                        <span>${Format.html(batchNo || "-")} | ${Format.html(audits.length)} \u6761</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <div class="case-detail-section compact">
+                    <span>\u6d41\u6c34\u7b5b\u9009</span>
+                    ${WorkbenchPanel.historyBatchAuditFilterHtml(audits)}
+                </div>
+                <div class="case-audit-list">
+                    ${audits.length ? audits.map((audit) => WorkbenchPanel.historyBatchAuditRowHtml(audit)).join("") : `<p class="muted">\u6682\u65e0\u6279\u6b21\u6d41\u6c34</p>`}
+                </div>
+                <footer class="case-detail-actions">
+                    <button type="button" class="case-confirm-button" data-history-batch-visible-queue data-history-batch-visible-queue-type="ALL" ${initialVisibleCaseNos.length ? "" : "disabled"}>\u5f53\u524d\u7b5b\u9009\u9001\u5165\u961f\u5217 ${Format.html(initialVisibleCaseNos.length)}</button>
+                    ${successCaseNos.length ? `<button type="button" class="case-snapshot-button" data-history-batch-ledger-queue="${Format.html(batchNo || "")}" data-history-batch-ledger-queue-type="SUCCESS">\u6210\u529f\u590d\u6838\u961f\u5217 ${Format.html(successCaseNos.length)}</button>` : ""}
+                    ${failedCaseNos.length ? `<button type="button" class="case-snapshot-button" data-history-batch-ledger-queue="${Format.html(batchNo || "")}" data-history-batch-ledger-queue-type="FAILED">\u5931\u8d25\u5904\u7406\u961f\u5217 ${Format.html(failedCaseNos.length)}</button>` : ""}
+                    ${skippedCaseNos.length ? `<button type="button" class="case-snapshot-button" data-history-batch-ledger-queue="${Format.html(batchNo || "")}" data-history-batch-ledger-queue-type="SKIPPED">\u8df3\u8fc7\u5904\u7406\u961f\u5217 ${Format.html(skippedCaseNos.length)}</button>` : ""}
+                    ${retestCaseNos.length ? `<button type="button" class="case-snapshot-button" data-history-batch-ledger-queue="${Format.html(batchNo || "")}" data-history-batch-ledger-queue-type="RETEST">\u590d\u6d4b\u5904\u7406\u961f\u5217 ${Format.html(retestCaseNos.length)}</button>` : ""}
+                    ${rollbackCaseNos.length ? `<button type="button" class="case-snapshot-button" data-history-batch-ledger-queue="${Format.html(batchNo || "")}" data-history-batch-ledger-queue-type="ROLLBACK">\u64a4\u9500\u590d\u6838\u961f\u5217 ${Format.html(rollbackCaseNos.length)}</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-history-batch-audit-export ${audits.length ? "" : "disabled"}>\u5bfc\u51fa\u6d41\u6c34</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            const filterButton = event.target.closest("button[data-history-batch-audit-filter]");
+            if (filterButton) {
+                const filter = filterButton.dataset.historyBatchAuditFilter || "ALL";
+                overlay.querySelectorAll("[data-history-batch-audit-filter]").forEach((button) => button.classList.toggle("active", button === filterButton));
+                overlay.querySelectorAll("[data-history-batch-audit-status]").forEach((row) => {
+                    row.hidden = filter !== "ALL" && row.dataset.historyBatchAuditStatus !== filter;
+                });
+                const visibleCaseNos = WorkbenchPanel.visibleHistoryBatchAuditCaseNos(overlay);
+                const queueButton = overlay.querySelector("[data-history-batch-visible-queue]");
+                if (queueButton) {
+                    queueButton.disabled = !visibleCaseNos.length;
+                    queueButton.dataset.historyBatchVisibleQueueType = WorkbenchPanel.historyBatchQueueTypeForStatus(filter);
+                    queueButton.textContent = `\u5f53\u524d\u7b5b\u9009\u9001\u5165\u961f\u5217 ${visibleCaseNos.length}`;
+                }
+                return;
+            }
+            const caseDetailButton = event.target.closest("button[data-case-detail-no]");
+            if (caseDetailButton) {
+                caseDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(caseDetailButton.dataset.caseDetailNo || "");
+                } catch (error) {
+                    caseDetailButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const comparisonButton = event.target.closest("button[data-history-write-comparison-case-no]");
+            if (comparisonButton) {
+                comparisonButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWriteComparison(comparisonButton.dataset.historyWriteComparisonCaseNo || "");
+                } catch (error) {
+                    comparisonButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const rollbackButton = event.target.closest("button[data-history-write-rollback-case-no]");
+            if (rollbackButton) {
+                rollbackButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(rollbackButton.dataset.historyWriteRollbackCaseNo || "");
+                } catch (error) {
+                    rollbackButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const queueButton = event.target.closest("button[data-history-batch-ledger-queue]");
+            if (queueButton) {
+                queueButton.disabled = true;
+                WorkbenchPanel.openHistoryBatchLedgerQueue(
+                    queueButton.dataset.historyBatchLedgerQueue || "",
+                    queueButton.dataset.historyBatchLedgerQueueType || "SUCCESS"
+                ).catch((error) => {
+                    queueButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            const visibleQueueButton = event.target.closest("button[data-history-batch-visible-queue]");
+            if (visibleQueueButton) {
+                visibleQueueButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryBatchAuditVisibleQueue(
+                        batchNo || "",
+                        WorkbenchPanel.visibleHistoryBatchAuditCaseNos(overlay),
+                        visibleQueueButton.dataset.historyBatchVisibleQueueType || "ALL"
+                    );
+                } catch (error) {
+                    visibleQueueButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const exportButton = event.target.closest("button[data-history-batch-audit-export]");
+            if (exportButton && !exportButton.disabled) {
+                const visibleStatuses = Array.from(overlay.querySelectorAll("[data-history-batch-audit-status]"))
+                    .filter((row) => !row.hidden)
+                    .map((row) => row.dataset.historyBatchAuditStatus || "");
+                const activeFilter = overlay.querySelector("[data-history-batch-audit-filter].active")?.dataset.historyBatchAuditFilter || "ALL";
+                const rows = activeFilter === "ALL"
+                    ? overlay._batchAuditRows
+                    : overlay._batchAuditRows.filter((audit) => visibleStatuses.includes(WorkbenchPanel.historyBatchAuditStatus(audit)));
+                WorkbenchPanel.downloadCsv(`history-write-batch-audits-${batchNo || "batch"}-${activeFilter}.csv`, WorkbenchPanel.historyBatchAuditCsvRows(rows));
                 return;
             }
             if (event.target === overlay || event.target.closest(".case-detail-close")) {
@@ -3441,15 +11454,20 @@ const WorkbenchPanel = {
                 <header class="case-detail-head">
                     <div>
                         <strong>\u5386\u53f2\u5199\u5165\u6279\u91cf\u6267\u884c</strong>
-                        <span>\u5171 ${Format.html(result.total || 0)} \u6761 | \u6210\u529f ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
+                        <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")} | \u5171 ${Format.html(result.total || 0)} \u6761 | \u6210\u529f ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
                     </div>
                     <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
                 </header>
                 <div class="history-plan-summary batch-preview-summary">
                     <span>\u5f53\u524d ${Format.html(result.total || 0)} \u6761</span>
+                    <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")}</span>
                     <span>\u6210\u529f ${Format.html(result.success || 0)}</span>
                     <span>\u5931\u8d25 ${Format.html(result.failed || 0)}</span>
                     <span>\u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u540e\u7eed\u5904\u7406</span>
+                    ${reviewBatch ? WorkbenchPanel.batchReviewFollowupHtml(result) : WorkbenchPanel.batchExecuteFollowupHtml(result)}
                 </div>
                 <div class="case-detail-section compact">
                     <span>\u7ed3\u679c\u7b5b\u9009</span>
@@ -3458,15 +11476,7 @@ const WorkbenchPanel = {
                 <div class="case-detail-section">
                     <span>\u6267\u884c\u660e\u7ec6</span>
                     <div class="case-history-field-list">
-                        ${items.length ? items.map((item) => `
-                            <div class="case-history-field ${Format.html(WorkbenchPanel.batchResultStatusClass(item.status))}" data-batch-result-status="${Format.html(item.status || "UNKNOWN")}">
-                                <strong>${Format.html(item.personCode || "-")}</strong>
-                                <span>${Format.html(WorkbenchPanel.batchResultStatusText(item.status))}</span>
-                                <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.writePlanId || "-")} | ${Format.html(item.historyId || "-")}</small>
-                                <small>${Format.html(item.message || "-")}</small>
-                                <button type="button" class="batch-result-locate" data-batch-result-locate data-person-code="${Format.html(item.personCode || "")}" data-case-no="${Format.html(item.caseNo || "")}" data-write-plan-id="${Format.html(item.writePlanId || "")}" data-result-status="${Format.html(item.status || "")}">\u5b9a\u4f4d</button>
-                            </div>
-                        `).join("") : `<p class="muted">\u6682\u65e0\u6267\u884c\u7ed3\u679c</p>`}
+                        ${items.length ? items.map((item) => WorkbenchPanel.batchResultRowHtml(item, "\u6267\u884c\u8bf4\u660e")).join("") : `<p class="muted">\u6682\u65e0\u6267\u884c\u7ed3\u679c</p>`}
                     </div>
                 </div>
                 <div class="case-error hidden" data-case-error></div>
@@ -3502,6 +11512,52 @@ const WorkbenchPanel = {
                 }
                 return;
             }
+            const followupButton = event.target.closest("button[data-batch-followup-queue]");
+            if (followupButton) {
+                followupButton.disabled = true;
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.openBatchExecuteFollowupQueue(result, followupButton.dataset.batchFollowupQueue || "");
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const reviewFollowupButton = event.target.closest("button[data-batch-review-followup-queue]");
+            if (reviewFollowupButton) {
+                reviewFollowupButton.disabled = true;
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.openBatchReviewFollowupQueue(result, reviewFollowupButton.dataset.batchReviewFollowupQueue || "");
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const comparisonButton = event.target.closest("button[data-batch-followup-comparison]");
+            if (comparisonButton) {
+                comparisonButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWriteComparison(comparisonButton.dataset.batchFollowupComparison || "");
+                } catch (error) {
+                    comparisonButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const rollbackButton = event.target.closest("button[data-batch-followup-rollback]");
+            if (rollbackButton) {
+                rollbackButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(rollbackButton.dataset.batchFollowupRollback || "");
+                } catch (error) {
+                    rollbackButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
             if (event.target.closest("button[data-batch-result-export]")) {
                 WorkbenchPanel.downloadCsv(overlay._batchExport.filename, overlay._batchExport.rows);
                 return;
@@ -3528,15 +11584,20 @@ const WorkbenchPanel = {
                 <header class="case-detail-head">
                     <div>
                         <strong>\u6279\u91cf\u590d\u6d4b\u901a\u8fc7</strong>
-                        <span>\u5171 ${Format.html(result.total || 0)} \u6761 | \u5df2\u6807\u8bb0 ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
+                        <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")} | \u5171 ${Format.html(result.total || 0)} \u6761 | \u5df2\u6807\u8bb0 ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
                     </div>
                     <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
                 </header>
                 <div class="history-plan-summary batch-preview-summary">
                     <span>\u5f53\u524d ${Format.html(result.total || 0)} \u6761</span>
+                    <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")}</span>
                     <span>\u5df2\u6807\u8bb0 ${Format.html(result.success || 0)}</span>
                     <span>\u5931\u8d25 ${Format.html(result.failed || 0)}</span>
                     <span>\u4ecd\u6709\u5dee\u5f02/\u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u540e\u7eed\u5904\u7406</span>
+                    ${WorkbenchPanel.batchApproveFollowupHtml(result)}
                 </div>
                 <div class="case-detail-section compact">
                     <span>\u7ed3\u679c\u7b5b\u9009</span>
@@ -3588,6 +11649,17 @@ const WorkbenchPanel = {
                 }
                 return;
             }
+            const followupButton = event.target.closest("button[data-batch-approve-followup-queue]");
+            if (followupButton) {
+                followupButton.disabled = true;
+                try {
+                    overlay.remove();
+                    await WorkbenchPanel.openBatchApproveFollowupQueue(result, followupButton.dataset.batchApproveFollowupQueue || "");
+                } catch (error) {
+                    setStatus(error.message);
+                }
+                return;
+            }
             if (event.target.closest("button[data-batch-result-export]")) {
                 WorkbenchPanel.downloadCsv(overlay._batchExport.filename, overlay._batchExport.rows);
                 return;
@@ -3614,12 +11686,13 @@ const WorkbenchPanel = {
                 <header class="case-detail-head">
                     <div>
                         <strong>\u5386\u53f2\u5199\u5165\u6279\u91cf\u64a4\u9500</strong>
-                        <span>\u5171 ${Format.html(result.total || 0)} \u6761 | \u6210\u529f ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
+                        <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")} | \u5171 ${Format.html(result.total || 0)} \u6761 | \u6210\u529f ${Format.html(result.success || 0)} | \u5931\u8d25 ${Format.html(result.failed || 0)} | \u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
                     </div>
                     <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
                 </header>
                 <div class="history-plan-summary batch-preview-summary">
                     <span>\u5f53\u524d ${Format.html(result.total || 0)} \u6761</span>
+                    <span>\u6279\u6b21 ${Format.html(result.batchNo || "-")}</span>
                     <span>\u6210\u529f ${Format.html(result.success || 0)}</span>
                     <span>\u5931\u8d25 ${Format.html(result.failed || 0)}</span>
                     <span>\u8df3\u8fc7 ${Format.html(result.skipped || 0)}</span>
@@ -3715,6 +11788,7 @@ const WorkbenchPanel = {
         const fields = [
             ["\u4e1a\u52a1\u6765\u6e90", detail.source],
             ["\u4e1a\u52a1\u72b6\u6001", Format.businessStatusText(detail.status || "PREVIEW")],
+            ["\u529e\u7406\u8fdb\u5ea6", Format.workflowStatusText(detail.workflowStatus)],
             ["\u4e1a\u52a1\u7c7b\u578b", detail.businessType],
             ["\u4eba\u5458\u7f16\u7801", detail.personCode],
             ["\u59d3\u540d", detail.personName],
@@ -3760,24 +11834,169 @@ const WorkbenchPanel = {
         }
         return fields;
     },
-    historyWriteSectionHtml(detail) {
-        const plan = detail.historyWritePlan;
-        const audits = detail.historyWriteAudits || [];
-        if (!plan && !audits.length) {
+    caseClosureNextActionHtml(detail) {
+        const closure = detail.closureStatus || {};
+        const steps = closure.steps || [];
+        if (!closure.status || closure.status === "CLOSED") {
+            return closure.status === "CLOSED"
+                ? `<div class="case-detail-section compact">
+                    <span>\u4e0b\u4e00\u6b65\u5904\u7406</span>
+                    <div class="case-history-status ready">
+                        <strong>\u5df2\u95ed\u73af</strong>
+                        <span>${Format.html(closure.message || "\u529e\u7406\u95ed\u73af\u5df2\u5b8c\u6210")}</span>
+                    </div>
+                </div>`
+                : "";
+        }
+        const step = closure.nextStep || steps.find((item) => item.status === "BLOCKED")
+            || steps.find((item) => item.required !== false && item.completed !== true)
+            || steps.find((item) => item.status !== "DONE");
+        if (!step) {
             return "";
         }
+        const caseNo = Format.html(detail.caseNo || "");
+        const plan = detail.historyWritePlan;
+        const printArchive = detail.reportPrintArchive || {};
+        const canReport = Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT");
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const canReview = detail.status === "DONE"
+            && ["DIFFERENT", "ERROR"].includes(detail.trialStatus || "")
+            && detail.reviewStatus !== "REVIEWED"
+            && Permissions.has("SALARY_DONE");
+        const written = WorkbenchPanel.historyPlanWritten(plan);
+        const writeReady = plan?.planStatus === "PREPARED" && plan?.writable === true && printArchive.printed === true;
+        const actions = (closure.nextActions || []).map((action) => WorkbenchPanel.caseClosureActionButton(action, {
+            caseNo,
+            canReview,
+            canReport,
+            canHistoryWrite,
+            detail,
+            plan,
+            writeReady,
+            written
+        })).filter(Boolean);
+        return `
+            <div class="case-detail-section compact case-next-action">
+                <span>\u4e0b\u4e00\u6b65\u5904\u7406</span>
+                <div class="case-history-status ${step.status === "BLOCKED" ? "blocked" : "warning"}">
+                    <strong>${Format.html(step.label || step.code || "\u5f85\u5904\u7406")}</strong>
+                    <span>${Format.html(step.message || closure.message || "-")}</span>
+                </div>
+                ${actions.length ? `<div class="case-detail-actions inline-actions">${actions.join("")}</div>` : ""}
+                ${actions.length ? "" : `<p class="case-next-action-empty">\u5f53\u524d\u6b65\u9aa4\u9700\u5904\u7406\uff0c\u4f46\u6682\u65e0\u53ef\u6267\u884c\u64cd\u4f5c\uff0c\u8bf7\u68c0\u67e5\u6743\u9650\u6216\u524d\u7f6e\u6761\u4ef6\u3002</p>`}
+            </div>
+        `;
+    },
+    caseClosureActionButton(action, context) {
+        const code = action?.code || "";
+        const caseNo = context.caseNo || "";
+        const primaryActionCodes = new Set(["EXECUTE_HISTORY_WRITE", "PRINT_APPROVAL", "CREATE_HISTORY_PLAN"]);
+        const primaryClass = action.primary === true || primaryActionCodes.has(code) ? " primary" : "";
+        const label = Format.html(action.label || code || "\u5904\u7406");
+        if (code === "REVIEW_TRIAL" && context.canReview) {
+            return `<button type="button" class="case-review-button${primaryClass}" data-review-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "VIEW_SNAPSHOT" && context.detail.snapshotExists) {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-snapshot-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "PRINT_APPROVAL" && context.canReport) {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-salary-case-approval-print="${caseNo}">${label}</button>`;
+        }
+        if (code === "CREATE_HISTORY_PLAN") {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-history-write-preview-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "VIEW_HISTORY_PLAN" && context.plan) {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-history-write-plan-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "EXECUTE_HISTORY_WRITE" && context.writeReady && context.canHistoryWrite) {
+            return `<button type="button" class="case-confirm-button${primaryClass}" data-history-write-execute-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "REVIEW_DIFFERENCE" && context.written) {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-history-write-comparison-case-no="${caseNo}">${label}</button>`;
+        }
+        if (code === "RETEST_DIFFERENCE" && context.written) {
+            return `<button type="button" class="case-snapshot-button${primaryClass}" data-history-write-comparison-retest-case-no="${caseNo}">${label}</button>`;
+        }
+        return "";
+    },
+    historyWriteSectionHtml(detail) {
+        const plan = detail.historyWritePlan;
+        const printArchive = detail.reportPrintArchive || {};
+        const audits = detail.historyWriteAudits || [];
         const latestAudit = audits[0];
         const planStatus = Format.historyWriteStatusText(plan?.planStatus);
         const executionResult = Format.historyWriteStatusText(plan?.executionResult);
+        const written = WorkbenchPanel.historyPlanWritten(plan);
+        const blocked = WorkbenchPanel.historyPlanBlocked(plan);
+        const mismatch = plan?.comparisonStatus === "MISMATCHED";
+        const reviewed = plan?.comparisonReviewStatus === "REVIEWED";
+        const printed = printArchive.printed === true;
+        const printBlocked = printArchive.status === "BLOCKED";
+        const printBatch = printArchive.latestBatchNo || (printArchive.latestTargetType === "REPORT_PRINT_BATCH" ? printArchive.latestTargetCode : "");
+        const canHistoryWrite = Permissions.has("SALARY_HISTORY_WRITE");
+        const writeReady = plan?.planStatus === "PREPARED" && plan?.writable === true && printed;
+        const writeGateBlocked = Boolean(plan) && !written && (!printed || blocked);
+        const closure = detail.closureStatus || {};
+        const closureState = closure.status === "CLOSED" ? "ready" : (["BLOCKED", "CANCELLED"].includes(closure.status) ? "blocked" : "warning");
+        const writeGateText = !plan
+            ? "\u9700\u5148\u751f\u6210\u5199\u5165\u8ba1\u5212"
+            : written
+                ? "\u5df2\u5199\u5165\u5386\u53f2"
+                : !printed
+                    ? "\u5ba1\u6279\u8868\u672a\u6253\u5370\uff0c\u4e0d\u53ef\u5199\u5165\u5386\u53f2"
+                    : blocked
+                        ? "\u5199\u5165\u8ba1\u5212\u5b58\u5728\u963b\u65ad\u9879"
+                        : writeReady
+                            ? "\u5ba1\u6279\u8868\u5df2\u5f52\u6863\uff0c\u53ef\u786e\u8ba4\u5199\u5165\u5386\u53f2"
+                            : "\u5f85\u5b8c\u6210\u5199\u5165\u524d\u9884\u68c0";
+        const readyCallout = writeReady && canHistoryWrite && !written
+            ? `<div class="case-history-status ready">
+                <strong>\u53ef\u786e\u8ba4\u5199\u5165\u5386\u53f2</strong>
+                <span>\u5ba1\u6279\u8868\u5df2\u5f52\u6863\uff0c\u5199\u5165\u8ba1\u5212\u5df2\u901a\u8fc7\u9884\u68c0\u3002</span>
+            </div>`
+            : "";
+        const fallbackSteps = [
+            { label: "\u529e\u7406", state: detail.status === "DONE" ? "done" : (detail.status === "CANCELLED" ? "blocked" : "pending"), text: Format.businessStatusText(detail.status) },
+            { label: "\u5feb\u7167", state: detail.snapshotExists ? "done" : "pending", text: detail.snapshotExists ? "\u5df2\u751f\u6210" : "\u672a\u751f\u6210" },
+            { label: "\u5ba1\u6279\u8868", state: printed ? "done" : (printBlocked ? "blocked" : "pending"), text: printed ? (printArchive.reprinted ? "\u5df2\u91cd\u6253" : "\u5df2\u6253\u5370") : (printBlocked ? "\u4e0d\u53ef\u6253\u5370" : "\u5f85\u6253\u5370") },
+            { label: "\u5199\u5165\u8ba1\u5212", state: plan ? (blocked ? "blocked" : "done") : "pending", text: plan ? planStatus : "\u672a\u751f\u6210" },
+            { label: "\u5199\u5165\u6267\u884c", state: written ? "done" : (writeGateBlocked ? "blocked" : "pending"), text: written ? "\u5df2\u5199\u5165" : (!printed && plan ? "\u5f85\u6253\u5370\u5ba1\u6279\u8868" : (blocked ? "\u5df2\u963b\u65ad" : "\u5f85\u6267\u884c")) },
+            { label: "\u5dee\u5f02\u6838\u67e5", state: !mismatch ? "done" : (reviewed ? "done" : "pending"), text: !plan ? "\u5f85\u5bf9\u7167" : (!mismatch ? "\u65e0\u5dee\u5f02" : (reviewed ? "\u5df2\u6838\u67e5" : "\u5f85\u6838\u67e5")) }
+        ];
+        const steps = (closure.steps || []).length
+            ? closure.steps.map((step) => ({
+                label: step.label || step.code || "-",
+                state: step.status === "DONE" ? "done" : (["BLOCKED", "CANCELLED"].includes(step.status) ? "blocked" : "pending"),
+                text: step.message || step.status || "-"
+            }))
+            : fallbackSteps;
         return `
             <div class="case-detail-section">
-                <span>\u5386\u53f2\u5199\u5165\u8ddf\u8e2a</span>
+                <span>\u529e\u7406\u95ed\u73af</span>
+                ${closure.status ? `<div class="case-history-status ${Format.html(closureState)}">
+                    <strong>${Format.html(closure.status === "CLOSED" ? "\u5df2\u95ed\u73af" : (closure.status === "BLOCKED" ? "\u6709\u963b\u65ad" : (closure.status === "CANCELLED" ? "\u5df2\u64a4\u56de" : "\u95ed\u73af\u4e2d")))}</strong>
+                    <span>${Format.html(closure.message || "-")} | ${Format.html(closure.completedSteps ?? 0)}/${Format.html(closure.totalSteps ?? steps.length)}</span>
+                </div>` : ""}
+                <div class="case-flow-steps">
+                    ${steps.map((step) => `
+                        <div class="case-flow-step ${Format.html(step.state)}">
+                            <strong>${Format.html(step.label)}</strong>
+                            <small>${Format.html(step.text || "-")}</small>
+                        </div>
+                    `).join("")}
+                </div>
                 <div class="case-change-list">
+                    ${readyCallout}
                     ${plan ? `
                         <div class="case-change-row">
                             <strong>${Format.html(planStatus)}</strong>
                             <span>${Format.html(plan.insertedHistoryId || "-")}</span>
-                            <small>\u8ba1\u5212 ${Format.html(plan.planNo || "-")} | \u6267\u884c\u7ed3\u679c ${Format.html(executionResult)} | \u524d ${Format.html(plan.previousHistoryId || "-")} | \u540e ${Format.html(plan.nextHistoryId || "-")}</small>
+                            <small>\u8ba1\u5212 ${Format.html(plan.planNo || "-")} | \u5ba1\u6279\u8868 ${printBatch ? Format.html(printBatch) : Format.html(printArchive.message || "\u672a\u6253\u5370")} | \u6267\u884c\u7ed3\u679c ${Format.html(executionResult)} | \u5bf9\u7167 ${Format.html(Format.historyWriteComparisonText(plan.comparisonStatus))} | \u6838\u67e5 ${Format.html(WorkbenchPanel.historyReviewStatusText(plan.comparisonReviewStatus || ""))}</small>
+                        </div>
+                        <div class="case-change-row ${writeGateBlocked ? "blocked" : (writeReady || written ? "ready" : "")}">
+                            <strong>\u5199\u5165\u524d\u7f6e</strong>
+                            <span>${writeReady ? "\u53ef\u5199\u5165" : (written ? "\u5df2\u5b8c\u6210" : "\u4e0d\u53ef\u5199\u5165")}</span>
+                            <small>${Format.html(writeGateText)}${printBatch ? ` | \u6253\u5370\u6279\u6b21 ${Format.html(printBatch)}` : ""}</small>
                         </div>
                         <div class="case-change-row">
                             <strong>\u6700\u8fd1\u8bf4\u660e</strong>
@@ -3794,12 +12013,1066 @@ const WorkbenchPanel = {
                     ` : ""}
                 </div>
                 <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-refresh-case-detail="${Format.html(detail.caseNo || "")}">\u5237\u65b0\u8be6\u60c5</button>
+                    ${Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT") ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${Format.html(detail.caseNo || "")}">\u6253\u5370\u5ba1\u6279\u8868</button>` : ""}
+                    ${detail.snapshotExists ? `<button type="button" class="case-snapshot-button" data-snapshot-case-no="${Format.html(detail.caseNo)}">\u67e5\u770b\u5feb\u7167</button>` : ""}
+                    ${detail.snapshotExists && !plan ? `<button type="button" class="case-snapshot-button" data-history-write-preview-case-no="${Format.html(detail.caseNo)}">\u751f\u6210\u5199\u5165\u9884\u68c0</button>` : ""}
                     ${plan ? `<button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(detail.caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>` : ""}
+                    ${writeReady && canHistoryWrite ? `<button type="button" class="case-confirm-button" data-history-write-execute-case-no="${Format.html(detail.caseNo)}">\u786e\u8ba4\u5199\u5165\u5386\u53f2</button>` : ""}
                     ${plan ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(detail.caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
                     ${audits.length ? `<button type="button" class="case-snapshot-button" data-history-write-audit-export-case-no="${Format.html(detail.caseNo)}">\u5bfc\u51fa\u5199\u5165\u6d41\u6c34</button>` : ""}
                 </div>
             </div>
         `;
+    },
+    historyWriteResultInlineHtml(detail) {
+        const plan = detail.historyWritePlan;
+        if (!plan || !WorkbenchPanel.historyPlanWritten(plan)) {
+            return "";
+        }
+        const comparison = detail.historyWriteComparison || {};
+        const rollbackPreview = detail.historyWriteRollbackPreview || {};
+        const inserted = rollbackPreview.insertedHistory || null;
+        const previous = rollbackPreview.previousHistory || comparison.previousHistory || null;
+        const next = rollbackPreview.nextHistory || comparison.nextHistory || null;
+        const historyId = plan.insertedHistoryId || inserted?.historyId || comparison.historyId || "-";
+        const period = `${Format.html(plan.year || comparison.year || "-")}-${Format.html(String(plan.month || comparison.month || 1).padStart(2, "0"))}`;
+        const rowSummary = (row) => row
+            ? `${Format.html(row.year || "-")}-${Format.html(String(row.month || 1).padStart(2, "0"))} | ${Format.html(row.changeType || "-")} | \u5408\u8ba1 ${Format.optionalAmount(row.totalAmount)} | sid ${Format.html(row.nextId || "-")}`
+            : "-";
+        const sidText = plan.previousHistoryId && historyId !== "-"
+            ? `\u4e0a\u6761 ${Format.html(plan.previousHistoryId)} -> \u672c\u6b21 ${Format.html(historyId)}${plan.nextHistoryId ? ` -> \u4e0b\u6761 ${Format.html(plan.nextHistoryId)}` : ""}`
+            : (plan.nextHistoryId ? `\u672c\u6b21 ${Format.html(historyId)} -> \u4e0b\u6761 ${Format.html(plan.nextHistoryId)}` : "\u672c\u6b21\u5199\u5165\u884c\u4e3a\u94fe\u5c3e\u6216\u552f\u4e00\u5386\u53f2\u884c");
+        return `
+            <div class="case-detail-section compact">
+                <span>\u5199\u5165\u7ed3\u679c</span>
+                <div class="case-history-status ready">
+                    <strong>\u5df2\u5199\u5165 hisbase</strong>
+                    <span>${Format.html(historyId)} | ${Format.html(period)} | ${Format.html(plan.executedBy || "-")} ${Format.html(plan.executedAt || "")}</span>
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row ready">
+                        <strong>\u5199\u5165\u884c</strong>
+                        <span>${Format.html(historyId)}</span>
+                        <small>${inserted ? rowSummary(inserted) : `${Format.html(plan.businessType || "-")} | ${Format.html(plan.executionMessage || "-")}`}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>sid \u94fe\u8def</strong>
+                        <span>${plan.previousHistoryId || plan.nextHistoryId ? "\u5df2\u63a5\u5165" : "\u65e0\u524d\u540e\u884c"}</span>
+                        <small>${sidText}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u524d\u4e00\u6761</strong>
+                        <span>${Format.html(plan.previousHistoryId || previous?.historyId || "-")}</span>
+                        <small>${rowSummary(previous)}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u540e\u4e00\u6761</strong>
+                        <span>${Format.html(plan.nextHistoryId || next?.historyId || "-")}</span>
+                        <small>${rowSummary(next)}</small>
+                    </div>
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(detail.caseNo || plan.caseNo || "")}">\u5b57\u6bb5\u5bf9\u7167</button>
+                    ${Permissions.has("SALARY_HISTORY_ROLLBACK") ? `<button type="button" class="case-snapshot-button" data-history-write-rollback-preview-case-no="${Format.html(detail.caseNo || plan.caseNo || "")}">\u56de\u6eda\u9884\u68c0</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteBlockedInlineHtml(detail) {
+        const plan = detail.historyWritePlan;
+        const written = WorkbenchPanel.historyPlanWritten(plan);
+        const rolledBack = plan?.planStatus === "ROLLED_BACK" || plan?.executionResult === "ROLLED_BACK";
+        const printArchive = detail.reportPrintArchive || {};
+        const printed = printArchive.printed === true;
+        const blocked = WorkbenchPanel.historyPlanBlocked(plan);
+        const needsPlan = detail.snapshotExists && !plan;
+        const needsSnapshot = !detail.snapshotExists;
+        const needsPrint = Boolean(plan) && !written && !printed;
+        if (written || rolledBack || (!blocked && !needsPlan && !needsSnapshot && !needsPrint)) {
+            return "";
+        }
+        const caseNo = detail.caseNo || plan?.caseNo || "";
+        const issues = WorkbenchPanel.historyPlanIssues(plan);
+        const categories = WorkbenchPanel.historyPlanBlockedCategories(plan);
+        const suggestions = WorkbenchPanel.historyPlanMaintenanceSuggestions(plan);
+        const canReviewBlocked = Boolean(plan) && WorkbenchPanel.historyPlanBlocked(plan) && plan.comparisonReviewStatus !== "REVIEWED";
+        const rows = [];
+        if (needsSnapshot) {
+            rows.push({ title: "\u5feb\u7167\u7f3a\u5931", status: "\u9700\u5148\u751f\u6210", detail: "\u5386\u53f2\u5199\u5165\u5fc5\u987b\u57fa\u4e8e\u5df2\u529e\u7406\u5feb\u7167\u548c\u5de5\u8d44\u660e\u7ec6\u3002" });
+        }
+        if (needsPlan) {
+            rows.push({ title: "\u5199\u5165\u8ba1\u5212\u7f3a\u5931", status: "\u9700\u9884\u68c0", detail: "\u5148\u751f\u6210\u5199\u5165\u9884\u68c0\uff0c\u7cfb\u7edf\u4f1a\u6309 hisbase \u5b57\u6bb5\u548c sid \u94fe\u8fdb\u884c\u6821\u9a8c\u3002" });
+        }
+        if (needsPrint) {
+            rows.push({ title: "\u5ba1\u6279\u8868\u672a\u5f52\u6863", status: "\u9700\u6253\u5370", detail: printArchive.message || "\u5148\u6253\u5370\u5e76\u5f52\u6863\u5ba1\u6279\u8868\uff0c\u518d\u786e\u8ba4\u5199\u5165\u5386\u53f2\u3002" });
+        }
+        for (const category of categories) {
+            rows.push({
+                title: WorkbenchPanel.historyPlanBlockedIssueCategoryText(category),
+                status: "\u9884\u68c0\u963b\u65ad",
+                detail: WorkbenchPanel.historyPlanBlockedIssueCategoryHint(category)
+            });
+        }
+        const issueRows = issues.slice(0, 6);
+        return `
+            <div class="case-detail-section compact">
+                <span>\u5199\u5165\u963b\u65ad\u5904\u7406</span>
+                <div class="case-history-status blocked">
+                    <strong>\u6682\u4e0d\u53ef\u5199\u5165\u5386\u53f2</strong>
+                    <span>${Format.html(plan?.planNo || caseNo || "-")} | ${Format.html(rows.length || issues.length || 1)} \u7c7b\u5f85\u5904\u7406\u9879</span>
+                </div>
+                <div class="case-change-list">
+                    ${(rows.length ? rows : [{ title: "\u5f85\u590d\u6838", status: "\u9700\u67e5\u770b\u8ba1\u5212", detail: plan?.executionMessage || plan?.rollbackMessage || "\u6253\u5f00\u5199\u5165\u8ba1\u5212\u67e5\u770b\u8be6\u7ec6\u963b\u65ad\u4fe1\u606f\u3002" }]).map((row) => `
+                        <div class="case-change-row blocked">
+                            <strong>${Format.html(row.title)}</strong>
+                            <span>${Format.html(row.status)}</span>
+                            <small>${Format.html(row.detail)}</small>
+                        </div>
+                    `).join("")}
+                    ${issueRows.length ? issueRows.map((issue) => `
+                        <div class="case-change-row blocked">
+                            <strong>${Format.html(WorkbenchPanel.historyPlanBlockedIssueCategoryText(WorkbenchPanel.historyPlanBlockedIssueCategory(issue)))}</strong>
+                            <span>issue</span>
+                            <small>${Format.html(issue)}</small>
+                        </div>
+                    `).join("") : ""}
+                    ${issues.length > issueRows.length ? `<p class="muted">\u8fd8\u6709 ${Format.html(issues.length - issueRows.length)} \u6761\u963b\u65ad\u660e\u7ec6\uff0c\u8bf7\u6253\u5f00\u5199\u5165\u8ba1\u5212\u67e5\u770b\u5168\u90e8 issues\u3002</p>` : ""}
+                    ${suggestions.length ? `<div class="history-plan-maintenance suggested">
+                        <small>\u6570\u636e\u6cbb\u7406\u5efa\u8bae</small>
+                        ${suggestions.map((suggestion) => {
+                            const fields = Array.isArray(suggestion.fields) ? suggestion.fields.join("\u3001") : "";
+                            return `<span title="${Format.html(`${suggestion.reason || ""}${fields ? `\uff1a${fields}` : ""}`)}">${Format.html(suggestion.label || "-")} ${Format.html(suggestion.count || 0)}</span>`;
+                        }).join("")}
+                    </div>` : ""}
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-refresh-case-detail="${Format.html(caseNo)}">\u5237\u65b0\u8be6\u60c5</button>
+                    ${needsSnapshot ? "" : `<button type="button" class="case-snapshot-button" data-snapshot-case-no="${Format.html(caseNo)}">\u67e5\u770b\u5feb\u7167</button>`}
+                    ${needsPlan ? `<button type="button" class="case-snapshot-button" data-history-write-preview-case-no="${Format.html(caseNo)}">\u751f\u6210\u5199\u5165\u9884\u68c0</button>` : ""}
+                    ${plan ? `<button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>` : ""}
+                    ${needsPrint && (Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT")) ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${Format.html(caseNo)}">\u6253\u5370\u5ba1\u6279\u8868</button>` : ""}
+                    ${plan ? `<button type="button" class="case-snapshot-button" data-history-write-preview-case-no="${Format.html(caseNo)}">\u91cd\u65b0\u9884\u68c0</button>` : ""}
+                    ${canReviewBlocked ? `<button type="button" class="case-review-button" data-history-write-blocked-review-case-no="${Format.html(caseNo)}">\u6807\u8bb0\u540e\u671f\u6838\u67e5</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteRollbackResultInlineHtml(detail) {
+        const plan = detail.historyWritePlan;
+        const rolledBack = plan?.planStatus === "ROLLED_BACK" || plan?.executionResult === "ROLLED_BACK";
+        if (!plan || !rolledBack) {
+            return "";
+        }
+        const caseNo = detail.caseNo || plan.caseNo || "";
+        const canReport = Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT");
+        const canRepreview = detail.snapshotExists === true;
+        return `
+            <div class="case-detail-section compact">
+                <span>\u56de\u6eda\u7ed3\u679c</span>
+                <div class="case-history-status warning">
+                    <strong>\u5199\u5165\u5df2\u64a4\u9500\uff0c\u53ef\u91cd\u65b0\u9884\u68c0</strong>
+                    <span>${Format.html(plan.insertedHistoryId || "-")} | ${Format.html(plan.rolledBackBy || "-")} ${Format.html(plan.rolledBackAt || "")}</span>
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row ready">
+                        <strong>hisbase \u5199\u5165\u884c</strong>
+                        <span>\u5df2\u5220\u9664</span>
+                        <small>${Format.html(plan.rollbackMessage || "\u5df2\u64a4\u9500\u5199\u5165\u884c\u5e76\u6062\u590d sid \u94fe\u3002")}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>sid \u94fe\u6062\u590d</strong>
+                        <span>${plan.previousHistoryId || plan.nextHistoryId ? "\u5df2\u6062\u590d" : "\u65e0\u9700\u6062\u590d"}</span>
+                        <small>${plan.previousHistoryId ? `\u524d\u4e00\u6761 ${Format.html(plan.previousHistoryId)}` : "\u65e0\u524d\u4e00\u6761"}${plan.nextHistoryId ? ` | \u540e\u4e00\u6761 ${Format.html(plan.nextHistoryId)}` : ""}</small>
+                    </div>
+                    <div class="case-change-row ${canRepreview ? "ready" : "blocked"}">
+                        <strong>\u518d\u6b21\u529e\u7406</strong>
+                        <span>${canRepreview ? "\u5148\u91cd\u65b0\u9884\u68c0" : "\u7f3a\u5c11\u5feb\u7167"}</span>
+                        <small>${canRepreview ? "\u64a4\u9500\u540e\u5df2\u6062\u590d hisbase \u94fe\u8def\uff0c\u9700\u6309\u5f53\u524d\u57fa\u7840\u4fe1\u606f\u91cd\u65b0\u751f\u6210\u5199\u5165\u9884\u68c0\uff0c\u901a\u8fc7\u540e\u518d\u5199\u5165\u3002" : "\u9700\u5148\u786e\u8ba4\u529e\u7406\u5feb\u7167\u5b58\u5728\uff0c\u518d\u91cd\u65b0\u9884\u68c0\u3002"}</small>
+                    </div>
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(caseNo)}">\u67e5\u770b\u5199\u5165\u8ba1\u5212</button>
+                    ${canRepreview ? `<button type="button" class="case-snapshot-button primary" data-history-write-preview-case-no="${Format.html(caseNo)}">\u91cd\u65b0\u9884\u68c0</button>` : ""}
+                    ${canReport ? `<button type="button" class="case-snapshot-button" data-salary-case-approval-print="${Format.html(caseNo)}">\u6253\u5370\u5ba1\u6279\u8868</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteReviewConclusionHtml(detail) {
+        const plan = detail.historyWritePlan;
+        if (!plan) {
+            return "";
+        }
+        const comparison = detail.historyWriteComparison || {};
+        const written = WorkbenchPanel.historyPlanWritten(plan);
+        const blocked = WorkbenchPanel.historyPlanBlocked(plan);
+        const hasMismatch = written && (plan.comparisonStatus === "MISMATCHED" || comparison.totalMatched === false || (comparison.fields || []).some((field) => !field.matched));
+        const reviewed = plan.comparisonReviewStatus === "REVIEWED" || comparison.reviewStatus === "REVIEWED";
+        const category = comparison.reviewCategory || plan.comparisonReviewCategory || "";
+        const reason = comparison.reviewReason || plan.comparisonReviewReason || "";
+        const reviewedBy = comparison.reviewedBy || plan.comparisonReviewedBy || "-";
+        const reviewedAt = comparison.reviewedAt || plan.comparisonReviewedAt || "-";
+        const needsConclusion = blocked || hasMismatch || reviewed;
+        if (!needsConclusion) {
+            return "";
+        }
+        const caseNo = detail.caseNo || plan.caseNo || "";
+        const statusText = reviewed
+            ? "\u5df2\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba"
+            : (blocked ? "\u963b\u65ad\u9879\u5f85\u540e\u671f\u6838\u67e5" : "\u5199\u5165\u5dee\u5f02\u5f85\u6838\u67e5");
+        const detailText = reviewed
+            ? `${Format.historyWriteReviewCategoryText(category)} | ${reason || "-"}`
+            : (blocked ? "\u53ef\u5c06\u5f53\u524d\u963b\u65ad\u6807\u8bb0\u4e3a\u540e\u671f\u6838\u67e5\uff0c\u4e0d\u4f5c\u4e3a\u5f53\u524d\u529e\u7406\u963b\u65ad\u3002" : "\u5148\u6309\u5f53\u524d\u57fa\u7840\u590d\u6d4b\uff0c\u4ecd\u4e0d\u4e00\u81f4\u65f6\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba\u3002");
+        return `
+            <div class="case-detail-section compact">
+                <span>\u6838\u67e5\u7ed3\u8bba</span>
+                <div class="case-history-status ${reviewed ? "ready" : "warning"}">
+                    <strong>${Format.html(statusText)}</strong>
+                    <span>${reviewed ? `${Format.html(reviewedBy)} | ${Format.html(reviewedAt)}` : Format.html(plan.planNo || caseNo || "-")}</span>
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row ${reviewed ? "ready" : "blocked"}">
+                        <strong>\u7ed3\u8bba\u5206\u7c7b</strong>
+                        <span>${reviewed ? Format.html(Format.historyWriteReviewCategoryText(category)) : "\u5f85\u767b\u8bb0"}</span>
+                        <small>${Format.html(detailText)}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u9002\u7528\u573a\u666f</strong>
+                        <span>${blocked ? "\u5199\u5165\u963b\u65ad" : (hasMismatch ? "\u5199\u5165\u5dee\u5f02" : "\u5df2\u5b8c\u6210")}</span>
+                        <small>${blocked ? "\u4f8b\u5982 sid \u94fe\u3001\u5b57\u6bb5\u6620\u5c04\u3001\u5386\u53f2\u7279\u6b8a\u60c5\u51b5\u7b49\u3002" : "\u5feb\u7167\u4e0e hisbase \u5b57\u6bb5\u5bf9\u7167\u540e\u5b58\u5728\u5dee\u5f02\u65f6\u4f7f\u7528\u3002"}</small>
+                    </div>
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    ${blocked && !reviewed ? `<button type="button" class="case-review-button primary" data-history-write-blocked-review-case-no="${Format.html(caseNo)}">\u6807\u8bb0\u540e\u671f\u6838\u67e5</button>` : ""}
+                    ${hasMismatch ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(caseNo)}">\u5b57\u6bb5\u5bf9\u7167</button>` : ""}
+                    ${hasMismatch && !reviewed ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-retest-case-no="${Format.html(caseNo)}">\u6309\u5f53\u524d\u57fa\u7840\u590d\u6d4b</button>` : ""}
+                    ${hasMismatch && !reviewed ? `<button type="button" class="case-review-button" data-history-write-focus-inline-review>\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteComparisonInlineHtml(detail) {
+        const plan = detail.historyWritePlan;
+        if (!plan) {
+            return "";
+        }
+        const comparison = detail.historyWriteComparison;
+        if (!comparison) {
+            return detail.historyWriteComparisonError
+                ? `<div class="case-detail-section">
+                    <span>\u5199\u5165\u540e\u5bf9\u7167</span>
+                    <div class="case-history-status blocked">
+                        <strong>\u5bf9\u7167\u672a\u52a0\u8f7d</strong>
+                        <span>${Format.html(detail.historyWriteComparisonError)}</span>
+                    </div>
+                </div>`
+                : "";
+        }
+        const fields = comparison.fields || [];
+        const mismatchedFields = fields.filter((field) => !field.matched);
+        const hasMismatch = Boolean(mismatchedFields.length || !comparison.totalMatched);
+        const reviewed = comparison.reviewStatus === "REVIEWED";
+        const retestStatus = comparison.retestStatus || plan.comparisonRetestStatus || "";
+        const rows = (hasMismatch ? mismatchedFields : fields).slice(0, 5);
+        const suggestionGroups = WorkbenchPanel.historyWriteSuggestionGroups(comparison, mismatchedFields);
+        const primaryReviewSuggestion = suggestionGroups.length
+            ? WorkbenchPanel.historyWriteReviewSuggestion(suggestionGroups[0])
+            : { category: "OTHER", reason: "" };
+        const selectedReviewCategory = comparison.reviewCategory || primaryReviewSuggestion.category || "";
+        const reviewReason = comparison.reviewReason || primaryReviewSuggestion.reason || "";
+        return `
+            <div class="case-detail-section">
+                <span>\u5199\u5165\u540e\u5bf9\u7167</span>
+                <div class="case-history-status ${hasMismatch ? "warning" : "ready"}">
+                    <strong>${hasMismatch ? "\u5b58\u5728\u5dee\u5f02" : "\u5bf9\u7167\u4e00\u81f4"}</strong>
+                    <span>\u5b57\u6bb5 ${Format.html(fields.length)} \u9879 | \u5dee\u5f02 ${Format.html(mismatchedFields.length)} \u9879 | \u5408\u8ba1${comparison.totalMatched ? "\u4e00\u81f4" : "\u4e0d\u4e00\u81f4"}</span>
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row ${hasMismatch ? "blocked" : "ready"}">
+                        <strong>\u6838\u67e5\u72b6\u6001</strong>
+                        <span>${Format.html(WorkbenchPanel.historyReviewStatusText(comparison.reviewStatus || plan.comparisonReviewStatus || ""))}</span>
+                        <small>${reviewed ? `${Format.html(Format.historyWriteReviewCategoryText(comparison.reviewCategory))} | ${Format.html(comparison.reviewReason || "-")}` : (hasMismatch ? "\u5f85\u590d\u6d4b\u6216\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba" : "\u65e0\u9700\u6838\u67e5")}</small>
+                    </div>
+                    ${retestStatus ? `<div class="case-change-row">
+                        <strong>\u590d\u6d4b\u72b6\u6001</strong>
+                        <span>${Format.html(WorkbenchPanel.historyRetestStatusText(retestStatus))}</span>
+                        <small>${Format.html(comparison.retestMessage || plan.comparisonRetestMessage || "-")}</small>
+                    </div>` : ""}
+                    ${rows.length ? rows.map((field) => {
+                        const suggestion = WorkbenchPanel.historyWriteFieldSuggestion(field, comparison);
+                        return `
+                            <div class="case-change-row ${field.matched ? "ready" : "blocked"}">
+                                <strong>${Format.html(field.itemName || field.itemCode || field.historyField || "-")}</strong>
+                                <span>${field.matched ? "\u4e00\u81f4" : "\u4e0d\u4e00\u81f4"}</span>
+                                <small>${Format.html(field.historyField || "-")} | \u5feb\u7167 ${Format.optionalAmount(field.expectedAmount)} | hisbase ${Format.optionalAmount(field.actualAmount)}${field.matched ? "" : ` | \u5efa\u8bae ${Format.html(suggestion.label)}`}</small>
+                            </div>
+                        `;
+                    }).join("") : `<p class="muted">\u6682\u65e0\u5b57\u6bb5\u5bf9\u7167</p>`}
+                    ${mismatchedFields.length > rows.length ? `<p class="muted">\u8fd8\u6709 ${Format.html(mismatchedFields.length - rows.length)} \u9879\u5dee\u5f02\uff0c\u8bf7\u6253\u5f00\u5b57\u6bb5\u5bf9\u7167\u67e5\u770b\u5168\u90e8\u660e\u7ec6\u3002</p>` : ""}
+                </div>
+                ${hasMismatch && !reviewed ? `<div class="case-review-reason compact">
+                    <label>
+                        <span>\u6838\u67e5\u5206\u7c7b</span>
+                        <select data-history-write-inline-review-category>
+                            <option value="">\u8bf7\u9009\u62e9</option>
+                            <option value="BASE_MISSING" ${selectedReviewCategory === "BASE_MISSING" ? "selected" : ""}>\u57fa\u7840\u4fe1\u606f\u7f3a\u5931</option>
+                            <option value="BASE_CHANGED" ${selectedReviewCategory === "BASE_CHANGED" ? "selected" : ""}>\u57fa\u7840\u4fe1\u606f\u5df2\u53d8\u66f4</option>
+                            <option value="POLICY_DIFF" ${selectedReviewCategory === "POLICY_DIFF" ? "selected" : ""}>\u653f\u7b56\u53d6\u503c\u5dee\u5f02</option>
+                            <option value="MANUAL_INPUT" ${selectedReviewCategory === "MANUAL_INPUT" ? "selected" : ""}>\u624b\u5de5\u5f55\u5165</option>
+                            <option value="HISTORY_SPECIAL" ${selectedReviewCategory === "HISTORY_SPECIAL" ? "selected" : ""}>\u5386\u53f2\u7279\u6b8a\u5904\u7406</option>
+                            <option value="OTHER" ${selectedReviewCategory === "OTHER" ? "selected" : ""}>\u5176\u4ed6</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>\u6838\u67e5\u8bf4\u660e</span>
+                        <textarea data-history-write-inline-review-reason rows="3" maxlength="1000" placeholder="\u8bf7\u8bf4\u660e\u8be5\u5199\u5165\u5dee\u5f02\u5df2\u6838\u67e5\u7684\u4f9d\u636e">${Format.html(reviewReason)}</textarea>
+                    </label>
+                </div>` : ""}
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-history-write-comparison-case-no="${Format.html(detail.caseNo || comparison.caseNo || "")}">\u5b57\u6bb5\u5bf9\u7167</button>
+                    ${hasMismatch && !reviewed ? `<button type="button" class="case-snapshot-button" data-history-write-comparison-retest-case-no="${Format.html(detail.caseNo || comparison.caseNo || "")}">\u6309\u5f53\u524d\u57fa\u7840\u590d\u6d4b</button>` : ""}
+                    ${hasMismatch && !reviewed ? `<button type="button" class="case-review-button" data-history-write-inline-review-case-no="${Format.html(detail.caseNo || comparison.caseNo || "")}">\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteRollbackInlineHtml(detail) {
+        const plan = detail.historyWritePlan;
+        if (!plan || plan.planStatus !== "EXECUTED" || plan.executionResult !== "SUCCESS") {
+            return "";
+        }
+        const preview = detail.historyWriteRollbackPreview;
+        if (!preview) {
+            return detail.historyWriteRollbackPreviewError
+                ? `<div class="case-detail-section">
+                    <span>\u56de\u6eda\u9884\u68c0</span>
+                    <div class="case-history-status blocked">
+                        <strong>\u56de\u6eda\u9884\u68c0\u672a\u52a0\u8f7d</strong>
+                        <span>${Format.html(detail.historyWriteRollbackPreviewError)}</span>
+                    </div>
+                </div>`
+                : "";
+        }
+        const issues = preview.issues || [];
+        const rollbackable = preview.rollbackable === true;
+        return `
+            <div class="case-detail-section">
+                <span>\u56de\u6eda\u9884\u68c0</span>
+                <div class="case-history-status ${rollbackable ? "ready" : "blocked"}">
+                    <strong>${rollbackable ? "\u53ef\u64a4\u9500\u5199\u5165" : "\u6682\u4e0d\u53ef\u64a4\u9500"}</strong>
+                    <span>${Format.html(preview.historyId || plan.insertedHistoryId || "-")} | ${Format.html(preview.status || "-")}</span>
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row ${rollbackable ? "ready" : "blocked"}">
+                        <strong>sid \u6062\u590d</strong>
+                        <span>${preview.sidUpdateRequired ? "\u9700\u8c03\u6574" : "\u65e0\u9700\u8c03\u6574"}</span>
+                        <small>${Format.html(preview.sidPlan || "-")}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u524d\u4e00\u6761</strong>
+                        <span>${Format.html(preview.previousHistory?.historyId || "-")}</span>
+                        <small>${preview.previousHistory ? `${Format.html(preview.previousHistory.year || "-")}-${Format.html(String(preview.previousHistory.month || 1).padStart(2, "0"))} | sid ${Format.html(preview.previousHistory.nextId || "-")}` : "-"}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u5199\u5165\u884c</strong>
+                        <span>${Format.html(preview.insertedHistory?.historyId || preview.historyId || "-")}</span>
+                        <small>${preview.insertedHistory ? `\u5408\u8ba1 ${Format.optionalAmount(preview.insertedHistory.totalAmount)} | sid ${Format.html(preview.insertedHistory.nextId || "-")}` : "-"}</small>
+                    </div>
+                    ${preview.nextHistory ? `<div class="case-change-row">
+                        <strong>\u540e\u4e00\u6761</strong>
+                        <span>${Format.html(preview.nextHistory.historyId || "-")}</span>
+                        <small>${Format.html(preview.nextHistory.year || "-")}-${Format.html(String(preview.nextHistory.month || 1).padStart(2, "0"))} | ${Format.html(preview.nextHistory.changeType || "-")}</small>
+                    </div>` : ""}
+                    ${issues.length ? issues.map((issue) => `
+                        <div class="case-change-row blocked">
+                            <strong>\u963b\u65ad\u9879</strong>
+                            <span>\u9700\u5904\u7406</span>
+                            <small>${Format.html(issue)}</small>
+                        </div>
+                    `).join("") : ""}
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-history-write-rollback-preview-case-no="${Format.html(detail.caseNo || preview.caseNo || "")}">\u6253\u5f00\u56de\u6eda\u9884\u68c0</button>
+                    <button type="button" class="case-snapshot-button" data-history-write-rollback-preview-export-case-no="${Format.html(detail.caseNo || preview.caseNo || "")}">\u5bfc\u51fa\u9884\u68c0</button>
+                    ${rollbackable && Permissions.has("SALARY_HISTORY_ROLLBACK") ? `<button type="button" class="case-cancel-button" data-history-write-rollback-case-no="${Format.html(detail.caseNo || preview.caseNo || "")}">\u64a4\u9500\u5199\u5165</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    historyWriteAuditTimelineHtml(detail) {
+        const audits = detail.historyWriteAudits || [];
+        if (!detail.historyWritePlan && !audits.length) {
+            return "";
+        }
+        return `
+            <div class="case-detail-section">
+                <span>\u5386\u53f2\u5199\u5165\u6d41\u6c34</span>
+                <div class="case-audit-list">
+                    ${audits.length ? audits.slice(0, 8).map((audit) => `
+                        <div class="case-audit-row">
+                            <strong>${Format.html(Format.auditActionText(audit.action))}</strong>
+                            <small>${Format.html(audit.summary || "-")}</small>
+                            <span>${Format.html(audit.operator || "-")} | ${Format.html(audit.createdAt || "-")}</span>
+                        </div>
+                    `).join("") : `<p class="muted">\u6682\u65e0\u5386\u53f2\u5199\u5165\u6d41\u6c34</p>`}
+                </div>
+                <div class="case-detail-actions inline-actions">
+                    <button type="button" class="case-snapshot-button" data-history-write-plan-case-no="${Format.html(detail.caseNo || "")}">\u5199\u5165\u8ba1\u5212</button>
+                    ${audits.length ? `<button type="button" class="case-snapshot-button" data-history-write-audit-export-case-no="${Format.html(detail.caseNo || "")}">\u5bfc\u51fa\u6d41\u6c34</button>` : ""}
+                </div>
+            </div>
+        `;
+    },
+    reportPrintSectionHtml(detail) {
+        const audits = detail.reportAudits || [];
+        const archive = detail.reportPrintArchive || {};
+        const latestAudit = audits[0];
+        const canUseReport = Permissions.has("SALARY_REPORT") || Permissions.has("SALARY_EXPORT");
+        const canExportReport = Permissions.has("SALARY_EXPORT");
+        const canAuditReport = Permissions.has("SYSTEM_AUDIT");
+        const caseNo = detail.caseNo || "";
+        const plan = detail.historyWritePlan;
+        const printReady = archive.printed === true;
+        const printGateBlocked = Boolean(plan) && !printReady && plan.planStatus !== "EXECUTED";
+        const reportParams = WorkbenchPanel.caseReportParams(detail);
+        const salaryHistoryParams = {
+            orgCode: detail.orgCode || "",
+            personCode: detail.personCode || "",
+            yearFrom: "2006",
+            yearTo: detail.year || new Date().getFullYear(),
+            limit: "500"
+        };
+        const changeLedgerParams = {
+            ...reportParams,
+            keyword: caseNo || detail.personCode || "",
+            limit: "200"
+        };
+        const printSourceText = (audit) => ["salary-case-approvals-print", "salary-case-approvals-reprint"].includes(audit?.action || "") ? "\u6279\u91cf\u6765\u6e90" : "\u5355\u7b14\u6253\u5370";
+        const printTargetText = (audit) => ["ORG", "REPORT_PRINT_BATCH"].includes(audit?.targetType || "") ? `\u6279\u6b21 ${audit.targetCode || "-"}` : (audit?.targetCode || detail.caseNo || "-");
+        const printTargetHtml = (audit) => audit?.targetType === "REPORT_PRINT_BATCH"
+            ? `<button type="button" class="batch-result-locate" data-report-print-batch="${Format.html(audit.targetCode || "")}">\u6279\u6b21 ${Format.html(audit.targetCode || "-")}</button>`
+            : Format.html(printTargetText(audit));
+        const auditLookupButton = (audit) => canAuditReport && audit?.id
+            ? `<button type="button" class="batch-result-locate" data-case-report-audit-id="${Format.html(audit.id)}">${Format.html(audit.id)}</button>`
+            : Format.html(audit?.id || "-");
+        const missing = [];
+        if (!detail.snapshotExists) {
+            missing.push("\u5feb\u7167");
+        }
+        if (!(detail.salaryItems || []).length) {
+            missing.push("\u5de5\u8d44\u660e\u7ec6");
+        }
+        const cancelled = detail.status === "CANCELLED";
+        const readinessText = missing.length
+            ? `\u9700\u8865\u5168 ${missing.join("\u3001")}`
+            : (cancelled ? "\u4e0d\u5efa\u8bae\u6253\u5370" : "\u53ef\u6253\u5370");
+        const archiveText = archive.printed
+            ? `${archive.reprinted ? "\u5df2\u91cd\u6253" : "\u5df2\u6253\u5370"} ${archive.printCount || 0} \u6b21`
+            : (archive.message || "\u672a\u6253\u5370");
+        const reportStatusClass = printReady ? "ready" : (printGateBlocked ? "blocked" : "pending");
+        const reportStatusText = printReady
+            ? "\u5ba1\u6279\u8868\u5df2\u5f52\u6863\uff0c\u53ef\u7ee7\u7eed\u5386\u53f2\u5199\u5165"
+            : (printGateBlocked ? "\u5386\u53f2\u5199\u5165\u524d\u9700\u5148\u6253\u5370\u5ba1\u6279\u8868" : "\u5f85\u6253\u5370\u6216\u67e5\u770b\u62a5\u8868");
+        return `
+            <div class="case-detail-section compact">
+                <span>\u62a5\u8868\u6253\u5370</span>
+                <div class="case-report-status ${Format.html(reportStatusClass)}" data-case-report-status>
+                    <strong>${Format.html(reportStatusText)}</strong>
+                    <small>${Format.html(archiveText)} | ${Format.html(archive.latestOperator || "-")} | ${Format.html(archive.latestPrintedAt || "-")}</small>
+                    ${printGateBlocked && canUseReport ? `<button type="button" class="case-snapshot-button primary" data-salary-case-approval-print="${Format.html(caseNo)}">\u5148\u6253\u5370\u5ba1\u6279\u8868</button>` : ""}
+                </div>
+                <div class="case-change-list">
+                    <div class="case-change-row">
+                        <strong>\u6253\u5370\u51c6\u5907</strong>
+                        <span>${Format.html(readinessText)}</span>
+                        <small>${missing.length ? "\u70b9\u51fb\u6253\u5370\u65f6\u4f1a\u5148\u6821\u9a8c\u5e76\u963b\u65ad\u7f3a\u5931\u9879" : "\u70b9\u51fb\u6253\u5370\u524d\u4f1a\u518d\u6309\u540e\u7aef\u53d6\u6570\u53e3\u5f84\u6821\u9a8c"}</small>
+                    </div>
+                    <div class="case-change-row">
+                        <strong>\u5f52\u6863\u72b6\u6001</strong>
+                        <span>${Format.html(archiveText)}</span>
+                        <small>${Format.html(archive.latestOperator || "-")} | ${Format.html(archive.latestPrintedAt || "-")} | ${archive.latestBatchNo ? `\u6279\u6b21 ${Format.html(archive.latestBatchNo)}` : Format.html(archive.latestTargetCode || detail.caseNo || "-")}</small>
+                    </div>
+                    ${latestAudit ? `
+                        <div class="case-change-row">
+                            <strong>${Format.html(Format.auditActionText(latestAudit.action))}</strong>
+                            <span>${Format.html(printSourceText(latestAudit))} | ${Format.html(latestAudit.operator || "-")} | \u5ba1\u8ba1 ${auditLookupButton(latestAudit)}</span>
+                            <small>${printTargetHtml(latestAudit)} | ${Format.html(latestAudit.createdAt || "-")} | ${Format.html(latestAudit.summary || "-")}</small>
+                        </div>
+                    ` : `
+                        <div class="case-change-row">
+                            <strong>\u5c1a\u672a\u6253\u5370</strong>
+                            <span>${Format.html(detail.caseNo || "-")}</span>
+                            <small>\u6253\u5370\u5ba1\u6279\u8868\u540e\uff0c\u8fd9\u91cc\u4f1a\u8bb0\u5f55\u64cd\u4f5c\u4eba\u3001\u65f6\u95f4\u548c\u6253\u5370\u6761\u4ef6</small>
+                        </div>
+                    `}
+                    ${audits.slice(1, 5).map((audit) => `
+                        <div class="case-change-row">
+                            <strong>${Format.html(Format.auditActionText(audit.action))}</strong>
+                            <span>${Format.html(printSourceText(audit))} | ${Format.html(audit.operator || "-")} | \u5ba1\u8ba1 ${auditLookupButton(audit)}</span>
+                            <small>${printTargetHtml(audit)} | ${Format.html(audit.createdAt || "-")} | ${Format.html(audit.summary || "-")}</small>
+                        </div>
+                    `).join("")}
+                </div>
+                ${canUseReport ? `
+                    <div class="case-report-actions">
+                        <div class="case-report-group" data-case-report-group="forms">
+                            <b>\u529e\u7406\u8868\u5355</b>
+                            <div>
+                                <button type="button" class="case-snapshot-button ${printGateBlocked ? "primary" : ""}" data-salary-case-approval-print="${Format.html(caseNo)}">\u5ba1\u6279\u8868</button>
+                                <button type="button" class="case-snapshot-button" data-case-approval-roster-print="${Format.html(JSON.stringify(reportParams))}">\u5ba1\u6279\u6e05\u518c</button>
+                            </div>
+                        </div>
+                        <div class="case-report-group" data-case-report-group="history">
+                            <b>\u5386\u53f2\u8ffd\u6eaf</b>
+                            <div>
+                                <button type="button" class="case-snapshot-button" data-case-salary-history-print="${Format.html(JSON.stringify(salaryHistoryParams))}">\u5386\u53f2\u660e\u7ec6</button>
+                                <button type="button" class="case-snapshot-button" data-case-change-ledger-print="${Format.html(JSON.stringify(changeLedgerParams))}">\u53d8\u52a8\u53f0\u8d26</button>
+                                ${canExportReport ? `<button type="button" class="case-snapshot-button" data-case-salary-history-export="${Format.html(JSON.stringify(salaryHistoryParams))}">\u5bfc\u51fa\u5386\u53f2CSV</button>` : ""}
+                                ${canExportReport ? `<button type="button" class="case-snapshot-button" data-case-change-ledger-export="${Format.html(JSON.stringify(changeLedgerParams))}">\u5bfc\u51fa\u53d8\u52a8CSV</button>` : ""}
+                            </div>
+                        </div>
+                        <div class="case-report-group" data-case-report-group="archive">
+                            <b>\u5f52\u6863\u5ba1\u8ba1</b>
+                            <div>
+                                <button type="button" class="case-snapshot-button" data-case-report-archive="${Format.html(caseNo)}">\u5f52\u6863\u53f0\u8d26</button>
+                                <button type="button" class="case-snapshot-button" data-case-report-archive-export="${Format.html(caseNo)}">\u5bfc\u51fa\u5f52\u6863CSV</button>
+                                ${canAuditReport ? `<button type="button" class="case-snapshot-button" data-case-report-audit-target="${Format.html(caseNo)}">\u67e5\u770b\u62a5\u8868\u7559\u75d5</button>` : ""}
+                                ${canAuditReport && latestAudit?.id ? `<button type="button" class="case-snapshot-button" data-case-report-audit-id="${Format.html(latestAudit.id)}">\u53cd\u67e5\u5ba1\u8ba1</button>` : ""}
+                                ${archive.latestBatchNo ? `<button type="button" class="case-snapshot-button" data-report-print-batch="${Format.html(archive.latestBatchNo)}">\u6279\u6b21\u8be6\u60c5</button>` : ""}
+                            </div>
+                        </div>
+                    </div>
+                ` : ""}
+            </div>
+        `;
+    },
+    async printSalaryCaseApproval(caseNo, errorBox) {
+        const safeCaseNo = caseNo || "";
+        if (!safeCaseNo) {
+            return;
+        }
+        const validation = await Api.request(`/api/reports/salary-case-approval/validate?${new URLSearchParams({ caseNo: safeCaseNo }).toString()}`);
+        const issues = validation.issues || [];
+        const warnings = validation.warnings || [];
+        const message = [...issues, ...warnings].map((item) => item.message || item.code || "").filter(Boolean).join("\n");
+        if (!validation.printable) {
+            WorkbenchPanel.setCaseError(errorBox, message || "\u5ba1\u6279\u8868\u6253\u5370\u6761\u4ef6\u4e0d\u5b8c\u6574");
+            setStatus("\u5ba1\u6279\u8868\u6253\u5370\u5df2\u963b\u65ad\uff0c\u8bf7\u5148\u8865\u5168\u7f3a\u5931\u9879");
+            return;
+        }
+        WorkbenchPanel.setCaseError(errorBox, warnings.length ? message : "");
+        window.open(`/api/reports/salary-case-approval/print?${new URLSearchParams({ caseNo: safeCaseNo }).toString()}`, "_blank", "noopener");
+        WorkbenchPanel.markCaseReportPrintRefresh(safeCaseNo);
+        window.setTimeout(() => WorkbenchPanel.refreshCaseAfterReportPrint(), 1800);
+        setStatus(warnings.length ? "\u5ba1\u6279\u8868\u5df2\u6253\u5f00\uff0c\u8bf7\u7559\u610f\u6253\u5370\u63d0\u793a" : "\u5ba1\u6279\u8868\u5df2\u6253\u5f00");
+    },
+    async printSalaryCaseApprovalAndRefreshDetail(caseNo, errorBox) {
+        const safeCaseNo = caseNo || "";
+        await WorkbenchPanel.printSalaryCaseApproval(safeCaseNo, errorBox);
+        if (!safeCaseNo || state.reportPrintRefreshCaseNo !== safeCaseNo) {
+            return;
+        }
+        await delay(1200);
+        await WorkbenchPanel.refreshCaseAfterReportPrint();
+    },
+    markCaseReportPrintRefresh(caseNo) {
+        const safeCaseNo = caseNo || "";
+        if (!safeCaseNo) {
+            return;
+        }
+        state.reportPrintRefreshCaseNo = safeCaseNo;
+        state.reportPrintRefreshAt = Date.now();
+    },
+    async refreshCaseAfterReportPrint() {
+        const caseNo = state.reportPrintRefreshCaseNo || "";
+        if (!caseNo || document.hidden) {
+            return;
+        }
+        const overlay = document.querySelector(".case-detail-overlay");
+        if (!overlay || overlay.dataset.caseDetailNo !== caseNo) {
+            return;
+        }
+        if (Date.now() - Number(state.reportPrintRefreshAt || 0) < 900) {
+            return;
+        }
+        state.reportPrintRefreshCaseNo = "";
+        state.reportPrintRefreshAt = 0;
+        await delay(700);
+        const currentOverlay = document.querySelector(".case-detail-overlay");
+        if (!currentOverlay || currentOverlay.dataset.caseDetailNo !== caseNo) {
+            return;
+        }
+        try {
+            await WorkbenchPanel.refreshAfterClosureAction();
+            await WorkbenchPanel.openCaseDetail(caseNo);
+            setStatus("\u5df2\u56de\u586b\u5ba1\u6279\u8868\u6253\u5370\u5f52\u6863\u72b6\u6001\uff0c\u5e76\u5237\u65b0\u95ed\u73af\u961f\u5217");
+        } catch (error) {
+            state.reportPrintRefreshCaseNo = caseNo;
+            state.reportPrintRefreshAt = Date.now();
+            setStatus(error.message);
+        }
+    },
+    markBatchReportPrintRefresh() {
+        state.reportBatchPrintRefreshPending = true;
+        state.reportBatchPrintRefreshAt = Date.now();
+    },
+    async refreshQueuesAfterBatchReportPrint() {
+        if (!state.reportBatchPrintRefreshPending || document.hidden) {
+            return;
+        }
+        if (Date.now() - Number(state.reportBatchPrintRefreshAt || 0) < 900) {
+            return;
+        }
+        state.reportBatchPrintRefreshPending = false;
+        state.reportBatchPrintRefreshAt = 0;
+        await delay(700);
+        try {
+            const tasks = [];
+            if (Permissions.has("SALARY_DONE")) {
+                tasks.push(WorkbenchPanel.refreshAfterClosureAction());
+            }
+            if (els.migrationToolResult?.querySelector("[data-report-center]")) {
+                tasks.push(WorkbenchPanel.loadReportAudits());
+                const archiveNode = els.migrationToolResult.querySelector("[data-report-archive-result]");
+                if (archiveNode && archiveNode.innerHTML.trim()) {
+                    tasks.push(WorkbenchPanel.loadReportPrintArchive());
+                }
+            }
+            if (tasks.length) {
+                await Promise.all(tasks);
+                setStatus("\u5df2\u5237\u65b0\u6279\u91cf\u5ba1\u6279\u8868\u5f52\u6863\u548c\u5386\u53f2\u5199\u5165\u961f\u5217");
+            }
+        } catch (error) {
+            state.reportBatchPrintRefreshPending = true;
+            state.reportBatchPrintRefreshAt = Date.now();
+            setStatus(error.message);
+        }
+    },
+    async openReportPrintBatch(batchNo, options = {}) {
+        const safeBatchNo = batchNo || "";
+        if (!safeBatchNo) {
+            return;
+        }
+        state.reportBatchReturnContext = options?.returnContext || null;
+        const result = await Api.request(`/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}`);
+        WorkbenchPanel.showReportPrintBatch(result);
+    },
+    async sendReportBatchToHistoryQueue(caseNos, label = "", sourceBatchNo = "") {
+        const safeCaseNos = Array.from(new Set((caseNos || []).map((caseNo) => String(caseNo || "").trim()).filter(Boolean)));
+        if (!safeCaseNos.length) {
+            setStatus("\u6279\u6b21\u4e2d\u6ca1\u6709\u53ef\u9001\u5165\u5199\u5165\u961f\u5217\u7684\u529e\u7406\u7f16\u53f7");
+            return;
+        }
+        let auditNo = "";
+        if (sourceBatchNo) {
+            const audit = await Api.request("/api/workbench/history-write-plans/report-batch-queue-audit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json;charset=UTF-8" },
+                body: JSON.stringify({
+                    batchNo: sourceBatchNo,
+                    label: label || "\u6253\u5370\u6279\u6b21\u5199\u5165\u961f\u5217",
+                    caseNos: safeCaseNos
+                })
+            });
+            auditNo = audit.auditNo || "";
+        }
+        state.historyPlanQueueFilter = {
+            caseNos: safeCaseNos,
+            autoSelect: true,
+            label: label || "\u6253\u5370\u6279\u6b21\u5199\u5165\u961f\u5217",
+            queueActionCode: "WRITE_HISTORY",
+            sourceBatchNo: sourceBatchNo || ""
+        };
+        state.historyPlanSelected.clear();
+        persistHistoryPlanQueueState();
+        document.querySelector(".case-detail-overlay")?.remove();
+        await WorkbenchPanel.loadHistoryWritePlans();
+        els.historyWritePlans?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStatus(`\u5df2\u9001\u5165\u5386\u53f2\u5199\u5165\u961f\u5217 ${safeCaseNos.length} \u6761${auditNo ? `\uff0c\u5ba1\u8ba1 ${auditNo}` : ""}`);
+    },
+    caseReportParams(detail = {}) {
+        return {
+            orgCode: detail.orgCode || "",
+            year: detail.year || "",
+            month: detail.month || "",
+            businessType: detail.businessType || "",
+            keyword: detail.caseNo || "",
+            limit: "100"
+        };
+    },
+    caseReportQuery(params = {}) {
+        const query = new URLSearchParams();
+        for (const [key, value] of Object.entries(params || {})) {
+            const safeValue = String(value ?? "").trim();
+            if (safeValue) {
+                query.set(key, safeValue);
+            }
+        }
+        return query.toString();
+    },
+    async openCaseReportArchive(caseNo) {
+        const safeCaseNo = caseNo || "";
+        if (!safeCaseNo) {
+            return;
+        }
+        const query = new URLSearchParams({ keyword: safeCaseNo, limit: "50" }).toString();
+        const result = await Api.request(`/api/reports/print-archive?${query}`);
+        WorkbenchPanel.showCaseReportArchive(result);
+    },
+    showCaseReportArchive(result) {
+        const items = result.items || [];
+        const keyword = result.keyword || "";
+        const canAuditReport = Permissions.has("SYSTEM_AUDIT");
+        const canExportAcceptancePackage = Permissions.has("SALARY_EXPORT") && Permissions.has("SALARY_ACCEPTANCE");
+        document.querySelector(".case-detail-overlay")?.remove();
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u5ba1\u6279\u8868\u5f52\u6863\u53f0\u8d26</strong>
+                        <span>${Format.html(keyword || "-")} | \u5df2\u6253\u5370 ${Format.html(result.printed || 0)} | \u672a\u6253\u5370 ${Format.html(result.unprinted || 0)}</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <div class="case-detail-section">
+                    <span>\u5f52\u6863\u660e\u7ec6</span>
+                    <div class="case-change-list">
+                        ${items.length ? items.map((item) => `
+                            <div class="case-change-row">
+                                <strong>${Format.html(item.caseNo || "-")} ${Format.html(item.personName || "")}</strong>
+                                <span>${Format.html(item.archiveStatus || "-")} | \u6253\u5370 ${Format.html(item.printCount || 0)} \u6b21</span>
+                                <small>${Format.html(item.personCode || "-")} | ${Format.html(item.orgCode || "-")} | ${Format.html(item.businessType || "-")} | ${Format.html(item.eventYear || "-")}-${String(item.eventMonth || 1).padStart(2, "0")}</small>
+                                <small>${Format.html(item.latestAction || "-")} | ${Format.html(item.latestOperator || "-")} | ${Format.html(item.latestPrintedAt || "-")} | ${item.latestBatchNo ? `\u6279\u6b21 ${Format.html(item.latestBatchNo)}` : Format.html(item.latestTargetCode || "-")} | ${item.acceptanceExported ? `\u5df2\u9a8c\u6536 ${Format.html(item.acceptanceAuditId || "-")}` : "\u672a\u9a8c\u6536"}</small>
+                                ${item.latestBatchNo ? `<div class="case-row-actions">
+                                    <button type="button" class="batch-result-locate" data-report-print-batch="${Format.html(item.latestBatchNo)}">\u67e5\u770b\u6279\u6b21</button>
+                                    ${canExportAcceptancePackage ? `<button type="button" class="batch-result-locate" data-report-print-batch-package="${Format.html(item.latestBatchNo)}">\u9a8c\u6536\u5305</button>` : ""}
+                                    ${canAuditReport ? `<button type="button" class="batch-result-locate" data-report-batch-export-audits data-audit-action="report-print-batch-acceptance-package" data-audit-target="${Format.html(item.latestBatchNo)}">\u5bfc\u51fa\u5ba1\u8ba1</button>` : ""}
+                                </div>` : ""}
+                            </div>
+                        `).join("") : `<p class="muted">\u672a\u627e\u5230\u5f52\u6863\u8bb0\u5f55</p>`}
+                    </div>
+                </div>
+                <footer class="case-detail-actions">
+                    <button type="button" class="case-snapshot-button" data-case-report-archive-export="${Format.html(keyword)}">\u5bfc\u51fa\u5f52\u6863CSV</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            const batchButton = event.target.closest("button[data-report-print-batch]");
+            if (batchButton) {
+                batchButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openReportPrintBatch(batchButton.dataset.reportPrintBatch || "");
+                } catch (error) {
+                    batchButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const packageButton = event.target.closest("button[data-report-print-batch-package]");
+            if (packageButton) {
+                const safeBatchNo = packageButton.dataset.reportPrintBatchPackage || "";
+                if (safeBatchNo) {
+                    WorkbenchPanel.showReportBatchAcceptanceExportResult(safeBatchNo);
+                    window.location.href = `/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}/acceptance-package.zip`;
+                }
+                return;
+            }
+            const auditButton = event.target.closest("button[data-report-batch-export-audits]");
+            if (auditButton) {
+                auditButton.disabled = true;
+                try {
+                    await WorkbenchPanel.loadReportAudits({
+                        action: auditButton.dataset.auditAction || "",
+                        targetCode: auditButton.dataset.auditTarget || "",
+                        limit: 20
+                    });
+                    setStatus("\u5df2\u8bfb\u53d6\u9a8c\u6536\u5305\u5bfc\u51fa\u5ba1\u8ba1");
+                } catch (error) {
+                    auditButton.disabled = false;
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const exportButton = event.target.closest("button[data-case-report-archive-export]");
+            if (exportButton) {
+                const safeKeyword = exportButton.dataset.caseReportArchiveExport || "";
+                window.location.href = `/api/reports/print-archive.csv?${new URLSearchParams({ keyword: safeKeyword, limit: "5000" }).toString()}`;
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+    },
+    showReportPrintBatch(result) {
+        const batch = result.batch || {};
+        const items = result.items || [];
+        const audits = result.audits || [];
+        const batchNo = batch.batchNo || "";
+        const batchCaseNos = Array.from(new Set(items.map((item) => item.caseNo || "").filter(Boolean)));
+        const canExportAcceptancePackage = Permissions.has("SALARY_EXPORT") && Permissions.has("SALARY_ACCEPTANCE");
+        const canAuditReport = Permissions.has("SYSTEM_AUDIT");
+        const returnContext = state.reportBatchReturnContext;
+        state.reportBatchReturnContext = null;
+        const returnCaseNos = new Set((returnContext?.caseNos || []).map((caseNo) => String(caseNo || "").trim()).filter(Boolean));
+        const returnedItems = items.filter((item) => returnCaseNos.has(item.caseNo || ""));
+        const returnedCompleted = returnedItems.filter((item) => item.closureReady === true || item.closureReady === 1 || item.historyWritten === true || item.historyWritten === 1).length;
+        const returnedBlocked = returnedItems.filter((item) => Number(item.issueCount || 0) > 0 || item.validationStatus === "BLOCKED").length;
+        const batchStats = {
+            printed: items.length,
+            written: items.filter((item) => item.historyWritten === true || item.historyWritten === 1).length,
+            closed: items.filter((item) => item.closureReady === true || item.closureReady === 1).length,
+            blocked: items.filter((item) => Number(item.issueCount || 0) > 0 || item.validationStatus === "BLOCKED").length
+        };
+        const unwrittenCaseNos = items
+            .filter((item) => !(item.historyWritten === true || item.historyWritten === 1))
+            .map((item) => item.caseNo || "")
+            .filter(Boolean);
+        const unclosedCaseNos = items
+            .filter((item) => !(item.closureReady === true || item.closureReady === 1))
+            .map((item) => item.caseNo || "")
+            .filter(Boolean);
+        const blockedCaseNos = items
+            .filter((item) => Number(item.issueCount || 0) > 0 || item.validationStatus === "BLOCKED")
+            .map((item) => item.caseNo || "")
+            .filter(Boolean);
+        const statusChip = (label, value, state = "") => `<b class="report-batch-status ${Format.html(state)}">${Format.html(label)} ${Format.html(value || "-")}</b>`;
+        const itemStatusChips = (item) => [
+            statusChip("\u6253\u5370", item.validationStatus || "READY", Number(item.issueCount || 0) > 0 || item.validationStatus === "BLOCKED" ? "blocked" : "ready"),
+            statusChip("\u529e\u7406", Format.statusText(item.caseStatus || ""), item.caseStatus === "CANCELLED" ? "blocked" : (item.caseStatus ? "ready" : "pending")),
+            statusChip("\u5199\u5165", Format.historyWriteStatusText(item.executionResult || item.planStatus || ""), item.historyWritten === true || item.historyWritten === 1 ? "ready" : (item.planStatus ? "pending" : "blocked")),
+            statusChip("\u95ed\u73af", item.closureReady === true || item.closureReady === 1 ? "\u5df2\u95ed\u73af" : "\u5f85\u95ed\u73af", item.closureReady === true || item.closureReady === 1 ? "ready" : "pending")
+        ].join("");
+        const auditIdHtml = (audit) => Permissions.has("SYSTEM_AUDIT") && audit.auditId
+            ? `<button type="button" class="batch-result-locate" data-report-batch-audit-id="${Format.html(audit.auditId)}">${Format.html(audit.auditId)}</button>`
+            : Format.html(audit.auditId || "-");
+        const acceptanceStatusHtml = (value) => {
+            if (!value.acceptanceExported) {
+                return "\u672a\u9a8c\u6536";
+            }
+            const auditId = value.acceptanceAuditId || "-";
+            const auditHtml = canAuditReport && value.acceptanceAuditId
+                ? `<button type="button" class="batch-result-locate" data-report-acceptance-audit-id="${Format.html(value.acceptanceAuditId)}">${Format.html(auditId)}</button>`
+                : Format.html(auditId);
+            return `\u5df2\u9a8c\u6536 ${auditHtml} | ${Format.html(value.acceptanceOperator || "-")} | ${Format.html(value.acceptanceExportedAt || "-")}`;
+        };
+        document.querySelector(".case-detail-overlay")?.remove();
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="\u62a5\u8868\u6253\u5370\u6279\u6b21">
+                <header class="case-detail-head">
+                    <div>
+                        <strong>\u62a5\u8868\u6253\u5370\u6279\u6b21</strong>
+                        <span>${Format.html(batch.batchNo || "-")} | ${Format.html(batch.orgCode || "-")}</span>
+                    </div>
+                    <button type="button" class="case-detail-close" aria-label="\u5173\u95ed">\u00d7</button>
+                </header>
+                <dl class="case-detail-grid">
+                    ${[
+                        ["\u6279\u6b21\u53f7", batch.batchNo],
+                        ["\u62a5\u8868\u7c7b\u578b", batch.reportType],
+                        ["\u5355\u4f4d", batch.orgCode],
+                        ["\u6267\u884c\u5e74\u6708", batch.eventYear ? `${batch.eventYear}-${String(batch.eventMonth || 1).padStart(2, "0")}` : "-"],
+                        ["\u4e1a\u52a1\u7c7b\u578b", batch.businessType || "\u5168\u90e8"],
+                        ["\u5173\u952e\u5b57", batch.keyword || "\u5168\u90e8"],
+                        ["\u6253\u5370\u4eba\u6570", batch.printedCount],
+                        ["\u63d0\u793a\u6570", batch.warningCount],
+                        ["\u64cd\u4f5c\u4eba", batch.printedBy],
+                        ["\u64cd\u4f5c\u65f6\u95f4", batch.printedAt]
+                    ].map(([label, value]) => `
+                        <div>
+                            <dt>${Format.html(label)}</dt>
+                            <dd>${Format.html(value || "-")}</dd>
+                        </div>
+                    `).join("")}
+                    <div>
+                        <dt>\u9a8c\u6536\u72b6\u6001</dt>
+                        <dd>${acceptanceStatusHtml(batch)}</dd>
+                    </div>
+                </dl>
+                <div class="case-detail-section">
+                    <span>\u6279\u6b21\u660e\u7ec6</span>
+                    ${returnCaseNos.size ? `<div class="report-batch-return-summary">
+                        <strong>\u961f\u5217\u5904\u7406\u56de\u5199</strong>
+                        <span>${Format.html(returnContext?.label || "\u6765\u6e90\u961f\u5217")} | \u672c\u6b21\u8ddf\u8e2a ${Format.html(returnCaseNos.size)} \u6761 | \u5df2\u66f4\u65b0 ${Format.html(returnedCompleted)} | \u4ecd\u963b\u65ad ${Format.html(returnedBlocked)}</span>
+                    </div>` : ""}
+                    <div class="report-batch-summary">
+                        ${statusChip("\u6279\u6b21\u4eba\u6570", batchStats.printed, "ready")}
+                        ${statusChip("\u5df2\u5199\u5165", batchStats.written, batchStats.written === batchStats.printed ? "ready" : "pending")}
+                        ${statusChip("\u5df2\u95ed\u73af", batchStats.closed, batchStats.closed === batchStats.printed ? "ready" : "pending")}
+                        ${statusChip("\u963b\u65ad", batchStats.blocked, batchStats.blocked ? "blocked" : "ready")}
+                    </div>
+                    <div class="report-batch-filter-actions">
+                        <button type="button" data-report-batch-filter="all">\u5168\u90e8</button>
+                        <button type="button" data-report-batch-filter="unwritten">\u672a\u5199\u5165 ${Format.html(unwrittenCaseNos.length)}</button>
+                        <button type="button" data-report-batch-filter="unclosed">\u672a\u95ed\u73af ${Format.html(unclosedCaseNos.length)}</button>
+                        <button type="button" data-report-batch-filter="blocked">\u963b\u65ad ${Format.html(blockedCaseNos.length)}</button>
+                        ${unwrittenCaseNos.length ? `<button type="button" class="primary" data-history-batch-queue-unwritten>\u672a\u5199\u5165\u9001\u5165\u961f\u5217</button>` : ""}
+                        ${unclosedCaseNos.length ? `<button type="button" data-history-batch-queue-unclosed>\u672a\u95ed\u73af\u9001\u5165\u961f\u5217</button>` : ""}
+                    </div>
+                    <div class="case-change-list">
+                        ${items.length ? items.map((item) => `
+                            <div class="case-change-row ${returnCaseNos.has(item.caseNo || "") ? "report-batch-returned" : ""}" data-report-batch-row
+                                 data-report-batch-unwritten="${item.historyWritten === true || item.historyWritten === 1 ? "false" : "true"}"
+                                 data-report-batch-unclosed="${item.closureReady === true || item.closureReady === 1 ? "false" : "true"}"
+                                 data-report-batch-blocked="${Number(item.issueCount || 0) > 0 || item.validationStatus === "BLOCKED" ? "true" : "false"}">
+                                <strong>${Format.html(item.personCode || "-")} ${Format.html(item.personName || "")}</strong>
+                                <span class="report-batch-statuses">${itemStatusChips(item)}</span>
+                                <small>${Format.html(item.caseNo || "-")} | ${Format.html(item.businessType || "-")} | \u63d0\u793a ${Format.html(item.warningCount || 0)} | \u5386\u53f2ID ${Format.html(item.insertedHistoryId || "-")} | ${Format.html(item.summary || "-")}</small>
+                                ${item.caseNo ? `<div class="case-row-actions">
+                                    <button type="button" class="batch-result-locate" data-case-detail-no="${Format.html(item.caseNo)}">\u529e\u7406\u8be6\u60c5</button>
+                                    <button type="button" class="batch-result-locate" data-history-batch-queue-case-no="${Format.html(item.caseNo)}">\u9001\u5165\u5199\u5165\u961f\u5217</button>
+                                </div>` : ""}
+                            </div>
+                        `).join("") : `<p class="muted">\u6682\u65e0\u6279\u6b21\u660e\u7ec6</p>`}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <span>\u6279\u6b21\u5ba1\u8ba1\u6d41\u6c34</span>
+                    <div class="report-batch-audit-list">
+                        ${audits.length ? audits.map((audit) => `
+                            <div class="report-batch-audit-row">
+                                <strong>${Format.html(Format.auditActionText(audit.actionName || audit.action || "-"))}</strong>
+                                <span>${auditIdHtml(audit)} | ${Format.html(audit.operator || "-")} | ${Format.html(audit.createdAt || "-")}</span>
+                                <small>${Format.html(audit.targetType || "-")} ${Format.html(audit.targetCode || "-")} | ${Format.html(audit.summary || "-")}</small>
+                            </div>
+                        `).join("") : `<p class="muted">\u6682\u65e0\u672c\u6279\u6b21\u5ba1\u8ba1\u6d41\u6c34</p>`}
+                    </div>
+                </div>
+                <footer class="case-detail-actions">
+                    ${batchCaseNos.length ? `<button type="button" class="case-confirm-button" data-history-batch-queue-all>\u6574\u6279\u9001\u5165\u5386\u53f2\u5199\u5165\u961f\u5217</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-report-print-batch-export="${Format.html(batchNo)}">\u5bfc\u51fa\u660e\u7ec6</button>
+                    ${canExportAcceptancePackage ? `<button type="button" class="case-snapshot-button" data-report-print-batch-package="${Format.html(batchNo)}">\u5bfc\u51fa\u9a8c\u6536\u5305</button>` : ""}
+                    <button type="button" class="case-snapshot-button" data-report-print-batch-reprint="${Format.html(batchNo)}">\u91cd\u65b0\u6253\u5370\u672c\u6279\u6b21</button>
+                    <button type="button" class="case-detail-close">\u5173\u95ed</button>
+                </footer>
+            </section>
+        `;
+        overlay.addEventListener("click", (event) => {
+            const exportButton = event.target.closest("button[data-report-print-batch-export]");
+            if (exportButton) {
+                const safeBatchNo = exportButton.dataset.reportPrintBatchExport || "";
+                if (safeBatchNo) {
+                    window.location.href = `/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}.csv`;
+                }
+                return;
+            }
+            const packageButton = event.target.closest("button[data-report-print-batch-package]");
+            if (packageButton) {
+                const safeBatchNo = packageButton.dataset.reportPrintBatchPackage || "";
+                if (safeBatchNo) {
+                    WorkbenchPanel.showReportBatchAcceptanceExportResult(safeBatchNo);
+                    window.location.href = `/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}/acceptance-package.zip`;
+                }
+                return;
+            }
+            const reprintButton = event.target.closest("button[data-report-print-batch-reprint]");
+            if (reprintButton) {
+                const safeBatchNo = reprintButton.dataset.reportPrintBatchReprint || "";
+                if (safeBatchNo) {
+                    window.open(`/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}/reprint`, "_blank", "noopener");
+                    WorkbenchPanel.markBatchReportPrintRefresh();
+                    setStatus("\u5df2\u6309\u539f\u6279\u6b21\u660e\u7ec6\u6253\u5f00\u91cd\u6253\u9875");
+                }
+                return;
+            }
+            const detailButton = event.target.closest("button[data-case-detail-no]");
+            if (detailButton) {
+                WorkbenchPanel.openCaseDetail(detailButton.dataset.caseDetailNo || "");
+                return;
+            }
+            const batchAuditButton = event.target.closest("button[data-report-batch-audit-id]");
+            if (batchAuditButton) {
+                batchAuditButton.disabled = true;
+                WorkbenchPanel.openReportAuditById(batchAuditButton.dataset.reportBatchAuditId || "").catch((error) => {
+                    batchAuditButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            const filterButton = event.target.closest("button[data-report-batch-filter]");
+            if (filterButton) {
+                const filter = filterButton.dataset.reportBatchFilter || "all";
+                const rows = Array.from(overlay.querySelectorAll("[data-report-batch-row]"));
+                let visible = 0;
+                rows.forEach((row) => {
+                    const show = filter === "all"
+                        || (filter === "unwritten" && row.dataset.reportBatchUnwritten === "true")
+                        || (filter === "unclosed" && row.dataset.reportBatchUnclosed === "true")
+                        || (filter === "blocked" && row.dataset.reportBatchBlocked === "true");
+                    row.hidden = !show;
+                    visible += show ? 1 : 0;
+                });
+                overlay.querySelectorAll("[data-report-batch-filter]").forEach((button) => button.classList.toggle("active", button === filterButton));
+                setStatus(`\u5df2\u7b5b\u9009\u6279\u6b21 ${batchNo || "-"}\uff1a${visible} \u6761`);
+                return;
+            }
+            const queueCaseButton = event.target.closest("button[data-history-batch-queue-case-no]");
+            if (queueCaseButton) {
+                queueCaseButton.disabled = true;
+                WorkbenchPanel.sendReportBatchToHistoryQueue(
+                    [queueCaseButton.dataset.historyBatchQueueCaseNo || ""],
+                    `\u6253\u5370\u6279\u6b21 ${batchNo || "-"}`,
+                    batchNo
+                ).catch((error) => {
+                    queueCaseButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            const queueUnwrittenButton = event.target.closest("button[data-history-batch-queue-unwritten]");
+            if (queueUnwrittenButton) {
+                queueUnwrittenButton.disabled = true;
+                WorkbenchPanel.sendReportBatchToHistoryQueue(
+                    unwrittenCaseNos,
+                    `\u6253\u5370\u6279\u6b21 ${batchNo || "-"}\u672a\u5199\u5165`,
+                    batchNo
+                ).catch((error) => {
+                    queueUnwrittenButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            const queueUnclosedButton = event.target.closest("button[data-history-batch-queue-unclosed]");
+            if (queueUnclosedButton) {
+                queueUnclosedButton.disabled = true;
+                WorkbenchPanel.sendReportBatchToHistoryQueue(
+                    unclosedCaseNos,
+                    `\u6253\u5370\u6279\u6b21 ${batchNo || "-"}\u672a\u95ed\u73af`,
+                    batchNo
+                ).catch((error) => {
+                    queueUnclosedButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            const queueAllButton = event.target.closest("button[data-history-batch-queue-all]");
+            if (queueAllButton) {
+                queueAllButton.disabled = true;
+                WorkbenchPanel.sendReportBatchToHistoryQueue(
+                    batchCaseNos,
+                    `\u6253\u5370\u6279\u6b21 ${batchNo || "-"}`,
+                    batchNo
+                ).catch((error) => {
+                    queueAllButton.disabled = false;
+                    setStatus(error.message);
+                });
+                return;
+            }
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
     },
     policyBasisHtml(detail) {
         const type = detail.businessType || "";
@@ -3855,6 +13128,31 @@ const WorkbenchPanel = {
             </div>
         `;
     },
+    salaryItemsHtml(detail) {
+        const items = detail.salaryItems || [];
+        if (!items.length) {
+            return "";
+        }
+        const total = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+        return `
+            <div class="case-detail-section">
+                <span>\u529e\u7406\u5de5\u8d44\u660e\u7ec6</span>
+                <div class="case-salary-total">
+                    <strong>\u5408\u8ba1 ${Format.optionalAmount(total)}</strong>
+                    <small>${Format.html(items.length)} \u9879\u5df2\u56fa\u5316\u5230\u529e\u7406\u5feb\u7167</small>
+                </div>
+                <div class="case-change-list salary-item-list">
+                    ${items.map((item) => `
+                        <div class="case-change-row salary-item-row">
+                            <strong>${Format.html(item.itemCode || "-")} ${Format.html(item.itemName || "")}</strong>
+                            <span>${Format.optionalAmount(item.amount)}</span>
+                            <small>${Format.html(item.ruleNote || "-")}</small>
+                        </div>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+    },
     showCaseWindow({ title, detail, fields, warningHtml, actionsHtml }) {
         document.querySelector(".case-detail-overlay")?.remove();
         const statusClass = (detail.trialStatus || "").toLowerCase();
@@ -3862,6 +13160,7 @@ const WorkbenchPanel = {
         const audits = detail.audits || [];
         const overlay = document.createElement("div");
         overlay.className = "case-detail-overlay";
+        overlay.dataset.caseDetailNo = detail.caseNo || "";
         overlay.innerHTML = `
             <section class="case-detail-dialog" role="dialog" aria-modal="true" aria-label="${Format.html(title)}">
                 <header class="case-detail-head">
@@ -3879,13 +13178,23 @@ const WorkbenchPanel = {
                         </div>
                     `).join("")}
                 </dl>
+                ${WorkbenchPanel.caseClosureNextActionHtml(detail)}
                 <div class="case-detail-section">
                     <span>\u529e\u7406\u6458\u8981</span>
                     <p>${Format.html(detail.summary || "-")}</p>
                 </div>
                 ${WorkbenchPanel.policyBasisHtml(detail)}
                 ${WorkbenchPanel.trialOverviewHtml(detail)}
+                ${WorkbenchPanel.salaryItemsHtml(detail)}
                 ${WorkbenchPanel.historyWriteSectionHtml(detail)}
+                ${WorkbenchPanel.historyWriteBlockedInlineHtml(detail)}
+                ${WorkbenchPanel.historyWriteResultInlineHtml(detail)}
+                ${WorkbenchPanel.historyWriteRollbackResultInlineHtml(detail)}
+                ${WorkbenchPanel.historyWriteReviewConclusionHtml(detail)}
+                ${WorkbenchPanel.historyWriteComparisonInlineHtml(detail)}
+                ${WorkbenchPanel.historyWriteRollbackInlineHtml(detail)}
+                ${WorkbenchPanel.historyWriteAuditTimelineHtml(detail)}
+                ${WorkbenchPanel.reportPrintSectionHtml(detail)}
                 <div class="case-detail-section">
                     <span>\u529e\u7406\u6d41\u6c34</span>
                     <div class="case-audit-list">
@@ -3981,11 +13290,156 @@ const WorkbenchPanel = {
                 }
                 return;
             }
+            const refreshDetailButton = event.target.closest("button[data-refresh-case-detail]");
+            if (refreshDetailButton) {
+                refreshDetailButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseDetail(refreshDetailButton.dataset.refreshCaseDetail);
+                } catch (error) {
+                    refreshDetailButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const approvalPrintButton = event.target.closest("button[data-salary-case-approval-print]");
+            if (approvalPrintButton) {
+                const caseNo = approvalPrintButton.dataset.salaryCaseApprovalPrint || "";
+                approvalPrintButton.disabled = true;
+                try {
+                    await WorkbenchPanel.printSalaryCaseApprovalAndRefreshDetail(caseNo, overlay.querySelector("[data-case-error]"));
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                } finally {
+                    approvalPrintButton.disabled = false;
+                }
+                return;
+            }
+            const approvalRosterButton = event.target.closest("button[data-case-approval-roster-print]");
+            if (approvalRosterButton) {
+                try {
+                    const params = JSON.parse(approvalRosterButton.dataset.caseApprovalRosterPrint || "{}");
+                    const query = WorkbenchPanel.caseReportQuery(params);
+                    window.open(`/api/reports/salary-case-approval-roster/print?${query}`, "_blank", "noopener");
+                    setStatus("\u5df2\u6309\u5f53\u524d\u529e\u7406\u6761\u4ef6\u6253\u5f00\u5ba1\u6279\u6e05\u518c");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const salaryHistoryButton = event.target.closest("button[data-case-salary-history-print]");
+            if (salaryHistoryButton) {
+                try {
+                    const params = JSON.parse(salaryHistoryButton.dataset.caseSalaryHistoryPrint || "{}");
+                    const query = WorkbenchPanel.caseReportQuery(params);
+                    window.open(`/api/reports/salary-history/print?${query}`, "_blank", "noopener");
+                    setStatus("\u5df2\u6309\u5f53\u524d\u529e\u7406\u4eba\u5458\u6253\u5f00\u5386\u53f2\u660e\u7ec6");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const salaryHistoryExportButton = event.target.closest("button[data-case-salary-history-export]");
+            if (salaryHistoryExportButton) {
+                try {
+                    const params = JSON.parse(salaryHistoryExportButton.dataset.caseSalaryHistoryExport || "{}");
+                    const query = WorkbenchPanel.caseReportQuery(params);
+                    window.location.href = `/api/reports/salary-history.csv?${query}`;
+                    setStatus("\u5df2\u6309\u5f53\u524d\u529e\u7406\u4eba\u5458\u5bfc\u51fa\u5386\u53f2\u660e\u7ec6CSV");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const changeLedgerButton = event.target.closest("button[data-case-change-ledger-print]");
+            if (changeLedgerButton) {
+                try {
+                    const params = JSON.parse(changeLedgerButton.dataset.caseChangeLedgerPrint || "{}");
+                    const query = WorkbenchPanel.caseReportQuery(params);
+                    window.open(`/api/reports/salary-change-ledger/print?${query}`, "_blank", "noopener");
+                    setStatus("\u5df2\u6309\u5f53\u524d\u529e\u7406\u6761\u4ef6\u6253\u5f00\u53d8\u52a8\u53f0\u8d26");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const changeLedgerExportButton = event.target.closest("button[data-case-change-ledger-export]");
+            if (changeLedgerExportButton) {
+                try {
+                    const params = JSON.parse(changeLedgerExportButton.dataset.caseChangeLedgerExport || "{}");
+                    const query = WorkbenchPanel.caseReportQuery(params);
+                    window.location.href = `/api/reports/salary-change-ledger.csv?${query}`;
+                    setStatus("\u5df2\u6309\u5f53\u524d\u529e\u7406\u6761\u4ef6\u5bfc\u51fa\u53d8\u52a8\u53f0\u8d26CSV");
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const reportArchiveButton = event.target.closest("button[data-case-report-archive]");
+            if (reportArchiveButton) {
+                reportArchiveButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openCaseReportArchive(reportArchiveButton.dataset.caseReportArchive || "");
+                } catch (error) {
+                    reportArchiveButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const reportArchiveExportButton = event.target.closest("button[data-case-report-archive-export]");
+            if (reportArchiveExportButton) {
+                const safeKeyword = reportArchiveExportButton.dataset.caseReportArchiveExport || "";
+                window.location.href = `/api/reports/print-archive.csv?${new URLSearchParams({ keyword: safeKeyword, limit: "5000" }).toString()}`;
+                return;
+            }
+            const reportAuditButton = event.target.closest("button[data-case-report-audit-id]");
+            if (reportAuditButton) {
+                reportAuditButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openReportAuditById(reportAuditButton.dataset.caseReportAuditId || "");
+                } catch (error) {
+                    reportAuditButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const reportAuditTargetButton = event.target.closest("button[data-case-report-audit-target]");
+            if (reportAuditTargetButton) {
+                reportAuditTargetButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openReportAuditByTarget(reportAuditTargetButton.dataset.caseReportAuditTarget || "");
+                } catch (error) {
+                    reportAuditTargetButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const reportPrintBatchButton = event.target.closest("button[data-report-print-batch]");
+            if (reportPrintBatchButton) {
+                reportPrintBatchButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openReportPrintBatch(reportPrintBatchButton.dataset.reportPrintBatch || "");
+                } catch (error) {
+                    reportPrintBatchButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
             const historyPreviewButton = event.target.closest("button[data-history-write-preview-case-no]");
             if (historyPreviewButton) {
                 historyPreviewButton.disabled = true;
                 try {
-                    await WorkbenchPanel.openHistoryWritePreview(historyPreviewButton.dataset.historyWritePreviewCaseNo);
+                    await WorkbenchPanel.openHistoryWritePreview(historyPreviewButton.dataset.historyWritePreviewCaseNo, { refreshDetail: true });
                 } catch (error) {
                     historyPreviewButton.disabled = false;
                     setStatus(error.message);
@@ -4022,6 +13476,68 @@ const WorkbenchPanel = {
                 }
                 return;
             }
+            const historyRetestButton = event.target.closest("button[data-history-write-comparison-retest-case-no]");
+            if (historyRetestButton) {
+                historyRetestButton.disabled = true;
+                try {
+                    await WorkbenchPanel.retestHistoryWriteComparison(historyRetestButton.dataset.historyWriteComparisonRetestCaseNo);
+                } catch (error) {
+                    historyRetestButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const historyInlineReviewButton = event.target.closest("button[data-history-write-inline-review-case-no]");
+            if (historyInlineReviewButton) {
+                const errorBox = overlay.querySelector("[data-case-error]");
+                const categoryInput = overlay.querySelector("[data-history-write-inline-review-category]");
+                const reasonInput = overlay.querySelector("[data-history-write-inline-review-reason]");
+                const category = (categoryInput?.value || "").trim();
+                const reason = (reasonInput?.value || "").trim();
+                if (!category) {
+                    WorkbenchPanel.setCaseError(errorBox, "\u8bf7\u9009\u62e9\u6838\u67e5\u5206\u7c7b\u3002");
+                    categoryInput?.classList.add("invalid");
+                    categoryInput?.focus();
+                    return;
+                }
+                if (!reason) {
+                    WorkbenchPanel.setCaseError(errorBox, "\u8bf7\u586b\u5199\u6838\u67e5\u8bf4\u660e\u3002");
+                    reasonInput?.classList.add("invalid");
+                    reasonInput?.focus();
+                    return;
+                }
+                categoryInput?.classList.remove("invalid");
+                reasonInput?.classList.remove("invalid");
+                historyInlineReviewButton.disabled = true;
+                try {
+                    const caseNo = historyInlineReviewButton.dataset.historyWriteInlineReviewCaseNo || "";
+                    await Api.request(`/api/workbench/salary-cases/${encodeURIComponent(caseNo)}/history-write-comparison-review`, {
+                        method: "POST",
+                        body: JSON.stringify({ reviewCategory: category, reviewReason: reason })
+                    });
+                    await WorkbenchPanel.refreshAfterHistoryWriteReview();
+                    await WorkbenchPanel.openCaseDetail(caseNo);
+                    setStatus("\u5199\u5165\u5dee\u5f02\u5df2\u767b\u8bb0\u6838\u67e5\u7ed3\u8bba");
+                } catch (error) {
+                    historyInlineReviewButton.disabled = false;
+                    WorkbenchPanel.setCaseError(errorBox, error.message);
+                    setStatus(error.message);
+                }
+                return;
+            }
+            const focusInlineReviewButton = event.target.closest("button[data-history-write-focus-inline-review]");
+            if (focusInlineReviewButton) {
+                const categoryInput = overlay.querySelector("[data-history-write-inline-review-category]");
+                const reasonInput = overlay.querySelector("[data-history-write-inline-review-reason]");
+                const target = categoryInput || reasonInput;
+                if (target) {
+                    target.scrollIntoView({ block: "center", behavior: "smooth" });
+                    target.focus();
+                    setStatus("\u5df2\u5b9a\u4f4d\u5230\u6838\u67e5\u7ed3\u8bba\u767b\u8bb0\u8868\u5355");
+                }
+                return;
+            }
             const historyExecuteButton = event.target.closest("button[data-history-write-execute-case-no]");
             if (historyExecuteButton) {
                 const caseNo = historyExecuteButton.dataset.historyWriteExecuteCaseNo;
@@ -4041,17 +13557,32 @@ const WorkbenchPanel = {
             const historyRollbackButton = event.target.closest("button[data-history-write-rollback-case-no]");
             if (historyRollbackButton) {
                 const caseNo = historyRollbackButton.dataset.historyWriteRollbackCaseNo;
-                if (!window.confirm(Format.text(TEXT.historyWriteRollbackConfirm, { caseNo }))) {
-                    return;
-                }
                 historyRollbackButton.disabled = true;
                 try {
-                    await WorkbenchPanel.rollbackHistoryWrite(caseNo);
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(caseNo);
                 } catch (error) {
                     historyRollbackButton.disabled = false;
                     setStatus(error.message);
                     WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
                 }
+                return;
+            }
+            const historyRollbackPreviewButton = event.target.closest("button[data-history-write-rollback-preview-case-no]");
+            if (historyRollbackPreviewButton) {
+                const caseNo = historyRollbackPreviewButton.dataset.historyWriteRollbackPreviewCaseNo;
+                historyRollbackPreviewButton.disabled = true;
+                try {
+                    await WorkbenchPanel.openHistoryWriteRollbackPreview(caseNo);
+                } catch (error) {
+                    historyRollbackPreviewButton.disabled = false;
+                    setStatus(error.message);
+                    WorkbenchPanel.setCaseError(overlay.querySelector("[data-case-error]"), error.message);
+                }
+                return;
+            }
+            const historyRollbackPreviewExportButton = event.target.closest("button[data-history-write-rollback-preview-export-case-no]");
+            if (historyRollbackPreviewExportButton) {
+                window.location.href = `/api/workbench/salary-cases/${encodeURIComponent(historyRollbackPreviewExportButton.dataset.historyWriteRollbackPreviewExportCaseNo || "")}/history-write-rollback-preview.csv`;
                 return;
             }
             const cancelButton = event.target.closest("button[data-cancel-case-no]");
@@ -4286,7 +13817,7 @@ const WorkbenchPanel = {
             setStatus(TEXT.workbenchReady);
             return;
         }
-        state.historyPlanQueueFilter = { caseNos: mismatchedCaseNos, autoSelect: true };
+        state.historyPlanQueueFilter = { caseNos: mismatchedCaseNos, autoSelect: true, label: "\u590d\u6d4b\u4e0d\u4e00\u81f4\u961f\u5217" };
         state.historyPlanSelected.clear();
         persistHistoryPlanQueueState();
         state.historyPlanMismatchField = "";
@@ -4390,9 +13921,17 @@ const WorkbenchPanel = {
     async openWorkItem(button) {
         try {
             const item = button.closest(".work-item") || button;
+            if (["DATA_GOVERNANCE", "REPORT_SAMPLE_COMPARISON"].includes(item.dataset.source || "")) {
+                await WorkbenchPanel.openDataGovernanceTaskDetail(item);
+                return;
+            }
             const personCode = item.dataset.personCode || "";
-            if (!personCode || !["SALARY_EVENT", "SALARY_CASE"].includes(item.dataset.source || "")) {
+            if (!personCode || !["SALARY_EVENT", "SALARY_CASE", "SALARY_CLOSURE"].includes(item.dataset.source || "")) {
                 setStatus(TEXT.menuPlaceholder);
+                return;
+            }
+            if (item.dataset.source === "SALARY_CLOSURE") {
+                await WorkbenchPanel.openCaseDetail(item.dataset.workId);
                 return;
             }
             if (item.dataset.source === "SALARY_CASE" && ["DONE", "CANCELLED"].includes(item.dataset.status || "")) {
@@ -4421,6 +13960,65 @@ const WorkbenchPanel = {
 const SystemPanel = {
     menuItems: [],
     orgItems: [],
+    auditScopeValues(summary = "") {
+        const values = {};
+        for (const part of String(summary || "").split(",")) {
+            const [rawKey, ...rest] = part.trim().split("=");
+            let key = (rawKey || "").trim();
+            if (!key) {
+                continue;
+            }
+            if (key === "scope") {
+                const scoped = rest.join("=");
+                const [scopeKey, ...scopeRest] = scoped.split("=");
+                const scopedKey = (scopeKey || "scope").trim();
+                values[scopedKey] = scopeRest.join("=").trim() || scoped.trim();
+            } else {
+                values[key] = rest.join("=").trim();
+            }
+        }
+        return values;
+    },
+    auditScopeLabel(key = "") {
+        return {
+            acceptanceNo: "\u9a8c\u6536\u53f7",
+            keyword: "\u5173\u952e\u5b57",
+            exportType: "\u5bfc\u51fa\u7c7b\u578b",
+            exportedFrom: "\u5f00\u59cb\u65e5\u671f",
+            exportedTo: "\u7ed3\u675f\u65e5\u671f",
+            limit: "\u9650\u5236\u6761\u6570",
+            count: "\u672c\u6b21\u6761\u6570",
+            pending: "\u5f85\u5904\u7406",
+            closed: "\u5df2\u95ed\u73af",
+            rows: "\u961f\u5217\u5feb\u7167",
+            evidence: "\u8bc1\u636e\u6587\u4ef6"
+        }[key] || key;
+    },
+    auditScopeValue(key = "", value = "") {
+        if (key === "exportType") {
+            return value === "PACKAGE" ? "\u9a8c\u6536\u5305" : value === "OVERVIEW" ? "\u4ea4\u4ed8\u603b\u89c8" : (value || "\u5168\u90e8\u7c7b\u578b");
+        }
+        if ((key === "keyword" || key === "exportedFrom" || key === "exportedTo") && !value) {
+            return key === "keyword" ? "\u5168\u90e8\u5173\u952e\u5b57" : "\u5168\u90e8\u65e5\u671f";
+        }
+        return value || "-";
+    },
+    auditSummaryHtml(summary = "") {
+        const values = SystemPanel.auditScopeValues(summary);
+        const scopeKeys = ["acceptanceNo", "keyword", "exportType", "exportedFrom", "exportedTo", "limit", "count", "pending", "closed", "rows", "evidence"]
+            .filter((key) => Object.prototype.hasOwnProperty.call(values, key));
+        if (!scopeKeys.length) {
+            return Format.html(summary || "-");
+        }
+        return `
+            <div class="audit-scope-tags">
+                ${scopeKeys.map((key) => `
+                    <span><b>${Format.html(SystemPanel.auditScopeLabel(key))}</b>${Format.html(SystemPanel.auditScopeValue(key, values[key]))}</span>
+                `).join("")}
+            </div>
+            <small class="audit-raw-summary">${Format.html(summary || "-")}</small>
+        `;
+    },
     async load(menuCode = state.activeMenuCode) {
         setStatus(TEXT.loadingSystem);
         if (menuCode === "SYSTEM_AUDIT") {
@@ -4476,7 +14074,7 @@ const SystemPanel = {
     },
     async loadAudits() {
         els.systemViewTitle.textContent = "\u64cd\u4f5c\u5ba1\u8ba1";
-        els.systemViewHint.textContent = "\u67e5\u770b\u7cfb\u7edf\u7ba1\u7406\u3001\u8d26\u6237\u5b89\u5168\u548c\u5de5\u8d44\u9879\u914d\u7f6e\u7684\u6700\u8fd1\u64cd\u4f5c\u8bb0\u5f55\u3002";
+        els.systemViewHint.textContent = "\u67e5\u770b\u7cfb\u7edf\u7ba1\u7406\u3001\u5de5\u8d44\u4e1a\u52a1\u3001\u8d26\u6237\u5b89\u5168\u548c\u5de5\u8d44\u9879\u914d\u7f6e\u7684\u6700\u8fd1\u64cd\u4f5c\u8bb0\u5f55\u3002";
         const params = new URLSearchParams();
         Object.entries(state.auditFilters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && String(value).trim() !== "") {
@@ -4489,17 +14087,26 @@ const SystemPanel = {
                 <select name="module" aria-label="\u6a21\u5757">
                     <option value="" ${state.auditFilters.module === "" ? "selected" : ""}>\u5168\u90e8\u6a21\u5757</option>
                     <option value="system" ${state.auditFilters.module === "system" ? "selected" : ""}>\u7cfb\u7edf\u7ba1\u7406</option>
+                    <option value="workbench" ${state.auditFilters.module === "workbench" ? "selected" : ""}>\u5de5\u8d44\u4e1a\u52a1</option>
                     <option value="salary-config" ${state.auditFilters.module === "salary-config" ? "selected" : ""}>\u5de5\u8d44\u9879\u914d\u7f6e</option>
                     <option value="\u8d26\u6237\u5b89\u5168" ${state.auditFilters.module === "\u8d26\u6237\u5b89\u5168" ? "selected" : ""}>\u8d26\u6237\u5b89\u5168</option>
                 </select>
                 <input name="operator" type="search" placeholder="\u64cd\u4f5c\u4eba" value="${Format.html(state.auditFilters.operator)}">
+                <input name="action" type="search" placeholder="\u52a8\u4f5c" value="${Format.html(state.auditFilters.action)}">
                 <input name="targetCode" type="search" placeholder="\u5bf9\u8c61\u7f16\u7801" value="${Format.html(state.auditFilters.targetCode)}">
+                <input name="auditId" type="search" placeholder="\u5ba1\u8ba1\u53f7 SYS-..." value="${Format.html(state.auditFilters.auditId || "")}">
                 <input name="start" type="datetime-local" value="${Format.html(state.auditFilters.start)}" aria-label="\u5f00\u59cb\u65f6\u95f4">
                 <input name="end" type="datetime-local" value="${Format.html(state.auditFilters.end)}" aria-label="\u7ed3\u675f\u65f6\u95f4">
                 <input name="limit" type="number" min="1" max="200" value="${Format.html(state.auditFilters.limit)}" aria-label="\u6761\u6570">
                 <button type="submit">\u7b5b\u9009</button>
                 <button type="button" data-reset-audit-filter>\u91cd\u7f6e</button>
                 <button type="button" data-export-audit>\u5bfc\u51fa</button>
+                <button type="button" data-audit-preset="historyBatchSafety">\u6279\u91cf\u5b89\u5168\u786e\u8ba4</button>
+                <button type="button" data-audit-preset="historyWriteExport">\u5386\u53f2\u5199\u5165\u5bfc\u51fa</button>
+                <button type="button" data-audit-preset="historyDeliveryOverview">\u4ea4\u4ed8\u603b\u89c8</button>
+                <button type="button" data-audit-preset="historyDeliveryAcceptance">\u4ea4\u4ed8\u9a8c\u6536</button>
+                <button type="button" data-audit-preset="historyClosureAcceptancePackage">\u95ed\u73af\u9a8c\u6536\u5305</button>
+                <button type="button" data-audit-preset="salaryMigrationDeliveryPackage">\u8fc1\u79fb\u603b\u4ea4\u4ed8\u5305</button>
             </form>
             <table class="system-table">
                 <thead>
@@ -4514,13 +14121,16 @@ const SystemPanel = {
                 </thead>
                 <tbody>
                     ${items.length ? items.map((item) => `
-                        <tr>
+                        <tr class="${item.targetType === "HISTORY_WRITE_BATCH_SAFETY" ? "audit-safety-row" : ""} ${String(item.action || "").endsWith("-csv") ? "audit-export-row" : ""}">
                             <td>${Format.html(item.createdAt || "-")}</td>
                             <td class="system-code">${Format.html(item.operator || "-")}</td>
-                            <td>${Format.html(item.module || "-")}</td>
-                            <td>${Format.html(item.action || "-")}</td>
-                            <td>${Format.html([item.targetType, item.targetCode].filter(Boolean).join(":") || "-")}</td>
-                            <td>${Format.html(item.summary || "-")}</td>
+                            <td>${Format.html(Format.auditModuleText(item.module || "-"))}</td>
+                            <td>
+                                <strong>${Format.html(Format.auditActionText(item.action || "-"))}</strong>
+                                <small class="system-subtle">${Format.html(item.action || "-")}</small>
+                            </td>
+                            <td>${Format.html(Format.auditTargetText(item))}</td>
+                            <td>${SystemPanel.auditSummaryHtml(item.summary || "-")}</td>
                         </tr>
                     `).join("") : `<tr><td colspan="6">${TEXT.noAudit}</td></tr>`}
                 </tbody>
@@ -4532,7 +14142,9 @@ const SystemPanel = {
         state.auditFilters = {
             module: values.module || "",
             operator: (values.operator || "").trim(),
+            action: (values.action || "").trim(),
             targetCode: (values.targetCode || "").trim(),
+            auditId: (values.auditId || "").trim(),
             start: values.start || "",
             end: values.end || "",
             limit: Number(values.limit || 100)
@@ -4540,11 +14152,89 @@ const SystemPanel = {
         await SystemPanel.loadAudits();
         setStatus(TEXT.systemReady);
     },
+    async applyAuditPreset(preset) {
+        if (preset === "historyBatchSafety") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "",
+                targetCode: "HISTORY_WRITE_BATCH_SAFETY",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        if (preset === "historyWriteExport") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "",
+                targetCode: "HISTORY_WRITE_",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        if (preset === "historyClosureAcceptancePackage") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "history-write-closure-acceptance-package",
+                targetCode: "PACKAGE",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        if (preset === "historyDeliveryOverview") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "history-write-delivery-overview-csv",
+                targetCode: "OVERVIEW",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        if (preset === "historyDeliveryAcceptance") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "history-write-delivery-acceptance",
+                targetCode: "",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        if (preset === "salaryMigrationDeliveryPackage") {
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "salary-migration-delivery-package",
+                targetCode: "SALARY_MIGRATION_DELIVERY",
+                auditId: "",
+                start: "",
+                end: "",
+                limit: 100
+            };
+        }
+        await SystemPanel.loadAudits();
+        setStatus(TEXT.systemReady);
+    },
     async resetAuditFilters() {
         state.auditFilters = {
             module: "",
             operator: "",
+            action: "",
             targetCode: "",
+            auditId: "",
             start: "",
             end: "",
             limit: 100
@@ -4925,6 +14615,9 @@ const SystemShell = {
         state.currentUsername = user.username || "";
         els.currentUserName.textContent = user.displayName || user.username || "System User";
         els.currentUserMeta.textContent = user.username || "\u7ba1\u7406\u5458";
+        if (els.desktopStatusUser) {
+            els.desktopStatusUser.textContent = `${user.displayName || user.username || "System User"} | ${user.username || "-"}`;
+        }
     },
     async loadMenus() {
         state.menus = await Api.request("/api/system/menus");
@@ -4938,6 +14631,9 @@ const SystemShell = {
         }
         state.activeView = nextView;
         state.activeMenuCode = menuCode || (nextView === "salary" ? "SALARY_PERSON" : "WORKBENCH");
+        if (els.desktopStatusModule) {
+            els.desktopStatusModule.textContent = SystemShell.menuTitle(state.activeMenuCode) || (nextView === "salary" ? "\u4eba\u5458\u5de5\u8d44" : nextView === "system" ? "\u7cfb\u7edf\u7ba1\u7406" : "\u5de5\u4f5c\u53f0");
+        }
         els.workbenchView.classList.toggle("hidden", nextView !== "workbench");
         els.salaryWorkspace.classList.toggle("hidden", nextView !== "salary");
         els.systemView.classList.toggle("hidden", nextView !== "system");
@@ -4971,6 +14667,19 @@ const SystemShell = {
             }
         }
         return null;
+    },
+    menuTitle(code, nodes = state.menus) {
+        const safeCode = code || "";
+        for (const node of nodes || []) {
+            if (node.code === safeCode) {
+                return node.title || node.name || node.code || "";
+            }
+            const childTitle = SystemShell.menuTitle(safeCode, node.children || []);
+            if (childTitle) {
+                return childTitle;
+            }
+        }
+        return "";
     },
     hasMenuCode(code, nodes = state.menus) {
         return (nodes || []).some((node) => node.code === code || SystemShell.hasMenuCode(code, node.children || []));
@@ -5588,6 +15297,45 @@ const PersonDetail = {
             `;
         }).join("");
     },
+    renderGeneratedTimelineBatch(result) {
+        els.emptyState.classList.add("hidden");
+        els.detailContent.classList.remove("hidden");
+        els.personName.textContent = TEXT.generatedTimelineBatch;
+        els.personMeta.textContent = `${result.orgCode}${result.keyword ? ` | ${result.keyword}` : ""}`;
+        els.profileGrid.innerHTML = "";
+        const summary = TEXT.generatedTimelineBatchSummary
+            .replace("{checked}", result.checkedCount)
+            .replace("{ok}", result.okCount)
+            .replace("{issue}", result.issueCount)
+            .replace("{different}", result.differentCount)
+            .replace("{missing}", result.missingHistoryCount)
+            .replace("{errors}", result.errorCount);
+        els.salaryHistory.innerHTML = `<div class="loading">${summary} | \u975e\u751f\u6210\u5386\u53f2 ${Format.html(result.unsupportedHistoryCount || 0)}</div>`;
+        els.salaryTitle.textContent = TEXT.generatedTimelineBatch;
+        els.salaryTotal.textContent = summary;
+        if (!result.items?.length) {
+            els.salaryDetails.innerHTML = `<div class="loading">${TEXT.noPeople}</div>`;
+            return;
+        }
+        els.salaryDetails.innerHTML = result.items.map((item) => {
+            const failed = item.status !== "OK";
+            const firstIssue = item.firstIssue || "\u65e0";
+            const issueDetail = item.issueItems?.length
+                ? item.issueItems.slice(0, 3).map((issue) => `${issue.year}-${String(issue.month).padStart(2, "0")} ${issue.changeType || "-"} ${issue.status || "-"}`).join(" | ")
+                : "";
+            return `
+                <button type="button" class="salary-row reconcile-row ${failed ? "failed" : "passed"}" data-person-code="${Format.html(item.personCode)}">
+                    <span class="salary-main">
+                        <strong>${Format.html(item.personCode)} ${Format.html(item.personName || "")}</strong>
+                        <span>${Format.html(item.status || "-")}</span>
+                    </span>
+                    <span class="salary-sub">
+                        \u5e94\u53d1 ${Format.html(item.expectedCount || 0)} | \u5339\u914d ${Format.html(item.matchedCount || 0)} | \u5dee\u5f02 ${Format.html(item.differentCount || 0)} | \u7f3a\u5386\u53f2 ${Format.html(item.missingHistoryCount || 0)} | \u9519\u8bef ${Format.html(item.errorCount || 0)} | ${Format.html(firstIssue)}${issueDetail ? ` | ${Format.html(issueDetail)}` : ""}
+                    </span>
+                </button>
+            `;
+        }).join("");
+    },
     renderBatchReconcile(result) {
         els.emptyState.classList.add("hidden");
         els.detailContent.classList.remove("hidden");
@@ -6075,6 +15823,276 @@ const PersonDetail = {
             .replace("{reverseStep}", result.reverseStepCount)
             .replace("{diff}", Format.amount(result.totalDifference)));
     },
+    async generateNormalGradeTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100),
+            changeType: batchChangeType()
+        });
+        els.generateNormalGradeTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u6b63\u5e38\u664b\u6863\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/normal-grade-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u6b63\u5e38\u664b\u6863\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u6b63\u5e38\u664b\u6863\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generateNormalGradeTodoButton.disabled = false;
+        }
+    },
+    async generateEntrySalaryTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100),
+            changeType: batchChangeType()
+        });
+        els.generateEntrySalaryTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u65b0\u8fdb/\u89c1\u4e60/\u8f6c\u6b63\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/entry-salary-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u65b0\u8fdb\u5de5\u8d44\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u89c1\u4e60 ${result.probationaryCount ?? 0}`,
+                `\u8f6c\u6b63 ${result.regularizationCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u65b0\u8fdb/\u89c1\u4e60/\u8f6c\u6b63\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generateEntrySalaryTodoButton.disabled = false;
+        }
+    },
+    async generatePostChangeTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100),
+            changeType: batchChangeType()
+        });
+        els.generatePostChangeTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u804c\u52a1/\u804c\u7ea7/\u5c97\u4f4d\u53d8\u52a8\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/post-change-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u804c\u52a1\u53d8\u52a8\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u804c\u52a1 ${result.civilPostCount ?? 0}`,
+                `\u804c\u7ea7 ${result.rankPromotionCount ?? 0}`,
+                `\u5c97\u4f4d ${result.institutionPostCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u804c\u52a1/\u804c\u7ea7/\u5c97\u4f4d\u53d8\u52a8\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generatePostChangeTodoButton.disabled = false;
+        }
+    },
+    async generateAllowanceChangeTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100),
+            changeType: batchChangeType()
+        });
+        els.generateAllowanceChangeTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u6d25\u8865\u8d34\u53d8\u5316\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/allowance-change-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u6d25\u8865\u8d34\u53d8\u5316\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u8c03\u6807 ${result.standardAdjustmentCount ?? 0}`,
+                `\u6559\u62a4 ${result.teacherNurseAllowanceCount ?? 0}`,
+                `\u6cd5\u68c0 ${result.judicialAllowanceCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u6d25\u8865\u8d34\u53d8\u5316\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generateAllowanceChangeTodoButton.disabled = false;
+        }
+    },
+    async generateTransferSalaryTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100)
+        });
+        const changeType = batchChangeType();
+        if (changeType) {
+            params.set("changeType", changeType);
+        }
+        els.generateTransferSalaryTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u8c03\u5165/\u8f6c\u4e1a/\u9000\u4f0d\u5b9a\u8d44\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/transfer-salary-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u8c03\u5165\u5b9a\u8d44\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u8c03\u5165 ${result.transferCount ?? 0}`,
+                `\u8f6c\u4e1a ${result.demobilizedCadreCount ?? 0}`,
+                `\u9000\u4f0d ${result.veteranPlacementCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u8c03\u5165/\u8f6c\u4e1a/\u9000\u4f0d\u5b9a\u8d44\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generateTransferSalaryTodoButton.disabled = false;
+        }
+    },
+    async generatePunishmentReductionTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100)
+        });
+        const changeType = batchChangeType();
+        if (changeType) {
+            params.set("changeType", changeType);
+        }
+        els.generatePunishmentReductionTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u964d\u8d44\u5904\u5206/\u5956\u52b1\u664b\u5347\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/punishment-reduction-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u5904\u5206/\u5956\u52b1\u7279\u6b8a\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u53ef\u529e ${result.eligibleCount ?? 0}`,
+                `\u5904\u5206 ${result.punishmentCount ?? 0}`,
+                `\u5956\u52b1 ${result.rewardCount ?? 0}`,
+                `\u5176\u4ed6 ${result.otherSpecialCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u964d\u8d44\u5904\u5206/\u5956\u52b1\u664b\u5347\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generatePunishmentReductionTodoButton.disabled = false;
+        }
+    },
+    async generatedTimelineBatch() {
+        if (!Permissions.guard("SALARY_TRIAL")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            limit: Number(els.batchLimitInput.value || 100),
+            eventLimit: 160
+        });
+        const keyword = batchChangeType();
+        if (keyword) {
+            params.set("keyword", keyword);
+        }
+        setStatus(TEXT.loadingGeneratedTimeline);
+        const result = await Api.request(`/api/salary/timeline-generated-batch?${params.toString()}`);
+        PersonDetail.renderGeneratedTimelineBatch(result);
+        setStatus(TEXT.generatedTimelineBatchSummary
+            .replace("{checked}", result.checkedCount)
+            .replace("{ok}", result.okCount)
+            .replace("{issue}", result.issueCount)
+            .replace("{different}", result.differentCount)
+            .replace("{missing}", result.missingHistoryCount)
+            .replace("{errors}", result.errorCount));
+    },
     exportBatchReconcile() {
         if (!Permissions.guard("SALARY_EXPORT")) {
             return;
@@ -6113,6 +16131,26 @@ const PersonDetail = {
         }
         setStatus(TEXT.exportNormalGradeStarted);
         window.location.href = `/api/salary/rule-trial/normal-grade-batch.csv?${params.toString()}`;
+    },
+    exportGeneratedTimelineBatch() {
+        if (!Permissions.guard("SALARY_EXPORT")) {
+            return;
+        }
+        if (!state.selectedOrgCode) {
+            setStatus(TEXT.chooseOrgForBatch);
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            limit: Number(els.batchLimitInput.value || 100),
+            eventLimit: 160
+        });
+        const keyword = batchChangeType();
+        if (keyword) {
+            params.set("keyword", keyword);
+        }
+        setStatus(TEXT.exportGeneratedTimelineStarted);
+        window.location.href = `/api/salary/timeline-generated-batch.csv?${params.toString()}`;
     }
 };
 
@@ -6285,6 +16323,7 @@ async function refreshAll() {
 }
 
 function bindEvents() {
+    restoreDesktopDensity();
     els.loginForm.addEventListener("submit", (event) => AuthPanel.login(event));
     els.logoutButton.addEventListener("click", () => AuthPanel.logout());
     els.changePasswordToggleButton.addEventListener("click", () => AuthPanel.togglePasswordForm(true));
@@ -6297,9 +16336,57 @@ function bindEvents() {
         }
     });
     els.todoWorkItems.addEventListener("click", async (event) => {
+        const generatedIssueRetestButton = event.target.closest("button[data-generated-issue-retest]");
+        if (generatedIssueRetestButton) {
+            await WorkbenchPanel.retestGeneratedTimelineIssue(generatedIssueRetestButton);
+            return;
+        }
+        const generatedIssueReviewButton = event.target.closest("button[data-generated-issue-review]");
+        if (generatedIssueReviewButton) {
+            await WorkbenchPanel.reviewGeneratedTimelineIssue(
+                generatedIssueReviewButton,
+                generatedIssueReviewButton.dataset.generatedIssueReviewStatus || "REVIEWED"
+            );
+            return;
+        }
+        const governanceRetestButton = event.target.closest("button[data-data-governance-retest]");
+        if (governanceRetestButton) {
+            await WorkbenchPanel.retestDataGovernanceTask(governanceRetestButton);
+            return;
+        }
+        if (event.target.closest("button[data-workbench-audit-salary-migration-delivery]")) {
+            await WorkbenchPanel.openSalaryMigrationDeliveryAudits();
+            return;
+        }
+        if (event.target.closest("button[data-workbench-audit-history-closure]")) {
+            await WorkbenchPanel.openHistoryClosureAcceptanceAudits();
+            return;
+        }
+        if (event.target.closest("button[data-workbench-audit-report-delivery]")) {
+            await WorkbenchPanel.openReportMigrationDeliveryAudits();
+            return;
+        }
+        const governanceReviewButton = event.target.closest("button[data-data-governance-review]");
+        if (governanceReviewButton) {
+            await WorkbenchPanel.reviewDataGovernanceTask(
+                governanceReviewButton,
+                governanceReviewButton.dataset.dataGovernanceReviewStatus || "REVIEWED"
+            );
+            return;
+        }
         const completeButton = event.target.closest("button[data-complete-work-id]");
         if (completeButton) {
             await WorkbenchPanel.completeWorkItem(completeButton);
+            return;
+        }
+        const historyPlanButton = event.target.closest("button[data-history-write-plan-case-no]");
+        if (historyPlanButton) {
+            await WorkbenchPanel.openHistoryWritePlan(historyPlanButton.dataset.historyWritePlanCaseNo);
+            return;
+        }
+        const historyComparisonButton = event.target.closest("button[data-history-write-comparison-case-no]");
+        if (historyComparisonButton) {
+            await WorkbenchPanel.openHistoryWriteComparison(historyComparisonButton.dataset.historyWriteComparisonCaseNo);
             return;
         }
         const button = event.target.closest("button[data-work-id]");
@@ -6308,6 +16395,16 @@ function bindEvents() {
         }
     });
     els.doneWorkItems.addEventListener("click", async (event) => {
+        const historyPlanButton = event.target.closest("button[data-history-write-plan-case-no]");
+        if (historyPlanButton) {
+            await WorkbenchPanel.openHistoryWritePlan(historyPlanButton.dataset.historyWritePlanCaseNo);
+            return;
+        }
+        const historyComparisonButton = event.target.closest("button[data-history-write-comparison-case-no]");
+        if (historyComparisonButton) {
+            await WorkbenchPanel.openHistoryWriteComparison(historyComparisonButton.dataset.historyWriteComparisonCaseNo);
+            return;
+        }
         const button = event.target.closest("button[data-work-id]");
         if (button) {
             await WorkbenchPanel.openWorkItem(button);
@@ -6368,6 +16465,22 @@ function bindEvents() {
             }
             return;
         }
+        const blockedReviewButton = event.target.closest("button[data-history-write-blocked-review-case-no]");
+        if (blockedReviewButton) {
+            const caseNo = blockedReviewButton.dataset.historyWriteBlockedReviewCaseNo || "";
+            const reason = window.prompt("\u8bf7\u586b\u5199\u963b\u65ad\u9879\u540e\u671f\u6838\u67e5\u8bf4\u660e", "\u57fa\u7840\u6570\u636e\u6216\u5386\u53f2\u94fe\u7279\u6b8a\u60c5\u51b5\uff0c\u540e\u671f\u6838\u67e5");
+            if (reason === null) {
+                return;
+            }
+            blockedReviewButton.disabled = true;
+            try {
+                await WorkbenchPanel.reviewBlockedHistoryWritePlan(caseNo, reason.trim());
+            } catch (error) {
+                blockedReviewButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
         const comparisonButton = event.target.closest("button[data-history-write-comparison-case-no]");
         if (comparisonButton) {
             await WorkbenchPanel.openHistoryWriteComparison(comparisonButton.dataset.historyWriteComparisonCaseNo);
@@ -6385,6 +16498,12 @@ function bindEvents() {
         }
     });
     els.peopleList.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-person-code]");
+        if (button) {
+            await PersonDetail.selectPerson(button.dataset.personCode);
+        }
+    });
+    els.salaryDetails.addEventListener("click", async (event) => {
         const button = event.target.closest("button[data-person-code]");
         if (button) {
             await PersonDetail.selectPerson(button.dataset.personCode);
@@ -6530,6 +16649,695 @@ function bindEvents() {
     els.refreshButton.addEventListener("click", refreshAll);
     els.refreshTodoCacheButton.addEventListener("click", () => WorkbenchPanel.refreshTodoCache());
     els.workbenchRefreshButton.addEventListener("click", () => WorkbenchPanel.load());
+    els.refreshGeneratedIssuesButton?.addEventListener("click", () => WorkbenchPanel.refreshGeneratedTimelineIssues());
+    els.dataGovernanceScanButton?.addEventListener("click", () => WorkbenchPanel.dataGovernanceScan());
+    els.dataGovernanceTasksButton?.addEventListener("click", () => WorkbenchPanel.refreshDataGovernanceTasks());
+    els.exportDataGovernanceButton?.addEventListener("click", () => WorkbenchPanel.exportDataGovernanceScan());
+    els.salaryFormsButton?.addEventListener("click", () => WorkbenchPanel.loadSalaryBusinessForms());
+    els.salaryFlowsButton?.addEventListener("click", () => WorkbenchPanel.loadSalaryBusinessFlows());
+    els.reportPrintButton?.addEventListener("click", () => WorkbenchPanel.loadReportCatalog());
+    els.migrationAcceptanceButton?.addEventListener("click", () => WorkbenchPanel.loadMigrationAcceptance());
+    els.migrationAcceptanceHistoryButton?.addEventListener("click", () => WorkbenchPanel.loadMigrationAcceptanceHistory());
+    els.exportMigrationAcceptanceButton?.addEventListener("click", () => WorkbenchPanel.exportMigrationAcceptance());
+    els.migrationRegressionButton?.addEventListener("click", () => WorkbenchPanel.runMigrationRegressionSamples());
+    els.migrationRegressionLibraryButton?.addEventListener("click", () => WorkbenchPanel.runMigrationRegressionLibrary());
+    els.migrationRegressionDashboardButton?.addEventListener("click", () => WorkbenchPanel.loadMigrationRegressionDashboard());
+    els.migrationQualityOverviewButton?.addEventListener("click", () => WorkbenchPanel.loadMigrationQualityOverview());
+    els.migrationPreflightButton?.addEventListener("click", () => WorkbenchPanel.runMigrationPreflight());
+    els.migrationReadinessButton?.addEventListener("click", () => WorkbenchPanel.loadMigrationReadiness());
+    els.historyDeliveryOverviewButton?.addEventListener("click", () => WorkbenchPanel.showHistoryDeliveryOverview());
+    els.historyClosureAcceptanceButton?.addEventListener("click", () => WorkbenchPanel.showHistoryClosureAcceptance());
+    els.migrationToolResult?.addEventListener("change", async (event) => {
+        const qualityReportAuditsFilter = event.target.closest("select[data-quality-report-audits-filter]");
+        if (qualityReportAuditsFilter) {
+            await WorkbenchPanel.loadMigrationQualityReportAudits(qualityReportAuditsFilter.value || "");
+        }
+    });
+    els.migrationToolResult?.addEventListener("click", async (event) => {
+        if (event.target.closest("button[data-history-delivery-archive-overview]")) {
+            WorkbenchPanel.showHistoryDeliveryOverview();
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-audit-lookup]")) {
+            const auditId = els.migrationToolResult?.querySelector("[data-history-delivery-audit-id]")?.value?.trim() || "";
+            if (!auditId) {
+                setStatus("\u8bf7\u8f93\u5165 SYS \u5ba1\u8ba1\u53f7");
+                return;
+            }
+            state.auditFilters = {
+                module: "workbench",
+                operator: "",
+                action: "",
+                targetCode: "",
+                auditId,
+                start: "",
+                end: "",
+                limit: 100
+            };
+            await SystemShell.selectView("system", "SYSTEM_AUDIT");
+            setStatus(`\u5df2\u6309\u5ba1\u8ba1\u53f7 ${auditId} \u53cd\u67e5`);
+            return;
+        }
+        const archiveDatePresetButton = event.target.closest("button[data-history-delivery-date-preset]");
+        if (archiveDatePresetButton) {
+            WorkbenchPanel.applyHistoryDeliveryDatePreset(els.migrationToolResult, archiveDatePresetButton.dataset.historyDeliveryDatePreset || "");
+            await WorkbenchPanel.loadHistoryDeliveryAcceptances(els.migrationToolResult, { reset: true });
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-acceptance-search]")) {
+            await WorkbenchPanel.loadHistoryDeliveryAcceptances(els.migrationToolResult, { reset: true });
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-acceptance-more]")) {
+            await WorkbenchPanel.loadMoreHistoryDeliveryAcceptances(els.migrationToolResult);
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-acceptance-index-export]")) {
+            const query = WorkbenchPanel.historyDeliveryAcceptanceQuery(els.migrationToolResult, 500);
+            window.location.href = `/api/workbench/history-write-delivery-acceptances/index.csv?${query.toString()}`;
+            setStatus("\u5df2\u5f00\u59cb\u5bfc\u51fa\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u5f52\u6863\u7d22\u5f15CSV");
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-acceptance-batch-print]")) {
+            const query = WorkbenchPanel.historyDeliveryAcceptanceQuery(els.migrationToolResult, 50);
+            window.open(`/api/workbench/history-write-delivery-acceptances/print-batch?${query.toString()}`, "_blank", "noopener");
+            setStatus("\u5df2\u6253\u5f00\u5386\u53f2\u5199\u5165\u4ea4\u4ed8\u786e\u8ba4\u5355\u6279\u91cf\u6253\u5370");
+            return;
+        }
+        if (event.target.closest("button[data-history-delivery-acceptance-batch-audits]")) {
+            await WorkbenchPanel.openHistoryDeliveryAcceptanceBatchAudits();
+            return;
+        }
+        const archiveAcceptanceExportButton = event.target.closest("button[data-history-delivery-acceptance-export]");
+        if (archiveAcceptanceExportButton) {
+            const acceptanceNo = archiveAcceptanceExportButton.dataset.historyDeliveryAcceptanceExport || "";
+            window.location.href = `/api/workbench/history-write-delivery-acceptances/${encodeURIComponent(acceptanceNo)}.csv`;
+            setStatus(`\u5df2\u5f00\u59cb\u5bfc\u51fa ${acceptanceNo} \u4ea4\u4ed8\u8be6\u60c5CSV`);
+            return;
+        }
+        const archiveAcceptancePrintButton = event.target.closest("button[data-history-delivery-acceptance-print]");
+        if (archiveAcceptancePrintButton) {
+            const acceptanceNo = archiveAcceptancePrintButton.dataset.historyDeliveryAcceptancePrint || "";
+            window.open(`/api/workbench/history-write-delivery-acceptances/${encodeURIComponent(acceptanceNo)}/print`, "_blank", "noopener");
+            setStatus(`\u5df2\u6253\u5f00 ${acceptanceNo} \u4ea4\u4ed8\u786e\u8ba4\u5355`);
+            return;
+        }
+        const archiveAcceptanceAuditButton = event.target.closest("button[data-history-delivery-acceptance-audits]");
+        if (archiveAcceptanceAuditButton) {
+            await WorkbenchPanel.openHistoryDeliveryAcceptanceAudits(archiveAcceptanceAuditButton.dataset.historyDeliveryAcceptanceAudits || "");
+            return;
+        }
+        const archiveAcceptanceButton = event.target.closest("button[data-history-delivery-acceptance-no]");
+        if (archiveAcceptanceButton) {
+            await WorkbenchPanel.loadHistoryDeliveryAcceptanceDetail(els.migrationToolResult, archiveAcceptanceButton.dataset.historyDeliveryAcceptanceNo || "");
+            return;
+        }
+        const qualityOverviewRefreshButton = event.target.closest("button[data-quality-overview-refresh]");
+        if (qualityOverviewRefreshButton) {
+            qualityOverviewRefreshButton.disabled = true;
+            try {
+                await WorkbenchPanel.loadMigrationQualityOverview();
+            } finally {
+                qualityOverviewRefreshButton.disabled = false;
+            }
+            return;
+        }
+        const qualityProgressActionButton = event.target.closest("button[data-quality-progress-action]");
+        if (qualityProgressActionButton) {
+            const action = qualityProgressActionButton.dataset.qualityProgressAction || "";
+            if (action === "archive-ledger") {
+                await WorkbenchPanel.loadMigrationQualityArchiveLedger(qualityProgressActionButton);
+            } else {
+                await WorkbenchPanel.openMigrationQualityDeltaAction(action);
+            }
+            return;
+        }
+        const qualitySnapshotCreateButton = event.target.closest("button[data-quality-snapshot-create]");
+        if (qualitySnapshotCreateButton) {
+            await WorkbenchPanel.createMigrationQualitySnapshot(qualitySnapshotCreateButton);
+            return;
+        }
+        const qualitySnapshotListButton = event.target.closest("button[data-quality-snapshot-list]");
+        if (qualitySnapshotListButton) {
+            await WorkbenchPanel.loadMigrationQualitySnapshots(qualitySnapshotListButton);
+            return;
+        }
+        const qualitySnapshotArchiveListButton = event.target.closest("button[data-quality-snapshot-archive-list]");
+        if (qualitySnapshotArchiveListButton) {
+            await WorkbenchPanel.loadMigrationQualityArchiveLedger(qualitySnapshotArchiveListButton);
+            return;
+        }
+        const qualityFinalSummaryExportButton = event.target.closest("button[data-quality-final-summary-export]");
+        if (qualityFinalSummaryExportButton) {
+            const orgCode = qualityFinalSummaryExportButton.dataset.orgCode || WorkbenchPanel.selectedOrgCode();
+            if (orgCode) {
+                window.location.href = `/api/workbench/migration-quality-overview/final-summary.csv?${new URLSearchParams({ orgCode }).toString()}`;
+            }
+            return;
+        }
+        const qualityFinalSummaryPrintButton = event.target.closest("button[data-quality-final-summary-print]");
+        if (qualityFinalSummaryPrintButton) {
+            await WorkbenchPanel.printMigrationFinalAcceptanceSummary(qualityFinalSummaryPrintButton);
+            return;
+        }
+        const qualityPreflightRunButton = event.target.closest("button[data-quality-preflight-run]");
+        if (qualityPreflightRunButton) {
+            await WorkbenchPanel.runMigrationPreflight();
+            return;
+        }
+        const qualityArchiveFilterResetButton = event.target.closest("button[data-quality-archive-filter-reset]");
+        if (qualityArchiveFilterResetButton) {
+            await WorkbenchPanel.loadMigrationQualityArchiveLedger(qualityArchiveFilterResetButton, {});
+            return;
+        }
+        const qualitySnapshotCompareButton = event.target.closest("button[data-quality-snapshot-compare-base]");
+        if (qualitySnapshotCompareButton) {
+            await WorkbenchPanel.compareMigrationQualitySnapshots(qualitySnapshotCompareButton);
+            return;
+        }
+        const qualitySnapshotComparisonExportButton = event.target.closest("button[data-quality-snapshot-comparison-export]");
+        if (qualitySnapshotComparisonExportButton) {
+            const baseSnapshotNo = qualitySnapshotComparisonExportButton.dataset.baseSnapshotNo || "";
+            const targetSnapshotNo = qualitySnapshotComparisonExportButton.dataset.targetSnapshotNo || "";
+            if (baseSnapshotNo && targetSnapshotNo) {
+                const query = new URLSearchParams({ baseSnapshotNo, targetSnapshotNo });
+                window.location.href = `/api/workbench/migration-quality-overview/snapshots/compare.csv?${query.toString()}`;
+            }
+            return;
+        }
+        const qualitySnapshotReportButton = event.target.closest("button[data-quality-snapshot-report]");
+        if (qualitySnapshotReportButton) {
+            await WorkbenchPanel.openMigrationQualityReport(qualitySnapshotReportButton.dataset.qualitySnapshotReport || "", {
+                fromArchiveLedger: qualitySnapshotReportButton.dataset.fromArchiveLedger === "true",
+                ledgerFilters: {
+                    preflightLevel: qualitySnapshotReportButton.dataset.preflightLevel || "",
+                    archivedBy: qualitySnapshotReportButton.dataset.archivedBy || "",
+                    archivedFrom: qualitySnapshotReportButton.dataset.archivedFrom || "",
+                    archivedTo: qualitySnapshotReportButton.dataset.archivedTo || "",
+                    limit: qualitySnapshotReportButton.dataset.limit || "50"
+                },
+                openAudits: qualitySnapshotReportButton.dataset.openAudits === "true",
+                auditAction: qualitySnapshotReportButton.dataset.auditAction || ""
+            });
+            return;
+        }
+        const qualityReportBackLedgerButton = event.target.closest("button[data-quality-report-back-ledger]");
+        if (qualityReportBackLedgerButton) {
+            const report = qualityReportBackLedgerButton.closest(".migration-quality-report");
+            await WorkbenchPanel.loadMigrationQualityArchiveLedger(qualityReportBackLedgerButton, {
+                preflightLevel: report?.dataset.preflightLevel || "",
+                archivedBy: report?.dataset.archivedBy || "",
+                archivedFrom: report?.dataset.archivedFrom || "",
+                archivedTo: report?.dataset.archivedTo || "",
+                limit: report?.dataset.limit || "50"
+            });
+            return;
+        }
+        const qualityReportPrintButton = event.target.closest("button[data-quality-report-print]");
+        if (qualityReportPrintButton) {
+            await WorkbenchPanel.printMigrationQualityReport();
+            return;
+        }
+        const qualityReportArchiveButton = event.target.closest("button[data-quality-report-archive]");
+        if (qualityReportArchiveButton) {
+            await WorkbenchPanel.archiveMigrationQualityReport();
+            return;
+        }
+        const qualityReportAuditsButton = event.target.closest("button[data-quality-report-audits]");
+        if (qualityReportAuditsButton) {
+            await WorkbenchPanel.loadMigrationQualityReportAudits();
+            return;
+        }
+        const qualityReportAuditsExportButton = event.target.closest("button[data-quality-report-audits-export]");
+        if (qualityReportAuditsExportButton) {
+            const snapshotNo = qualityReportAuditsExportButton.dataset.qualityReportAuditsExport || "";
+            if (snapshotNo) {
+                const action = qualityReportAuditsExportButton.dataset.auditAction || "";
+                const query = action ? `?${new URLSearchParams({ action }).toString()}` : "";
+                window.location.href = `/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}/print-audits.csv${query}`;
+            }
+            return;
+        }
+        const qualityAcceptancePackageButton = event.target.closest("button[data-quality-acceptance-package]");
+        if (qualityAcceptancePackageButton) {
+            await WorkbenchPanel.exportMigrationQualityAcceptancePackage(qualityAcceptancePackageButton);
+            return;
+        }
+        const qualityAcceptancePackageConfirmButton = event.target.closest("button[data-quality-acceptance-package-confirm]");
+        if (qualityAcceptancePackageConfirmButton) {
+            WorkbenchPanel.confirmMigrationQualityAcceptancePackage(qualityAcceptancePackageConfirmButton);
+            return;
+        }
+        const qualityAcceptancePackagePreviewCloseButton = event.target.closest("button[data-quality-acceptance-package-preview-close]");
+        if (qualityAcceptancePackagePreviewCloseButton) {
+            qualityAcceptancePackagePreviewCloseButton.closest(".migration-acceptance-package-preview")?.remove();
+            setStatus("\u9a8c\u6536\u5305\u5bfc\u51fa\u5df2\u53d6\u6d88");
+            return;
+        }
+        const qualitySnapshotLedgerExportButton = event.target.closest("button[data-quality-snapshot-ledger-export]");
+        if (qualitySnapshotLedgerExportButton) {
+            const orgCode = WorkbenchPanel.selectedOrgCode();
+            if (!orgCode) {
+                setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d");
+                return;
+            }
+            const archivedOnly = qualitySnapshotLedgerExportButton.dataset.archivedOnly === "true" ? "true" : "false";
+            const limit = qualitySnapshotLedgerExportButton.dataset.limit || "50";
+            const params = WorkbenchPanel.migrationQualityLedgerParams(orgCode, {
+                archivedOnly,
+                limit,
+                preflightLevel: qualitySnapshotLedgerExportButton.dataset.preflightLevel || "",
+                archivedBy: qualitySnapshotLedgerExportButton.dataset.archivedBy || "",
+                archivedFrom: qualitySnapshotLedgerExportButton.dataset.archivedFrom || "",
+                archivedTo: qualitySnapshotLedgerExportButton.dataset.archivedTo || ""
+            });
+            window.location.href = `/api/workbench/migration-quality-overview/snapshots.csv?${params.toString()}`;
+            return;
+        }
+        const qualitySnapshotExportButton = event.target.closest("button[data-quality-snapshot-export]");
+        if (qualitySnapshotExportButton) {
+            const snapshotNo = qualitySnapshotExportButton.dataset.qualitySnapshotExport || "";
+            if (snapshotNo) {
+                window.location.href = `/api/workbench/migration-quality-overview/snapshots/${encodeURIComponent(snapshotNo)}.csv`;
+            }
+            return;
+        }
+        const qualityGateButton = event.target.closest("button[data-quality-gate]");
+        if (qualityGateButton) {
+            await WorkbenchPanel.openMigrationQualityGate(qualityGateButton.dataset.qualityGate || "");
+            return;
+        }
+        const qualityDeltaActionButton = event.target.closest("button[data-quality-delta-action]");
+        if (qualityDeltaActionButton) {
+            await WorkbenchPanel.openMigrationQualityDeltaAction(qualityDeltaActionButton.dataset.qualityDeltaAction || "");
+            return;
+        }
+        const regressionSampleEnabledButton = event.target.closest("button[data-regression-sample-enabled]");
+        if (regressionSampleEnabledButton) {
+            await WorkbenchPanel.setMigrationRegressionSampleEnabled(regressionSampleEnabledButton);
+            return;
+        }
+        const regressionSampleExportButton = event.target.closest("button[data-regression-sample-export]");
+        if (regressionSampleExportButton) {
+            WorkbenchPanel.exportMigrationRegressionLibrary(regressionSampleExportButton);
+            return;
+        }
+        const regressionSampleRunBatchButton = event.target.closest("button[data-regression-sample-run-batch]");
+        if (regressionSampleRunBatchButton) {
+            await WorkbenchPanel.runMigrationRegressionLibraryBatch(regressionSampleRunBatchButton);
+            return;
+        }
+        const regressionSampleRunHistoryButton = event.target.closest("button[data-regression-sample-run-history]");
+        if (regressionSampleRunHistoryButton) {
+            await WorkbenchPanel.loadMigrationRegressionRunHistory(regressionSampleRunHistoryButton);
+            return;
+        }
+        const regressionRunRow = event.target.closest("[data-regression-run-no]");
+        if (regressionRunRow) {
+            await WorkbenchPanel.openMigrationRegressionRun(regressionRunRow.dataset.regressionRunNo || "");
+            return;
+        }
+        const regressionRerunBatchButton = event.target.closest("button[data-regression-rerun-batch]");
+        if (regressionRerunBatchButton) {
+            await WorkbenchPanel.rerunMigrationRegressionBatchFromDetail(regressionRerunBatchButton);
+            return;
+        }
+        const regressionReviewFilterButton = event.target.closest("button[data-regression-review-filter]");
+        if (regressionReviewFilterButton) {
+            WorkbenchPanel.filterMigrationRegressionReview(regressionReviewFilterButton);
+            return;
+        }
+        const regressionGovernanceTaskButton = event.target.closest("button[data-regression-governance-task]");
+        if (regressionGovernanceTaskButton) {
+            await WorkbenchPanel.createGovernanceTaskFromRegression(regressionGovernanceTaskButton);
+            return;
+        }
+        const reportColumnPresetButton = event.target.closest("button[data-report-column-preset]");
+        if (reportColumnPresetButton) {
+            WorkbenchPanel.applyReportSalaryColumnPreset(reportColumnPresetButton.dataset.reportColumnPreset || "default");
+            return;
+        }
+        const reportPrefClearButton = event.target.closest("button[data-report-pref-clear]");
+        if (reportPrefClearButton) {
+            WorkbenchPanel.clearReportCenterPrefs();
+            WorkbenchPanel.loadReportCatalog();
+            setStatus("\u62a5\u8868\u53c2\u6570\u8bb0\u5fc6\u5df2\u6e05\u9664");
+            return;
+        }
+        const reportPreviewButton = event.target.closest("button[data-report-preview]");
+        if (reportPreviewButton) {
+            WorkbenchPanel.previewReportCenter();
+            return;
+        }
+        const reportClosureButton = event.target.closest("button[data-report-closure-view]");
+        if (reportClosureButton) {
+            WorkbenchPanel.loadReportMigrationClosure();
+            return;
+        }
+        const reportPrintSelfCheckButton = event.target.closest("button[data-report-print-self-check]");
+        if (reportPrintSelfCheckButton) {
+            WorkbenchPanel.loadReportPrintSelfCheck();
+            return;
+        }
+        const reportMigrationGuideButton = event.target.closest("button[data-report-migration-guide]");
+        if (reportMigrationGuideButton) {
+            WorkbenchPanel.showReportMigrationGuide();
+            return;
+        }
+        const reportMigrationMatrixButton = event.target.closest("button[data-report-migration-matrix]");
+        if (reportMigrationMatrixButton) {
+            WorkbenchPanel.loadReportMigrationMatrix();
+            return;
+        }
+        const reportMigrationMatrixExportButton = event.target.closest("button[data-report-migration-matrix-export]");
+        if (reportMigrationMatrixExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationMatrixCsvUrl();
+            return;
+        }
+        const reportAcceptanceChecklistButton = event.target.closest("button[data-report-acceptance-checklist]");
+        if (reportAcceptanceChecklistButton) {
+            WorkbenchPanel.loadReportMigrationAcceptanceChecklist();
+            return;
+        }
+        const reportAcceptanceChecklistExportButton = event.target.closest("button[data-report-acceptance-checklist-export]");
+        if (reportAcceptanceChecklistExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationAcceptanceChecklistUrl("csv");
+            return;
+        }
+        const reportSampleEvidenceButton = event.target.closest("button[data-report-sample-evidence]");
+        if (reportSampleEvidenceButton) {
+            WorkbenchPanel.loadReportMigrationSampleEvidence();
+            return;
+        }
+        const reportSampleEvidenceExportButton = event.target.closest("button[data-report-sample-evidence-export]");
+        if (reportSampleEvidenceExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationSampleEvidenceUrl("csv");
+            return;
+        }
+        const reportSampleComparisonButton = event.target.closest("button[data-report-sample-comparison]");
+        if (reportSampleComparisonButton) {
+            WorkbenchPanel.loadReportMigrationSampleComparison();
+            return;
+        }
+        const reportSampleComparisonExportButton = event.target.closest("button[data-report-sample-comparison-export]");
+        if (reportSampleComparisonExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationSampleComparisonUrl("csv");
+            return;
+        }
+        const reportSampleComparisonReviewButton = event.target.closest("button[data-report-sample-comparison-review]");
+        if (reportSampleComparisonReviewButton) {
+            await WorkbenchPanel.reviewReportMigrationSampleComparison(reportSampleComparisonReviewButton);
+            return;
+        }
+        const reportSampleComparisonBatchReviewButton = event.target.closest("button[data-report-sample-comparison-batch-review]");
+        if (reportSampleComparisonBatchReviewButton) {
+            await WorkbenchPanel.batchReviewReportMigrationSampleComparison(reportSampleComparisonBatchReviewButton);
+            return;
+        }
+        const reportMigrationGuideExportButton = event.target.closest("button[data-report-migration-guide-export]");
+        if (reportMigrationGuideExportButton) {
+            window.location.href = "/api/reports/migration-guide.csv";
+            return;
+        }
+        const reportMigrationDeliveryPackageButton = event.target.closest("button[data-report-migration-delivery-package]");
+        if (reportMigrationDeliveryPackageButton) {
+            window.location.href = WorkbenchPanel.reportMigrationDeliveryPackageUrl();
+            return;
+        }
+        const reportPrintSelfCheckExportButton = event.target.closest("button[data-report-print-self-check-export]");
+        if (reportPrintSelfCheckExportButton) {
+            window.location.href = WorkbenchPanel.reportPrintSelfCheckCsvUrl();
+            return;
+        }
+        const reportClosureExportButton = event.target.closest("button[data-report-closure-export]");
+        if (reportClosureExportButton) {
+            window.location.href = WorkbenchPanel.reportMigrationClosureUrl("csv");
+            return;
+        }
+        const reportPendingAcceptanceButton = event.target.closest("button[data-report-pending-acceptance-batches]");
+        if (reportPendingAcceptanceButton) {
+            reportPendingAcceptanceButton.disabled = true;
+            try {
+                await WorkbenchPanel.openPendingReportBatchAcceptance();
+            } catch (error) {
+                reportPendingAcceptanceButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportAuditViewButton = event.target.closest("button[data-report-audit-view]");
+        if (reportAuditViewButton) {
+            WorkbenchPanel.loadReportAudits();
+            return;
+        }
+        const reportCenterAuditIdButton = event.target.closest("button[data-report-center-audit-id]");
+        if (reportCenterAuditIdButton) {
+            reportCenterAuditIdButton.disabled = true;
+            try {
+                await WorkbenchPanel.openReportAuditById(reportCenterAuditIdButton.dataset.reportCenterAuditId || "");
+            } catch (error) {
+                reportCenterAuditIdButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportCenterAuditTargetButton = event.target.closest("button[data-report-center-audit-target]");
+        if (reportCenterAuditTargetButton) {
+            reportCenterAuditTargetButton.disabled = true;
+            try {
+                await WorkbenchPanel.openReportAuditByTarget(reportCenterAuditTargetButton.dataset.reportCenterAuditTarget || "");
+            } catch (error) {
+                reportCenterAuditTargetButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportArchiveViewButton = event.target.closest("button[data-report-archive-view]");
+        if (reportArchiveViewButton) {
+            WorkbenchPanel.loadReportPrintArchive();
+            return;
+        }
+        const reportBatchViewButton = event.target.closest("button[data-report-batch-view]");
+        if (reportBatchViewButton) {
+            WorkbenchPanel.loadReportPrintBatches();
+            return;
+        }
+        const reportArchiveExportButton = event.target.closest("button[data-report-archive-export]");
+        if (reportArchiveExportButton) {
+            window.location.href = WorkbenchPanel.reportPrintArchiveUrl("csv");
+            return;
+        }
+        const reportPrintBatchButton = event.target.closest("button[data-report-print-batch]");
+        if (reportPrintBatchButton) {
+            reportPrintBatchButton.disabled = true;
+            try {
+                await WorkbenchPanel.openReportPrintBatch(reportPrintBatchButton.dataset.reportPrintBatch || "");
+            } catch (error) {
+                reportPrintBatchButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportPrintBatchExportButton = event.target.closest("button[data-report-print-batch-export]");
+        if (reportPrintBatchExportButton) {
+            const safeBatchNo = reportPrintBatchExportButton.dataset.reportPrintBatchExport || "";
+            if (safeBatchNo) {
+                window.location.href = `/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}.csv`;
+            }
+            return;
+        }
+        const reportPrintBatchPackageButton = event.target.closest("button[data-report-print-batch-package]");
+        if (reportPrintBatchPackageButton) {
+            const safeBatchNo = reportPrintBatchPackageButton.dataset.reportPrintBatchPackage || "";
+            if (safeBatchNo) {
+                WorkbenchPanel.showReportBatchAcceptanceExportResult(safeBatchNo);
+                window.location.href = `/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}/acceptance-package.zip`;
+            }
+            return;
+        }
+        const reportAcceptanceAuditButton = event.target.closest("button[data-report-acceptance-audit-id]");
+        if (reportAcceptanceAuditButton) {
+            reportAcceptanceAuditButton.disabled = true;
+            try {
+                await WorkbenchPanel.openReportAuditById(reportAcceptanceAuditButton.dataset.reportAcceptanceAuditId || "");
+            } catch (error) {
+                reportAcceptanceAuditButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportPrintBatchBulkPackageButton = event.target.closest("button[data-report-print-batch-bulk-package]");
+        if (reportPrintBatchBulkPackageButton) {
+            WorkbenchPanel.showReportBatchBulkExportResult();
+            window.location.href = WorkbenchPanel.reportPrintBatchAcceptancePackagesUrl();
+            return;
+        }
+        const reportBatchRefreshPendingButton = event.target.closest("button[data-report-batch-refresh-pending]");
+        if (reportBatchRefreshPendingButton) {
+            reportBatchRefreshPendingButton.disabled = true;
+            try {
+                await WorkbenchPanel.switchReportBatchAcceptanceStatus("PENDING");
+                setStatus("\u5df2\u5237\u65b0\u672a\u9a8c\u6536\u6253\u5370\u6279\u6b21");
+            } catch (error) {
+                reportBatchRefreshPendingButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportBatchShowExportedButton = event.target.closest("button[data-report-batch-show-exported]");
+        if (reportBatchShowExportedButton) {
+            reportBatchShowExportedButton.disabled = true;
+            try {
+                await WorkbenchPanel.switchReportBatchAcceptanceStatus("EXPORTED");
+                setStatus("\u5df2\u5207\u6362\u5230\u5df2\u9a8c\u6536\u6253\u5370\u6279\u6b21");
+            } catch (error) {
+                reportBatchShowExportedButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportBatchExportAuditsButton = event.target.closest("button[data-report-batch-export-audits]");
+        if (reportBatchExportAuditsButton) {
+            reportBatchExportAuditsButton.disabled = true;
+            try {
+                await WorkbenchPanel.loadReportAudits({
+                    action: reportBatchExportAuditsButton.dataset.auditAction || "",
+                    targetCode: reportBatchExportAuditsButton.dataset.auditTarget || "",
+                    limit: 20
+                });
+                setStatus("\u5df2\u8bfb\u53d6\u9a8c\u6536\u5305\u5bfc\u51fa\u5ba1\u8ba1");
+            } catch (error) {
+                reportBatchExportAuditsButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
+        const reportPrintBatchReprintButton = event.target.closest("button[data-report-print-batch-reprint]");
+        if (reportPrintBatchReprintButton) {
+            const safeBatchNo = reportPrintBatchReprintButton.dataset.reportPrintBatchReprint || "";
+            if (safeBatchNo) {
+                window.open(`/api/reports/print-batches/${encodeURIComponent(safeBatchNo)}/reprint`, "_blank", "noopener");
+                WorkbenchPanel.markBatchReportPrintRefresh();
+                setStatus("\u5df2\u6309\u539f\u6279\u6b21\u660e\u7ec6\u6253\u5f00\u91cd\u6253\u9875");
+            }
+            return;
+        }
+        const reportActionButton = event.target.closest("button[data-report-action]");
+        if (reportActionButton && !reportActionButton.disabled) {
+            if (reportActionButton.dataset.reportAction === "approvalBatch") {
+                reportActionButton.disabled = true;
+                try {
+                    const ok = await WorkbenchPanel.validateBatchApprovalPrint();
+                    if (!ok) {
+                        return;
+                    }
+                } catch (error) {
+                    setStatus(error.message);
+                    WorkbenchPanel.reportCenterShowMessage(`<span class="warning"><b>\u6821\u9a8c\u5931\u8d25</b>${Format.html(error.message)}</span>`, true);
+                    return;
+                } finally {
+                    reportActionButton.disabled = false;
+                }
+            }
+            const url = WorkbenchPanel.reportCenterUrl(
+                reportActionButton.dataset.reportAction || "",
+                reportActionButton.dataset.reportMode || "print"
+            );
+            if (!url) {
+                setStatus(TEXT.menuPlaceholder);
+                return;
+            }
+            if (reportActionButton.dataset.reportMode === "csv") {
+                window.location.href = url;
+            } else {
+                window.open(url, "_blank", "noopener");
+                if (reportActionButton.dataset.reportAction === "approvalBatch") {
+                    WorkbenchPanel.markBatchReportPrintRefresh();
+                    window.setTimeout(() => WorkbenchPanel.loadReportAudits(), 1200);
+                }
+            }
+            return;
+        }
+        const printButton = event.target.closest("button[data-report-print-url]");
+        if (printButton && !printButton.disabled) {
+            window.open(printButton.dataset.reportPrintUrl || "", "_blank", "noopener");
+            return;
+        }
+        const downloadButton = event.target.closest("button[data-report-download-url]");
+        if (downloadButton && !downloadButton.disabled) {
+            window.location.href = downloadButton.dataset.reportDownloadUrl || "";
+            return;
+        }
+        const catalogExportButton = event.target.closest("button[data-report-catalog-export]");
+        if (catalogExportButton) {
+            window.location.href = "/api/reports/catalog.csv";
+            return;
+        }
+        const button = event.target.closest("button[data-acceptance-run]");
+        if (button) {
+            WorkbenchPanel.openMigrationAcceptanceRun(button.dataset.acceptanceRun || "");
+            return;
+        }
+        const exportRunButton = event.target.closest("button[data-acceptance-run-export]");
+        if (exportRunButton) {
+            WorkbenchPanel.exportMigrationAcceptanceRun(exportRunButton.dataset.acceptanceRunExport || "");
+            return;
+        }
+        const reviewButton = event.target.closest("button[data-acceptance-issue-review]");
+        if (reviewButton) {
+            WorkbenchPanel.reviewMigrationAcceptanceIssue(reviewButton.dataset.acceptanceIssueReview || "", "REVIEWED");
+            return;
+        }
+        const ignoreButton = event.target.closest("button[data-acceptance-issue-ignore]");
+        if (ignoreButton) {
+            WorkbenchPanel.reviewMigrationAcceptanceIssue(ignoreButton.dataset.acceptanceIssueIgnore || "", "IGNORED");
+            return;
+        }
+        const historyPendingQueueButton = event.target.closest("button[data-history-pending-queue]");
+        if (historyPendingQueueButton) {
+            WorkbenchPanel.applyHistoryPendingQueue(historyPendingQueueButton.dataset.historyPendingQueue || "");
+        }
+    });
+    els.migrationToolResult?.addEventListener("submit", async (event) => {
+        const qualityArchiveFilterForm = event.target.closest("form[data-quality-archive-filter-form]");
+        if (qualityArchiveFilterForm) {
+            event.preventDefault();
+            await WorkbenchPanel.filterMigrationQualityArchiveLedger(qualityArchiveFilterForm);
+            return;
+        }
+        const filterRegressionForm = event.target.closest("form[data-regression-sample-filter-form]");
+        if (filterRegressionForm) {
+            event.preventDefault();
+            await WorkbenchPanel.filterMigrationRegressionLibrary(filterRegressionForm);
+            return;
+        }
+        const manualRegressionForm = event.target.closest("form[data-regression-sample-manual-form]");
+        if (manualRegressionForm) {
+            event.preventDefault();
+            await WorkbenchPanel.addMigrationRegressionSample(manualRegressionForm);
+            return;
+        }
+        const regressionReviewForm = event.target.closest("form[data-regression-review-form]");
+        if (regressionReviewForm) {
+            event.preventDefault();
+            await WorkbenchPanel.reviewMigrationRegressionRunSample(regressionReviewForm);
+        }
+    });
+    els.migrationToolResult?.addEventListener("input", (event) => {
+        if (event.target.closest("[data-report-center]")) {
+            WorkbenchPanel.refreshReportCenterActionState();
+        }
+    });
+    els.migrationToolResult?.addEventListener("change", (event) => {
+        const regressionImportInput = event.target.closest("input[data-regression-sample-import]");
+        if (regressionImportInput) {
+            WorkbenchPanel.importMigrationRegressionLibrary(regressionImportInput);
+            return;
+        }
+        if (event.target.closest("[data-report-center]")) {
+            WorkbenchPanel.refreshReportCenterActionState();
+        }
+    });
     els.historyPlanRefreshButton?.addEventListener("click", () => WorkbenchPanel.loadHistoryWritePlans());
     els.historyPlanClearFiltersButton?.addEventListener("click", () => WorkbenchPanel.clearHistoryPlanFilters());
     els.historyPlanSummary?.addEventListener("click", async (event) => {
@@ -6540,14 +17348,93 @@ function bindEvents() {
             await WorkbenchPanel.loadHistoryWritePlans();
             return;
         }
+        const printQueueButton = event.target.closest("button[data-history-plan-print-queue]");
+        if (printQueueButton) {
+            await WorkbenchPanel.applyHistoryPlanPrintQueue(printQueueButton.dataset.historyPlanPrintQueue || "");
+            return;
+        }
+        const printQueueWriteButton = event.target.closest("button[data-history-plan-print-queue-write]");
+        if (printQueueWriteButton) {
+            printQueueWriteButton.disabled = true;
+            try {
+                await WorkbenchPanel.executePrintedReadyHistoryQueue();
+            } finally {
+                printQueueWriteButton.disabled = false;
+            }
+            return;
+        }
+        const printQueuePrintButton = event.target.closest("button[data-history-plan-print-queue-print]");
+        if (printQueuePrintButton) {
+            printQueuePrintButton.disabled = true;
+            try {
+                await WorkbenchPanel.printUnprintedBlockedHistoryQueue();
+            } finally {
+                printQueuePrintButton.disabled = false;
+            }
+            return;
+        }
+        const reviewQueueRetestButton = event.target.closest("button[data-history-plan-review-queue-retest]");
+        if (reviewQueueRetestButton) {
+            reviewQueueRetestButton.disabled = true;
+            try {
+                await WorkbenchPanel.batchRetestHistoryWritePlans();
+            } finally {
+                reviewQueueRetestButton.disabled = false;
+            }
+            return;
+        }
+        const reviewQueueReviewButton = event.target.closest("button[data-history-plan-review-queue-review]");
+        if (reviewQueueReviewButton) {
+            reviewQueueReviewButton.disabled = true;
+            try {
+                await WorkbenchPanel.batchReviewHistoryWriteComparisons();
+            } finally {
+                reviewQueueReviewButton.disabled = false;
+            }
+            return;
+        }
         const queueAutoSelectButton = event.target.closest("button[data-history-plan-queue-autoselect]");
         if (queueAutoSelectButton) {
             await WorkbenchPanel.autoSelectHistoryPlanQueue();
             return;
         }
+        const workbenchSourceButton = event.target.closest("button[data-history-plan-workbench-source]");
+        if (workbenchSourceButton) {
+            workbenchSourceButton.disabled = true;
+            try {
+                await WorkbenchPanel.returnToWorkbenchNextActionFilter();
+            } finally {
+                workbenchSourceButton.disabled = false;
+            }
+            return;
+        }
+        const queueBatchButton = event.target.closest("button[data-history-plan-queue-batch]");
+        if (queueBatchButton) {
+            queueBatchButton.disabled = true;
+            try {
+                const queueFilter = state.historyPlanQueueFilter || {};
+                await WorkbenchPanel.openReportPrintBatch(queueBatchButton.dataset.historyPlanQueueBatch || "", {
+                    returnContext: {
+                        caseNos: queueFilter.caseNos || [],
+                        label: queueFilter.label || "\u5386\u53f2\u5199\u5165\u961f\u5217"
+                    }
+                });
+                setStatus("\u5df2\u6253\u5f00\u961f\u5217\u6765\u6e90\u6253\u5370\u6279\u6b21");
+            } catch (error) {
+                queueBatchButton.disabled = false;
+                setStatus(error.message);
+            }
+            return;
+        }
         const queueClearButton = event.target.closest("button[data-history-ledger-clear-queue-filter]");
         if (queueClearButton) {
             await WorkbenchPanel.clearHistoryPlanQueueFilter();
+            return;
+        }
+        const blockedCategoryClearButton = event.target.closest("button[data-history-ledger-clear-blocked-category]");
+        if (blockedCategoryClearButton) {
+            state.historyPlanBlockedIssueCategory = "";
+            await WorkbenchPanel.loadHistoryWritePlans();
             return;
         }
         const selectionFilterButton = event.target.closest("button[data-history-plan-selection-filter]");
@@ -6568,6 +17455,39 @@ function bindEvents() {
         const selectionApproveButton = event.target.closest("button[data-history-plan-selection-approve]");
         if (selectionApproveButton) {
             await WorkbenchPanel.batchApproveSelectedRetestHistoryWritePlans();
+            return;
+        }
+        const selectionReviewButton = event.target.closest("button[data-history-plan-selection-review]");
+        if (selectionReviewButton) {
+            await WorkbenchPanel.batchReviewSelectedHistoryWriteComparisons();
+            return;
+        }
+        const selectionSpecialButton = event.target.closest("button[data-history-plan-selection-special]");
+        if (selectionSpecialButton) {
+            await WorkbenchPanel.batchMarkSelectedSpecialHistoryWritePlans();
+            return;
+        }
+        const selectionPreviewButton = event.target.closest("button[data-history-plan-selection-preview]");
+        if (selectionPreviewButton) {
+            await WorkbenchPanel.batchPreviewSelectedHistoryWritePlans();
+            return;
+        }
+        const blockedCategoryButton = event.target.closest("button[data-history-plan-blocked-category]");
+        if (blockedCategoryButton) {
+            state.historyPlanBlockedIssueCategory = blockedCategoryButton.dataset.historyPlanBlockedCategory || "";
+            state.historyPlanSelected.clear();
+            persistHistoryPlanQueueState();
+            await WorkbenchPanel.loadHistoryWritePlans();
+            return;
+        }
+        const selectionExecuteButton = event.target.closest("button[data-history-plan-selection-execute]");
+        if (selectionExecuteButton) {
+            await WorkbenchPanel.batchExecuteSelectedHistoryWritePlans();
+            return;
+        }
+        const selectionRollbackButton = event.target.closest("button[data-history-plan-selection-rollback]");
+        if (selectionRollbackButton) {
+            await WorkbenchPanel.batchRollbackSelectedHistoryWritePlans();
             return;
         }
         const selectionMaintenanceButton = event.target.closest("button[data-history-plan-selection-maintenance]");
@@ -6622,6 +17542,12 @@ function bindEvents() {
             await WorkbenchPanel.clearHistoryPlanQueueFilter();
             return;
         }
+        const clearBlockedCategoryButton = event.target.closest("[data-history-ledger-clear-blocked-category]");
+        if (clearBlockedCategoryButton) {
+            state.historyPlanBlockedIssueCategory = "";
+            await WorkbenchPanel.loadHistoryWritePlans();
+            return;
+        }
         const clearFilterButton = event.target.closest("[data-history-ledger-clear-filter]");
         if (clearFilterButton) {
             await WorkbenchPanel.clearHistoryPlanFilter(clearFilterButton.dataset.historyLedgerClearFilter);
@@ -6647,6 +17573,30 @@ function bindEvents() {
             batchRetestApproveButton.disabled = true;
             try {
                 await WorkbenchPanel.batchApproveRetestFromLedger();
+            } catch (error) {
+                setStatus(error.message);
+            } finally {
+                WorkbenchPanel.updateHistoryPlanActionState();
+            }
+            return;
+        }
+        const batchReviewButton = event.target.closest("[data-history-ledger-batch-review]");
+        if (batchReviewButton) {
+            batchReviewButton.disabled = true;
+            try {
+                await WorkbenchPanel.batchReviewHistoryWriteComparisons();
+            } catch (error) {
+                setStatus(error.message);
+            } finally {
+                WorkbenchPanel.updateHistoryPlanActionState();
+            }
+            return;
+        }
+        const batchSpecialButton = event.target.closest("[data-history-ledger-batch-special]");
+        if (batchSpecialButton) {
+            batchSpecialButton.disabled = true;
+            try {
+                await WorkbenchPanel.batchMarkSpecialHistoryWritePlans();
             } catch (error) {
                 setStatus(error.message);
             } finally {
@@ -6689,6 +17639,26 @@ function bindEvents() {
             WorkbenchPanel.updateHistoryPlanActionState();
         }
     });
+    els.historyPlanBatchReviewButton?.addEventListener("click", async () => {
+        els.historyPlanBatchReviewButton.disabled = true;
+        try {
+            await WorkbenchPanel.batchReviewHistoryWriteComparisons();
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            WorkbenchPanel.updateHistoryPlanActionState();
+        }
+    });
+    els.historyPlanBatchSpecialButton?.addEventListener("click", async () => {
+        els.historyPlanBatchSpecialButton.disabled = true;
+        try {
+            await WorkbenchPanel.batchMarkSpecialHistoryWritePlans();
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            WorkbenchPanel.updateHistoryPlanActionState();
+        }
+    });
     els.historyPlanBatchExecuteButton?.addEventListener("click", async () => {
         els.historyPlanBatchExecuteButton.disabled = true;
         try {
@@ -6709,6 +17679,8 @@ function bindEvents() {
             WorkbenchPanel.updateHistoryPlanActionState();
         }
     });
+    els.historyPendingQueuesButton?.addEventListener("click", () => WorkbenchPanel.loadHistoryWritePendingQueues());
+    els.historyBatchLedgerButton?.addEventListener("click", () => WorkbenchPanel.loadHistoryWriteBatchLedger());
     els.historyPlanExportButton?.addEventListener("click", () => WorkbenchPanel.exportHistoryWritePlans());
     els.systemRefreshButton.addEventListener("click", () => SystemPanel.load(state.activeMenuCode));
     els.systemContent.addEventListener("change", async (event) => {
@@ -6771,12 +17743,73 @@ function bindEvents() {
         if (auditExportButton) {
             SystemPanel.exportAudits();
         }
+        const auditPresetButton = event.target.closest("button[data-audit-preset]");
+        if (auditPresetButton) {
+            await SystemPanel.applyAuditPreset(auditPresetButton.dataset.auditPreset || "");
+        }
     });
     els.workbenchFilterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         await WorkbenchPanel.load();
     });
+    els.workbenchFilterSummary.addEventListener("click", async (event) => {
+        const historyButton = event.target.closest("button[data-workbench-queue-history]");
+        if (historyButton) {
+            historyButton.disabled = true;
+            try {
+                await WorkbenchPanel.applyWorkbenchNextActionToHistoryQueue();
+            } catch (error) {
+                setStatus(error.message);
+            } finally {
+                historyButton.disabled = false;
+            }
+            return;
+        }
+        const exportButton = event.target.closest("button[data-workbench-queue-export]");
+        if (exportButton) {
+            WorkbenchPanel.exportItems("DONE");
+        }
+    });
+    els.workspaceTabs?.addEventListener("click", (event) => {
+        const densityButton = event.target.closest("button[data-density-mode]");
+        if (densityButton) {
+            applyDesktopDensity(densityButton.dataset.densityMode || "compact");
+            setStatus(densityButton.dataset.densityMode === "comfortable" ? "\u5df2\u5207\u6362\u5230\u8212\u9002\u5bc6\u5ea6" : "\u5df2\u5207\u6362\u5230\u7d27\u51d1\u5bc6\u5ea6");
+            return;
+        }
+        const button = event.target.closest("button[data-workbench-jump]");
+        if (button) {
+            WorkbenchPanel.jumpToWorkspace(button.dataset.workbenchJump || "");
+        }
+    });
+    window.addEventListener("focus", () => {
+        WorkbenchPanel.refreshCaseAfterReportPrint();
+        WorkbenchPanel.refreshQueuesAfterBatchReportPrint();
+    });
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+            WorkbenchPanel.refreshCaseAfterReportPrint();
+            WorkbenchPanel.refreshQueuesAfterBatchReportPrint();
+        }
+    });
     els.workbenchMetrics.addEventListener("click", async (event) => {
+        const closureQueueExport = event.target.closest("[data-closure-queue-export]");
+        if (closureQueueExport) {
+            event.stopPropagation();
+            await WorkbenchPanel.exportClosureQueue(closureQueueExport.dataset.closureQueueExport);
+            return;
+        }
+        const closureQueueLedger = event.target.closest("[data-closure-queue-ledger]");
+        if (closureQueueLedger) {
+            event.stopPropagation();
+            await WorkbenchPanel.openClosureQueueLedger(closureQueueLedger.dataset.closureQueueLedger);
+            return;
+        }
+        const closureQueueOpen = event.target.closest("[data-closure-queue-open]");
+        if (closureQueueOpen) {
+            await WorkbenchPanel.openMetric(closureQueueOpen.dataset.closureQueueOpen);
+            return;
+        }
         const exportButton = event.target.closest("[data-metric-export]");
         if (exportButton) {
             event.stopPropagation();
@@ -6800,8 +17833,16 @@ function bindEvents() {
     els.loadMoreDoneButton.addEventListener("click", () => WorkbenchPanel.loadMore("DONE"));
     els.batchReconcileButton.addEventListener("click", () => PersonDetail.reconcileBatch());
     els.normalGradeBatchButton.addEventListener("click", () => PersonDetail.normalGradeBatch());
+    els.generateNormalGradeTodoButton.addEventListener("click", () => PersonDetail.generateNormalGradeTodo());
+    els.generateEntrySalaryTodoButton.addEventListener("click", () => PersonDetail.generateEntrySalaryTodo());
+    els.generatePostChangeTodoButton.addEventListener("click", () => PersonDetail.generatePostChangeTodo());
+    els.generateAllowanceChangeTodoButton.addEventListener("click", () => PersonDetail.generateAllowanceChangeTodo());
+    els.generateTransferSalaryTodoButton.addEventListener("click", () => PersonDetail.generateTransferSalaryTodo());
+    els.generatePunishmentReductionTodoButton.addEventListener("click", () => PersonDetail.generatePunishmentReductionTodo());
+    els.generatedTimelineBatchButton.addEventListener("click", () => PersonDetail.generatedTimelineBatch());
     els.exportBatchReconcileButton.addEventListener("click", () => PersonDetail.exportBatchReconcile());
     els.exportNormalGradeButton.addEventListener("click", () => PersonDetail.exportNormalGradeBatch());
+    els.exportGeneratedTimelineButton.addEventListener("click", () => PersonDetail.exportGeneratedTimelineBatch());
     els.loadAcceptanceSampleButton.addEventListener("click", () => AcceptanceSamples.loadSelected());
     els.trialCalcButton.addEventListener("click", () => PersonDetail.trialCalculate());
     els.reconcileButton.addEventListener("click", () => PersonDetail.reconcileSelectedHistory());

@@ -3,9 +3,12 @@
 *.err
 FOXUSER.*
 temp/
+~$*
 
+# Spring Boot backend build/runtime artifacts
 backend/target/
-backend/*.log
-backend/*.err.log
-backend/*.pid
 backend/BOOT-INF/
+backend/*.log
+backend/*.pid
+backend/spring-run*.out
+backend/spring-run*.err

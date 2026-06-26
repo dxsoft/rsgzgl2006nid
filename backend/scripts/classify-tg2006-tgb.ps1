@@ -1,11 +1,11 @@
-param(
+﻿param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [string]$OutputPath = "target\tg2006-tgb-classification.tsv",
     [string]$DiffOutputPath = "target\tg2006-tgb-diffs.tsv",
     [string]$SamplePath = "target\tg2006-tgb-samples.tsv",
     [string]$JdbcUrl = "jdbc:mysql://127.0.0.1:3306/gzjsgl?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true",
     [string]$DbUser = "root",
-    [string]$DbPassword = "dx262105",
+    [string]$DbPassword = $env:DB_PASSWORD,
     [string]$JavaHome = "C:\Program Files\Java\jdk-21.0.10"
 )
 

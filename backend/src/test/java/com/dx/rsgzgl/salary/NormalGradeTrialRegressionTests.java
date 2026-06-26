@@ -412,7 +412,7 @@ class NormalGradeTrialRegressionTests {
     }
 
     @Test
-    void teacherNurseIncreaseDoesNotIncludeTeachingAllowanceAgeInBase() {
+    void teacherNurseIncreaseRecalculatesFromBaseSalaryAndTeachingAllowanceAge() {
         NormalGradeTrialResult result = normalGradeTrialService.trial(new NormalGradeTrialCommand(
                 "00111-00070",
                 "00111",
@@ -429,7 +429,9 @@ class NormalGradeTrialRegressionTests {
         assertThat(result.changes())
                 .anySatisfy(change -> {
                     assertThat(change.itemCode()).isEqualTo("JSFSZWTG2");
-                    assertThat(change.afterAmount()).isEqualByComparingTo("397");
+                    assertThat(change.beforeAmount()).isEqualByComparingTo("397");
+                    assertThat(change.afterAmount()).isEqualByComparingTo("407");
+                    assertThat(change.difference()).isEqualByComparingTo("10");
                 });
     }
 

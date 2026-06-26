@@ -88,6 +88,8 @@ public interface LegacySalaryMapper {
                     CAST(id AS CHAR) AS sourceId,
                     CONCAT(TRIM(dwbm), '-', TRIM(grbm)) AS personCode,
                     CASE
+                        WHEN LEFT(TRIM(zwbm), 2) = '03'
+                             AND COALESCE(previousPrefix, '') <> '03' THEN '\u6cd5\u68c0\u5957\u6539'
                         WHEN LEFT(TRIM(zwbm), 2) IN ('23','24','25','26','27','28')
                              AND COALESCE(previousPrefix, '') IN ('23','24','25','26','27','28')
                              AND TRIM(COALESCE(xrzwbz, '')) = '1'
@@ -159,6 +161,60 @@ public interface LegacySalaryMapper {
                                 TRIM(COALESCE(punishment.qtqk, ''))
                             ) USING utf8mb4)) LIKE '%E9998D%'
                         )
+                  )
+
+                UNION ALL
+
+                SELECT
+                    'jx' AS source,
+                    CONCAT(CAST(id AS CHAR), ':rank') AS sourceId,
+                    CONCAT(TRIM(dwbm), '-', TRIM(grbm)) AS personCode,
+                    YEAR(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(sysj), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH)) AS year,
+                    MONTH(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(sysj), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH)) AS month,
+                    CASE
+                        WHEN TRIM(jx) LIKE '%\u8b66%' THEN '\u8b66\u8854\u53d8\u5316'
+                        WHEN TRIM(jx) LIKE '%\u6cd5%' THEN '\u6cd5\u5b98\u7b49\u7ea7'
+                        WHEN TRIM(jx) LIKE '%\u68c0%' THEN '\u68c0\u5bdf\u7b49\u7ea7'
+                        WHEN TRIM(jx) LIKE '%\u76d1%' THEN '\u76d1\u5bdf\u5b98\u7b49\u7ea7'
+                        ELSE '\u8b66\u8854\u53d8\u5316'
+                    END AS changeType,
+                    CONCAT('\u8b66\u8854/\u6cd5\u68c0/\u76d1\u5bdf\u7b49\u7ea7\u4fe1\u606f sysj=', TRIM(sysj), '\uff0cjx=', TRIM(jx), '\uff0c\u6b21\u6708\u6267\u884c') AS note
+                FROM (
+                    SELECT r.*,
+                           LAG(TRIM(jx)) OVER (PARTITION BY dwbm, grbm ORDER BY sysj, id) AS previousRank
+                    FROM jx r
+                    WHERE dwbm = #{orgCode}
+                      AND grbm = #{personNo}
+                ) rank_rows
+                WHERE rank_rows.dwbm = #{orgCode}
+                  AND rank_rows.grbm = #{personNo}
+                  AND TRIM(COALESCE(sysj, '')) <> ''
+                  AND CAST(REPLACE(TRIM(sysj), '.', '') AS UNSIGNED) >= 200607
+                  AND TRIM(COALESCE(jx, '')) <> ''
+                  AND (
+                      TRIM(jx) LIKE '%\u8b66%'
+                      OR TRIM(jx) LIKE '%\u6cd5%'
+                      OR TRIM(jx) LIKE '%\u68c0%'
+                      OR TRIM(jx) LIKE '%\u76d1%'
+                  )
+                  AND TRIM(COALESCE(previousRank, '')) <> ''
+                  AND TRIM(jx) <> TRIM(previousRank)
+                  AND EXISTS (
+                      SELECT 1
+                      FROM hisbase hb
+                      WHERE hb.dwbm = rank_rows.dwbm
+                        AND hb.grbm = rank_rows.grbm
+                        AND TRIM(hb.jslb) IN (
+                            '\u8b66\u8854\u53d8\u5316', '\u8b66\u8854\u6d25\u8d34',
+                            '\u6cd5\u5b98\u7b49\u7ea7', '\u5ba1\u5224\u6d25\u8d34',
+                            '\u68c0\u5bdf\u7b49\u7ea7', '\u68c0\u5bdf\u6d25\u8d34',
+                            '\u76d1\u5bdf\u5b98\u7b49\u7ea7', '\u76d1\u5bdf\u7b49\u7ea7', '\u76d1\u5bdf\u6d25\u8d34'
+                        )
+                        AND ABS((CAST(TRIM(hb.jsnf) AS SIGNED) * 12 + CAST(TRIM(hb.jsyf) AS SIGNED)) -
+                            (
+                                YEAR(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(rank_rows.sysj), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH)) * 12
+                                + MONTH(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(rank_rows.sysj), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH))
+                            )) <= 1
                   )
 
                 UNION ALL
@@ -268,6 +324,7 @@ public interface LegacySalaryMapper {
                 CASE changeType
                     WHEN '\u804c\u7ea7\u5957\u6539' THEN 16
                     WHEN '\u804c\u7ea7\u664b\u5347' THEN 17
+                    WHEN '\u6cd5\u68c0\u5957\u6539' THEN 18
                     WHEN '2006套改' THEN 0
                     WHEN '职务变化' THEN 10
                     WHEN '警员套改' THEN 15

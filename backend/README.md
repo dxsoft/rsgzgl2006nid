@@ -83,10 +83,37 @@ Current screens:
 
 ## Salary Rule Regression
 
+Run the launch readiness gate before production history-write batches:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ..\scripts\verify-launch-readiness.ps1
+```
+
+The report is written to `target\launch-readiness-report.txt`.
+
+Additional launch artifacts can be produced from the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\verify-history-write-rehearsal.ps1
+powershell -ExecutionPolicy Bypass -File scripts\build-real-history-write-precheck.ps1 -ScanLimit 300 -Take 5
+powershell -ExecutionPolicy Bypass -File scripts\scan-real-writable-candidates.ps1 -Start 2025-01 -End 2026-06 -OrgLimit 80 -PerPreviewLimit 100 -Take 20
+powershell -ExecutionPolicy Bypass -File scripts\run-real-writable-candidate-precheck.ps1 -Take 3 -ReviewBeforeConfirm
+powershell -ExecutionPolicy Bypass -File scripts\run-real-writable-candidate-pilot.ps1 -Take 1
+powershell -ExecutionPolicy Bypass -File scripts\run-real-history-write-pilot.ps1
+powershell -ExecutionPolicy Bypass -File scripts\export-production-permission-snapshot.ps1
+powershell -ExecutionPolicy Bypass -File scripts\build-production-data-governance-ledger.ps1
+```
+
 Run the main regression gate after rule changes:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\verify-salary-samples.ps1 -FailOnUnexpected
+```
+
+For production history-write preparation, use the checklist in:
+
+```text
+..\docs\上线前历史写入操作与数据保护清单.md
 ```
 
 The main gate also verifies the business acceptance samples. To run only those fixed walkthrough samples:
@@ -106,6 +133,7 @@ The gate verifies these sample sets when their TSV files exist:
 | `core-flow` | `scripts\build-core-flow-samples.ps1` | `target/core-flow-results.tsv` | standard/allowance changes, post changes, entrance salary |
 | `special-flow` | `scripts\build-special-flow-samples.ps1` | `target/special-flow-results.tsv` | education change, teacher/nurse allowance, 2006 conversion, normal increment |
 | `business-acceptance` | maintained TSV | `target/business-acceptance-results.tsv` | fixed representative samples for UI/business walkthroughs |
+| `report-print-archive` | runtime API samples | `target/report-print-archive-results.tsv` | approval-report archive metadata, unprinted write blocking, batch executable counts |
 
 To rebuild generated sample files against the current legacy database:
 
@@ -133,5 +161,7 @@ powershell -ExecutionPolicy Bypass -File scripts\build-probationary-data-issues.
 `build-jslb-coverage.ps1` writes `target/jslb-coverage.tsv` and checks whether any in-service `jslb` is still unmapped. `classify-tg2006-tgb.ps1` writes 2006 civil TGB classification files for non-amount validation review. `build-probationary-data-issues.ps1` writes `target/probationary-data-issues.tsv` for zero-total probationary placeholder records.
 
 `verify-business-acceptance-samples.ps1` verifies the fixed representative samples in `scripts\business-acceptance-samples.tsv`; it requires both `matchedExpected=true` and the calculated total to equal the documented target amount.
+
+`verify-report-print-archive-samples.ps1` verifies the report-printing side of the formal salary workflow: printed cases expose archive metadata, unprinted cases are blocked at history-write confirmation, and batch preview executable counts exclude unprinted approval-report warnings.
 
 `GET /api/org/tree` now reads the legacy `dwbm` table and builds a hierarchy from organization-code prefixes. `GET /api/persons` reads from `dryjbxx` and joins `dwbm` for organization names; `GET /api/persons/{personCode}` returns the broader legacy personnel profile. `GET /api/salary/history/{personCode}` reads `hisbase` and returns salary totals by calculation year/month. Salary details are generated from `fldgz` configuration: applicable fields, titles, ordering, and civil-service versus institution category differences come from configuration, with values read from `hisbase`. `POST /api/salary/trial-calc` currently returns a historical baseline calculation by using the latest `hisbase` row at or before the requested year/month. `POST /api/salary/reconcile` compares an exact legacy `hisbase` month with the current calculation result and returns total/detail differences. `POST /api/salary/rule-trial/normal-grade` is the first rule-based trial PoC: it reads the previous `hisbase` baseline and branches by `zwbm2` prefix, not by `dwsx`. Prefixes `01/02/03/04/23/24/25/26/27/28` follow grade increment against `bz06_jbgz`; prefixes `21/22` follow rank-grade increment against `bz06_djgz`; prefixes `05/06` follow worker post-grade increment against `bz06_zwgz_gr` and update `ZWGZSE2`; prefixes `07/08/09/10/11` follow institution salary-grade increment against `bz06_xjgz`. Assessment records come from `dndkh`; only `优秀/称职/合格` count. Prefixes `01/02/04/21/22/23/24/25/26/27/28` first check 5 qualified years from `xckhndjb` for one-level promotion. When the person has reached the highest level allowed by the current post, the same 5-year rule is converted into a grade increment within the current level. If level promotion and grade increment happen in the same month, the rule applies level promotion first and then grade increment. If level promotion does not apply, grade prefixes and worker prefixes require 2 qualified years from `xckhndzw`, while salary-grade prefixes require 1 qualified year from `xckhndzw`. Worker technical-grade promotion is detected from exact target-month `职务变化` records for `05/06`: it updates `ZWGZSE2`, `JSDJGZ2`, and derived `DFBT2`/`SDBT`, with post-grade placement against `bz06_zwgz_gr`. Standard lookup tries `zwgzdc2 + 1` first when the next standard exists and is not zero; otherwise it keeps `zwgzdc2`, increments `djc2`, and calculates the amount by grade difference. The result is compared with the exact target-month legacy record when present. `POST /api/salary/rule-trial/normal-grade-batch` applies the same rule to people under an organization and summarizes matched, different, no-target-record, skipped, reverse-step, level-promotion, and not-eligible counts. Each batch item includes `ruleType` and `ruleNote` for review. `GET /api/salary/rule-trial/normal-grade-batch.csv` exports the same batch result with a UTF-8 BOM for spreadsheet review. Auth controllers still return stable placeholder data while their legacy table mappings are confirmed.

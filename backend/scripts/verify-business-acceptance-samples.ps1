@@ -1,6 +1,8 @@
 param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [int]$TimeoutSec = 20,
+    [string]$Username = "admin",
+    [string]$Password = "admin",
     [switch]$FailOnUnexpected
 )
 
@@ -15,7 +17,9 @@ $outputPath = "target/business-acceptance-results.tsv"
     -SamplePath $samplePath `
     -OutputPath $outputPath `
     -BaseUrl $BaseUrl `
-    -TimeoutSec $TimeoutSec
+    -TimeoutSec $TimeoutSec `
+    -Username $Username `
+    -Password $Password
 
 $sampleRows = Get-Content $samplePath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object {
     $parts = $_ -split "`t"

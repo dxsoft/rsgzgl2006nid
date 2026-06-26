@@ -12,9 +12,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class CurrentUserService {
+
+    private static final ThreadLocal<String> RUN_AS_USERNAME = new ThreadLocal<>();
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -23,6 +26,10 @@ public class CurrentUserService {
     }
 
     public String currentUsername() {
+        String runAsUsername = RUN_AS_USERNAME.get();
+        if (runAsUsername != null && !runAsUsername.isBlank()) {
+            return runAsUsername;
+        }
         String sessionUsername = sessionUsername();
         if (sessionUsername != null) {
             return sessionUsername;
@@ -36,6 +43,24 @@ public class CurrentUserService {
             return authentication.getName();
         }
         return null;
+    }
+
+    public <T> T runAs(String username, Supplier<T> supplier) {
+        String previous = RUN_AS_USERNAME.get();
+        if (username == null || username.isBlank()) {
+            RUN_AS_USERNAME.remove();
+        } else {
+            RUN_AS_USERNAME.set(username);
+        }
+        try {
+            return supplier.get();
+        } finally {
+            if (previous == null || previous.isBlank()) {
+                RUN_AS_USERNAME.remove();
+            } else {
+                RUN_AS_USERNAME.set(previous);
+            }
+        }
     }
 
     public CurrentUserResponse currentUser() {

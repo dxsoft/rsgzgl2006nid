@@ -2,8 +2,12 @@ package com.dx.rsgzgl.system.service;
 
 import com.dx.rsgzgl.system.dto.SystemAuditLogResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,31 +22,38 @@ public class SystemAuditService {
         this.currentUserService = currentUserService;
     }
 
-    public void record(String module, String action, String targetType, String targetCode, String summary) {
+    public long record(String module, String action, String targetType, String targetCode, String summary) {
         ensureTable();
-        jdbcTemplate.update("""
-                INSERT INTO sys_audit_log(module_name, action_name, target_type, target_code, summary, operator)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                trim(module),
-                trim(action),
-                trim(targetType),
-                trim(targetCode),
-                trim(summary),
-                operator()
-        );
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement statement = connection.prepareStatement("""
+                    INSERT INTO sys_audit_log(module_name, action_name, target_type, target_code, summary, operator)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, trim(module));
+            statement.setString(2, trim(action));
+            statement.setString(3, trim(targetType));
+            statement.setString(4, trim(targetCode));
+            statement.setString(5, trim(summary));
+            statement.setString(6, operator());
+            return statement;
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        return key == null ? 0L : key.longValue();
     }
 
     public List<SystemAuditLogResponse> latest(int limit) {
         ensureTable();
         int safeLimit = Math.max(1, Math.min(limit, 200));
-        return latest("", "", "", "", "", safeLimit);
+        return latest("", "", "", "", "", "", "", safeLimit);
     }
 
     public List<SystemAuditLogResponse> latest(
             String module,
             String operator,
+            String action,
             String targetCode,
+            String auditId,
             String start,
             String end,
             int limit
@@ -50,7 +61,7 @@ public class SystemAuditService {
         ensureTable();
         int safeLimit = Math.max(1, Math.min(limit, 200));
         List<Object> params = new ArrayList<>();
-        String where = auditWhere(module, operator, targetCode, start, end, params);
+        String where = auditWhere(module, operator, action, targetCode, auditId, start, end, params);
         params.add(safeLimit);
         return jdbcTemplate.query("""
                 SELECT *
@@ -132,7 +143,9 @@ public class SystemAuditService {
     private String auditWhere(
             String module,
             String operator,
+            String action,
             String targetCode,
+            String auditId,
             String start,
             String end,
             List<Object> params
@@ -148,11 +161,21 @@ public class SystemAuditService {
             clauses.add("operator LIKE CONCAT('%', ?, '%')");
             params.add(operatorValue);
         }
+        String actionValue = trim(action);
+        if (!actionValue.isBlank()) {
+            clauses.add("action_name LIKE CONCAT('%', ?, '%')");
+            params.add(actionValue);
+        }
         String targetValue = trim(targetCode);
         if (!targetValue.isBlank()) {
             clauses.add("(target_code LIKE CONCAT('%', ?, '%') OR target_type LIKE CONCAT('%', ?, '%'))");
             params.add(targetValue);
             params.add(targetValue);
+        }
+        String auditIdValue = trim(auditId);
+        if (!auditIdValue.isBlank()) {
+            clauses.add("audit_id = ?");
+            params.add(auditIdValue);
         }
         String startValue = normalizeDateTime(start);
         if (!startValue.isBlank()) {

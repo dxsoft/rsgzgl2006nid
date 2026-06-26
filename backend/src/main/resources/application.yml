@@ -10,7 +10,7 @@ spring:
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
-    enabled: false
+    enabled: ${DB_MIGRATION_ENABLED:false}
     locations: classpath:db/migration
     baseline-on-migrate: true
 

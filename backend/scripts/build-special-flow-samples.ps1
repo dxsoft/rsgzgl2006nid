@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [string]$OutputPath = "target\special-flow-samples.tsv",
     [string]$CandidatePath = "target\special-flow-candidates.tsv",
@@ -6,7 +6,7 @@ param(
     [int]$CandidatePerType = 180,
     [string]$JdbcUrl = "jdbc:mysql://127.0.0.1:3306/gzjsgl?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true",
     [string]$DbUser = "root",
-    [string]$DbPassword = "dx262105",
+    [string]$DbPassword = $env:DB_PASSWORD,
     [string]$JavaHome = "C:\Program Files\Java\jdk-21.0.10"
 )
 

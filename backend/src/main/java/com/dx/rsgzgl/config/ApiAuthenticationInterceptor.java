@@ -84,6 +84,7 @@ public class ApiAuthenticationInterceptor implements HandlerInterceptor {
             return "SALARY_CONFIG";
         }
         if (path.equals("/api/salary/trial-calc")
+                || path.equals("/api/salary/timeline-generated-batch")
                 || path.startsWith("/api/salary/rule-trial/normal-grade")) {
             return path.endsWith(".csv") ? "SALARY_EXPORT" : "SALARY_TRIAL";
         }

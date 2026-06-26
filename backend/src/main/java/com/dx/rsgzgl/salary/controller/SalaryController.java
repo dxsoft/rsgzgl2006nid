@@ -9,6 +9,8 @@ import com.dx.rsgzgl.salary.dto.SalaryCalculationCommand;
 import com.dx.rsgzgl.salary.dto.SalaryCalculationResult;
 import com.dx.rsgzgl.salary.dto.SalaryBatchReconcileCommand;
 import com.dx.rsgzgl.salary.dto.SalaryBatchReconcileResult;
+import com.dx.rsgzgl.salary.dto.SalaryGeneratedTimelineBatchItem;
+import com.dx.rsgzgl.salary.dto.SalaryGeneratedTimelineBatchResult;
 import com.dx.rsgzgl.salary.dto.SalaryGeneratedTimelineResult;
 import com.dx.rsgzgl.salary.dto.SalaryHistoryItem;
 import com.dx.rsgzgl.salary.dto.SalaryPeriodItem;
@@ -19,6 +21,7 @@ import com.dx.rsgzgl.salary.service.NormalGradeBatchTrialService;
 import com.dx.rsgzgl.salary.service.NormalGradeTrialService;
 import com.dx.rsgzgl.salary.service.SalaryBatchReconcileService;
 import com.dx.rsgzgl.salary.service.SalaryCalculationService;
+import com.dx.rsgzgl.salary.service.SalaryGeneratedTimelineBatchService;
 import com.dx.rsgzgl.salary.service.SalaryGeneratedTimelineService;
 import com.dx.rsgzgl.salary.service.SalaryHistoryService;
 import com.dx.rsgzgl.salary.service.SalaryPeriodService;
@@ -55,6 +58,7 @@ public class SalaryController {
     private final NormalGradeBatchTrialService normalGradeBatchTrialService;
     private final SalaryTimelineService salaryTimelineService;
     private final SalaryGeneratedTimelineService salaryGeneratedTimelineService;
+    private final SalaryGeneratedTimelineBatchService salaryGeneratedTimelineBatchService;
     private final OrganizationAccessService organizationAccessService;
 
     public SalaryController(
@@ -67,6 +71,7 @@ public class SalaryController {
             NormalGradeBatchTrialService normalGradeBatchTrialService,
             SalaryTimelineService salaryTimelineService,
             SalaryGeneratedTimelineService salaryGeneratedTimelineService,
+            SalaryGeneratedTimelineBatchService salaryGeneratedTimelineBatchService,
             OrganizationAccessService organizationAccessService
     ) {
         this.salaryCalculationService = salaryCalculationService;
@@ -78,6 +83,7 @@ public class SalaryController {
         this.normalGradeBatchTrialService = normalGradeBatchTrialService;
         this.salaryTimelineService = salaryTimelineService;
         this.salaryGeneratedTimelineService = salaryGeneratedTimelineService;
+        this.salaryGeneratedTimelineBatchService = salaryGeneratedTimelineBatchService;
         this.organizationAccessService = organizationAccessService;
     }
 
@@ -112,6 +118,17 @@ public class SalaryController {
     ) {
         organizationAccessService.requirePersonAccess(personCode, null);
         return ApiResponse.ok(salaryGeneratedTimelineService.generateAndCompare(personCode, limit));
+    }
+
+    @GetMapping("/timeline-generated-batch")
+    public ApiResponse<SalaryGeneratedTimelineBatchResult> generatedTimelineBatch(
+            @RequestParam String orgCode,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer eventLimit
+    ) {
+        organizationAccessService.requireOrgAccess(orgCode);
+        return ApiResponse.ok(salaryGeneratedTimelineBatchService.scan(orgCode, keyword, limit, eventLimit));
     }
 
     @GetMapping("/history-records/{historyId}")
@@ -190,6 +207,23 @@ public class SalaryController {
                 .body(body);
     }
 
+    @GetMapping(value = "/timeline-generated-batch.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> generatedTimelineBatchCsv(
+            @RequestParam String orgCode,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "50") int limit,
+            @RequestParam(defaultValue = "160") int eventLimit
+    ) {
+        organizationAccessService.requireOrgAccess(orgCode);
+        SalaryGeneratedTimelineBatchResult result = salaryGeneratedTimelineBatchService.scan(orgCode, keyword, limit, eventLimit);
+        byte[] body = withUtf8Bom(toCsv(result));
+        String filename = "generated-timeline-" + result.orgCode() + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename(filename, StandardCharsets.UTF_8).build().toString())
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(body);
+    }
+
     private String toCsv(SalaryBatchReconcileResult result) {
         StringBuilder csv = new StringBuilder();
         csv.append("单位编码,年度,月份,检查人数,通过人数,差异人数,跳过人数,差额合计").append('\n');
@@ -255,6 +289,36 @@ public class SalaryController {
                 .append(csv(item.ruleNote())).append(',')
                 .append(csv(item.status())).append(',')
                 .append(csv(item.message())).append('\n'));
+        return csv.toString();
+    }
+
+    private String toCsv(SalaryGeneratedTimelineBatchResult result) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("\u5355\u4f4d\u7f16\u7801,\u5173\u952e\u5b57,\u68c0\u67e5\u4eba\u6570,\u6b63\u5e38\u4eba\u6570,\u95ee\u9898\u4eba\u6570,\u5dee\u5f02\u6761\u6570,\u7f3a\u5c11\u5386\u53f2\u6761\u6570,\u9519\u8bef\u6761\u6570,\u975e\u751f\u6210\u5386\u53f2\u6761\u6570").append('\n');
+        csv.append(csv(result.orgCode())).append(',')
+                .append(csv(result.keyword())).append(',')
+                .append(result.checkedCount()).append(',')
+                .append(result.okCount()).append(',')
+                .append(result.issueCount()).append(',')
+                .append(result.differentCount()).append(',')
+                .append(result.missingHistoryCount()).append(',')
+                .append(result.errorCount()).append(',')
+                .append(result.unsupportedHistoryCount()).append('\n')
+                .append('\n');
+        csv.append("\u4eba\u5458\u7f16\u7801,\u59d3\u540d,\u5355\u4f4d\u7f16\u7801,\u5e94\u53d1\u6761\u6570,\u5339\u914d\u6761\u6570,\u5dee\u5f02\u6761\u6570,\u7f3a\u5c11\u5386\u53f2\u6761\u6570,\u9519\u8bef\u6761\u6570,\u975e\u751f\u6210\u5386\u53f2\u6761\u6570,\u72b6\u6001,\u9996\u4e2a\u95ee\u9898").append('\n');
+        for (SalaryGeneratedTimelineBatchItem item : result.items()) {
+            csv.append(csv(item.personCode())).append(',')
+                    .append(csv(item.personName())).append(',')
+                    .append(csv(item.orgCode())).append(',')
+                    .append(item.expectedCount()).append(',')
+                    .append(item.matchedCount()).append(',')
+                    .append(item.differentCount()).append(',')
+                    .append(item.missingHistoryCount()).append(',')
+                    .append(item.errorCount()).append(',')
+                    .append(item.unsupportedHistoryCount()).append(',')
+                    .append(csv(item.status())).append(',')
+                    .append(csv(item.firstIssue())).append('\n');
+        }
         return csv.toString();
     }
 

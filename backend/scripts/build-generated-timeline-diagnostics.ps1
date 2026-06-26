@@ -70,6 +70,12 @@ function Diagnosis-Category([string]$Source, [string]$Status, [string]$Message, 
     if ($Source -eq "dndkh") {
         return "ASSESSMENT_STATE"
     }
+    if ($Source -eq "jx") {
+        return "RANK_BASE"
+    }
+    if ($Source -eq "hjxx") {
+        return "REWARD_PUNISHMENT_BASE"
+    }
     if ($Source -eq "dryjbxx") {
         return "BASIC_INFO"
     }
@@ -81,6 +87,12 @@ function Diagnosis-Category([string]$Source, [string]$Status, [string]$Message, 
     }
     if ($messageEsc -match "xckh|\\u8003\\u6838|\\u8d77\\u7b97|\\u672a\\u5b9a|\\u4e0d\\u5408\\u683c") {
         return "ASSESSMENT_STATE"
+    }
+    if ($messageEsc -match "\\bjx\\b|jxjtbz|\\u8b66\\u8854|\\u6d25\\u8d34") {
+        return "RANK_BASE"
+    }
+    if ($messageEsc -match "hjxx|\\u5956\\u60e9|\\u5904\\u5206|\\u964d\\u8d44|\\u5956\\u52b1") {
+        return "REWARD_PUNISHMENT_BASE"
     }
     if ($Status -eq "MISSING_HISTORY") {
         return "MISSING_HISTORY"

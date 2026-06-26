@@ -35,6 +35,7 @@ public record WorkbenchHistoryWritePlanResponse(
         String processingPriority,
         String nextActionCode,
         String nextAction,
+        WorkbenchReportPrintArchiveResponse reportPrintArchive,
         String maintenanceSuggestionJson,
         String issuesJson,
         String previewJson

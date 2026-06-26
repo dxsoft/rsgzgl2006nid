@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -44,8 +45,20 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
     private static final String CHANGE_CIVIL_RANK_CONVERSION = "\u804c\u7ea7\u5957\u6539";
     private static final String CHANGE_CIVIL_RANK_PROMOTION = "\u804c\u7ea7\u664b\u5347";
     private static final String CHANGE_JUDICIAL_CONVERSION = "\u6cd5\u68c0\u5957\u6539";
+    private static final String CHANGE_POLICE_RANK_CHANGE = "\u8b66\u8854\u53d8\u5316";
+    private static final String CHANGE_POLICE_RANK_ALLOWANCE = "\u8b66\u8854\u6d25\u8d34";
+    private static final String CHANGE_JUDGE_RANK = "\u6cd5\u5b98\u7b49\u7ea7";
+    private static final String CHANGE_JUDGE_ALLOWANCE = "\u5ba1\u5224\u6d25\u8d34";
+    private static final String CHANGE_PROSECUTOR_RANK = "\u68c0\u5bdf\u7b49\u7ea7";
+    private static final String CHANGE_PROSECUTOR_ALLOWANCE = "\u68c0\u5bdf\u6d25\u8d34";
+    private static final String CHANGE_SUPERVISOR_RANK = "\u76d1\u5bdf\u5b98\u7b49\u7ea7";
+    private static final String CHANGE_SUPERVISOR_RANK_LEGACY = "\u76d1\u5bdf\u7b49\u7ea7";
+    private static final String CHANGE_SUPERVISOR_ALLOWANCE = "\u76d1\u5bdf\u6d25\u8d34";
     private static final String CHANGE_SALARY_REDUCTION_PUNISHMENT = "\u964d\u8d44\u5904\u5206";
     private static final String CHANGE_REWARD_PROMOTION = "\u5956\u52b1\u664b\u5347";
+    private static final Set<String> NORMAL_LEVEL_PREFIXES = Set.of(
+            "01", "02", "04", "21", "22", "23", "24", "25", "26", "27", "28"
+    );
     private static final Set<String> GENERATED_CHANGE_TYPES = Set.of(
             "2006套改",
             "职务变化",
@@ -54,6 +67,15 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
             CHANGE_CIVIL_RANK_CONVERSION,
             CHANGE_CIVIL_RANK_PROMOTION,
             CHANGE_JUDICIAL_CONVERSION,
+            CHANGE_POLICE_RANK_CHANGE,
+            CHANGE_POLICE_RANK_ALLOWANCE,
+            CHANGE_JUDGE_RANK,
+            CHANGE_JUDGE_ALLOWANCE,
+            CHANGE_PROSECUTOR_RANK,
+            CHANGE_PROSECUTOR_ALLOWANCE,
+            CHANGE_SUPERVISOR_RANK,
+            CHANGE_SUPERVISOR_RANK_LEGACY,
+            CHANGE_SUPERVISOR_ALLOWANCE,
             CHANGE_NORMAL_LEVEL,
             CHANGE_LEVEL_ROLLING,
             CHANGE_SALARY_REDUCTION_PUNISHMENT,
@@ -88,12 +110,17 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
                 legacySalaryMapper.findHistoryLinks(parts.orgCode(), parts.personNo())
         );
         Map<HistoryKey, List<SalaryHistoryLinkItem>> historyByKey = historyByKey(history);
+        List<SalaryExpectedEventCandidate> baseEvents = addAssessmentLevelEvents(
+                parts,
+                legacySalaryMapper.findExpectedEventsFromBaseInfo(parts.orgCode(), parts.personNo())
+        );
         List<SalaryExpectedEventCandidate> expectedEvents = expandAssessmentEvents(
-                legacySalaryMapper.findExpectedEventsFromBaseInfo(parts.orgCode(), parts.personNo()),
+                baseEvents,
                 historyByKey
         );
         expectedEvents = alignPostEventsToNearbyHistory(expectedEvents, historyByKey);
         expectedEvents = alignPostEventsToNearbyHistoryType(expectedEvents, historyByKey);
+        expectedEvents = alignRankEventsToNearbyHistoryType(expectedEvents, historyByKey);
         expectedEvents = alignEducationEventsToNearbyHistoryType(expectedEvents, historyByKey);
         expectedEvents = alignHjxxEventsToNearbyHistory(expectedEvents, historyByKey);
         expectedEvents = removeEducationEventsWithoutSalaryImpact(expectedEvents, historyByKey);
@@ -257,6 +284,12 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
             Map<HistoryKey, List<SalaryHistoryLinkItem>> historyByKey
     ) {
         List<SalaryExpectedEventCandidate> expanded = new ArrayList<>();
+        Set<String> explicitAssessmentLevels = new HashSet<>();
+        for (SalaryExpectedEventCandidate event : events) {
+            if (SOURCE_ASSESSMENT.equals(event.source()) && CHANGE_NORMAL_LEVEL.equals(event.changeType())) {
+                explicitAssessmentLevels.add(event.year() + "-" + event.month());
+            }
+        }
         for (SalaryExpectedEventCandidate event : events) {
             if (!SOURCE_ASSESSMENT.equals(event.source()) || !CHANGE_NORMAL_GRADE.equals(event.changeType())) {
                 expanded.add(event);
@@ -280,7 +313,9 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
                 ));
             }
             if (hasLevelPromotion) {
-                expanded.add(new SalaryExpectedEventCandidate(
+                String levelKey = event.year() + "-" + event.month();
+                if (!explicitAssessmentLevels.contains(levelKey)) {
+                    expanded.add(new SalaryExpectedEventCandidate(
                         event.source(),
                         event.sourceId() + ":level",
                         event.personCode(),
@@ -288,7 +323,8 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
                         event.month(),
                         CHANGE_NORMAL_LEVEL,
                         event.note() + "；历史链级别起算状态满足5年晋升级别"
-                ));
+                    ));
+                }
             }
             if (hasNormalGrade) {
                 expanded.add(event);
@@ -321,6 +357,150 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
             aligned.add(event);
         }
         return aligned;
+    }
+
+    private List<SalaryExpectedEventCandidate> addAssessmentLevelEvents(
+            PersonCodeParts parts,
+            List<SalaryExpectedEventCandidate> events
+    ) {
+        List<SalaryExpectedEventCandidate> result = new ArrayList<>(events);
+        Set<HistoryKey> existingKeys = new HashSet<>();
+        for (SalaryExpectedEventCandidate event : events) {
+            existingKeys.add(HistoryKey.of(event));
+        }
+        List<Map<String, Object>> assessmentRows = jdbcTemplate.queryForList("""
+                SELECT CAST(TRIM(khnd) AS SIGNED) AS khnd,
+                       TRIM(COALESCE(khjg, '')) AS khjg
+                FROM dndkh
+                WHERE dwbm = ?
+                  AND grbm = ?
+                  AND TRIM(khnd) REGEXP '^[0-9]{4}$'
+                  AND CAST(TRIM(khnd) AS SIGNED) >= 2006
+                  AND TRIM(khjg) IN ('\u4f18\u79c0', '\u79f0\u804c', '\u5408\u683c')
+                ORDER BY CAST(TRIM(khnd) AS SIGNED)
+                """, parts.orgCode(), parts.personNo());
+        int qualifiedCount = 0;
+        for (Map<String, Object> row : assessmentRows) {
+            int assessmentYear = parseInt(row.get("khnd"));
+            if (assessmentYear <= 0) {
+                continue;
+            }
+            qualifiedCount += 1;
+            if (qualifiedCount < 5 || qualifiedCount % 5 != 0) {
+                continue;
+            }
+            int targetYear = assessmentYear + 1;
+            int targetMonth = 1;
+            String prefix = latestSalaryPostPrefixAt(parts, targetYear, targetMonth);
+            if (!NORMAL_LEVEL_PREFIXES.contains(prefix)) {
+                continue;
+            }
+            if (!normalLevelPromotionWouldApply(parts, targetYear, targetMonth)) {
+                continue;
+            }
+            SalaryExpectedEventCandidate event = new SalaryExpectedEventCandidate(
+                    SOURCE_ASSESSMENT,
+                    assessmentYear + ":level-base",
+                    parts.orgCode() + "-" + parts.personNo(),
+                    targetYear,
+                    targetMonth,
+                    CHANGE_NORMAL_LEVEL,
+                    "\u5e74\u5ea6\u8003\u6838\u7d2f\u8ba1\u7b2c" + qualifiedCount + "\u4e2a\u5408\u683c\u5e74\u5ea6\uff0c\u6b21\u5e741\u6708\u6b63\u5e38\u7ea7\u522b\u664b\u5347"
+            );
+            if (existingKeys.add(HistoryKey.of(event))) {
+                result.add(event);
+            }
+        }
+        return result.stream()
+                .sorted(Comparator
+                        .comparingInt(SalaryExpectedEventCandidate::year)
+                        .thenComparingInt(SalaryExpectedEventCandidate::month)
+                        .thenComparingInt(event -> eventOrder(event.changeType()))
+                        .thenComparing(SalaryExpectedEventCandidate::source)
+                        .thenComparing(SalaryExpectedEventCandidate::sourceId))
+                .toList();
+    }
+
+    private int eventOrder(String changeType) {
+        String value = trim(changeType);
+        if (CHANGE_CIVIL_RANK_CONVERSION.equals(value)) {
+            return 16;
+        }
+        if (CHANGE_CIVIL_RANK_PROMOTION.equals(value)) {
+            return 17;
+        }
+        if (CHANGE_JUDICIAL_CONVERSION.equals(value)) {
+            return 18;
+        }
+        if (CHANGE_2006_CONVERSION.equals(value) || value.contains("2006")) {
+            return 0;
+        }
+        if (CHANGE_POST_CHANGE.equals(value) || "鑱屽姟鍙樺寲".equals(value)) {
+            return 10;
+        }
+        if (CHANGE_POLICE_CONVERSION.equals(value) || "璀﹀憳濂楁敼".equals(value)) {
+            return 15;
+        }
+        if (CHANGE_EDUCATION_CHANGE.equals(value) || value.contains("\u5b66\u5386")) {
+            return 20;
+        }
+        if (isRankAllowanceChange(value)) {
+            return 21;
+        }
+        if (CHANGE_NORMAL_LEVEL.equals(value)) {
+            return 30;
+        }
+        if (CHANGE_NORMAL_GRADE.equals(value)) {
+            return 40;
+        }
+        return 99;
+    }
+
+    private String latestSalaryPostPrefixAt(PersonCodeParts parts, int year, int month) {
+        List<String> rows = jdbcTemplate.queryForList("""
+                SELECT TRIM(COALESCE(zwbm2, ''))
+                FROM hisbase
+                WHERE dwbm = ? AND grbm = ?
+                  AND (CAST(TRIM(jsnf) AS SIGNED) * 100 + CAST(TRIM(jsyf) AS SIGNED)) <= ?
+                  AND TRIM(COALESCE(zwbm2, '')) <> ''
+                  AND COALESCE(hj2, 0) > 0
+                ORDER BY CAST(TRIM(jsnf) AS SIGNED) DESC,
+                         CAST(TRIM(jsyf) AS SIGNED) DESC,
+                         COALESCE(hj2, 0) DESC,
+                         id DESC
+                LIMIT 1
+                """, String.class, parts.orgCode(), parts.personNo(), year * 100 + month);
+        String postCode = rows.isEmpty() ? baseInfoPostCode(parts) : trim(rows.get(0));
+        return postPrefix(postCode);
+    }
+
+    private String baseInfoPostCode(PersonCodeParts parts) {
+        List<String> rows = jdbcTemplate.queryForList("""
+                SELECT TRIM(COALESCE(zwbm, zjbm, ''))
+                FROM dryjbxx
+                WHERE dwbm = ? AND grbm = ?
+                LIMIT 1
+                """, String.class, parts.orgCode(), parts.personNo());
+        return rows.isEmpty() ? "" : trim(rows.get(0));
+    }
+
+    private boolean normalLevelPromotionWouldApply(PersonCodeParts parts, int year, int month) {
+        try {
+            NormalGradeTrialResult trial = normalGradeTrialService.trial(new NormalGradeTrialCommand(
+                    parts.orgCode() + "-" + parts.personNo(),
+                    parts.orgCode(),
+                    year,
+                    month,
+                    CHANGE_NORMAL_LEVEL,
+                    null
+            ));
+            return trial.changes().stream()
+                    .map(SalaryRuleChange::ruleNote)
+                    .map(this::trim)
+                    .anyMatch(note -> note.startsWith("\u7ea7\u522b\u664b\u5347\uff1a"));
+        } catch (RuntimeException ignored) {
+            return false;
+        }
     }
 
     private List<SalaryExpectedEventCandidate> alignPostEventsToNearbyHistoryType(
@@ -386,6 +566,36 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
                     nearby.month(),
                     nearby.changeType(),
                     event.note() + "\uff1b\u5386\u53f2\u94fe\u5b66\u5386\u53d8\u5316\u7c7b\u578b\u5b57\u9762\u5df2\u5bf9\u9f50"
+            ));
+        }
+        return aligned;
+    }
+
+    private List<SalaryExpectedEventCandidate> alignRankEventsToNearbyHistoryType(
+            List<SalaryExpectedEventCandidate> events,
+            Map<HistoryKey, List<SalaryHistoryLinkItem>> historyByKey
+    ) {
+        List<SalaryExpectedEventCandidate> aligned = new ArrayList<>();
+        for (SalaryExpectedEventCandidate event : events) {
+            if (!"jx".equals(event.source())
+                    || !isRankAllowanceChange(event.changeType())
+                    || hasHistoryEvent(historyByKey, event.year(), event.month(), event.changeType())) {
+                aligned.add(event);
+                continue;
+            }
+            HistoryTypeCandidate nearby = nearbyRankHistory(event.personCode(), event.year(), event.month(), event.changeType());
+            if (nearby == null || event.changeType().equals(nearby.changeType())) {
+                aligned.add(event);
+                continue;
+            }
+            aligned.add(new SalaryExpectedEventCandidate(
+                    event.source(),
+                    event.sourceId(),
+                    event.personCode(),
+                    nearby.year(),
+                    nearby.month(),
+                    nearby.changeType(),
+                    event.note() + "\uff1b\u5386\u53f2\u94fe\u8b66\u8854/\u6cd5\u68c0/\u76d1\u5bdf\u7b49\u7ea7\u6d25\u8d34\u7c7b\u578b\u5b57\u9762\u5df2\u5bf9\u9f50"
             ));
         }
         return aligned;
@@ -511,7 +721,8 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
         String value = trim(changeType);
         return isPostChangeEventType(value)
                 || CHANGE_CIVIL_RANK_CONVERSION.equals(value)
-                || CHANGE_CIVIL_RANK_PROMOTION.equals(value);
+                || CHANGE_CIVIL_RANK_PROMOTION.equals(value)
+                || CHANGE_JUDICIAL_CONVERSION.equals(value);
     }
 
     private boolean postEventCoveredByBroaderHistory(SalaryExpectedEventCandidate event) {
@@ -1126,6 +1337,100 @@ public class DefaultSalaryGeneratedTimelineService implements SalaryGeneratedTim
             );
         }
         return null;
+    }
+
+    private HistoryTypeCandidate nearbyRankHistory(String personCode, int year, int month, String generatedChangeType) {
+        PersonCodeParts parts = personCodeParser.parse(personCode);
+        String preferredType = trim(generatedChangeType);
+        String pairedType = pairedRankAllowanceType(preferredType);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT CAST(TRIM(jsnf) AS SIGNED) AS year,
+                       CAST(TRIM(jsyf) AS SIGNED) AS month,
+                       TRIM(jslb) AS changeType
+                FROM hisbase
+                WHERE dwbm = ? AND grbm = ?
+                  AND TRIM(jslb) IN (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  AND ABS((CAST(TRIM(jsnf) AS SIGNED) * 12 + CAST(TRIM(jsyf) AS SIGNED)) - (? * 12 + ?)) <= 1
+                ORDER BY ABS((CAST(TRIM(jsnf) AS SIGNED) * 12 + CAST(TRIM(jsyf) AS SIGNED)) - (? * 12 + ?)),
+                         CASE TRIM(jslb)
+                             WHEN ? THEN 0
+                             WHEN ? THEN 1
+                             ELSE 2
+                         END,
+                         CAST(TRIM(jsnf) AS SIGNED),
+                         CAST(TRIM(jsyf) AS SIGNED),
+                         id
+                LIMIT 1
+                """,
+                parts.orgCode(),
+                parts.personNo(),
+                CHANGE_POLICE_RANK_CHANGE,
+                CHANGE_POLICE_RANK_ALLOWANCE,
+                CHANGE_JUDGE_RANK,
+                CHANGE_JUDGE_ALLOWANCE,
+                CHANGE_PROSECUTOR_RANK,
+                CHANGE_PROSECUTOR_ALLOWANCE,
+                CHANGE_SUPERVISOR_RANK,
+                CHANGE_SUPERVISOR_RANK_LEGACY,
+                CHANGE_SUPERVISOR_ALLOWANCE,
+                year,
+                month,
+                year,
+                month,
+                preferredType,
+                pairedType
+        );
+        if (rows.isEmpty()) {
+            return null;
+        }
+        Map<String, Object> row = rows.get(0);
+        return new HistoryTypeCandidate(
+                Integer.parseInt(trim(row.get("year"))),
+                Integer.parseInt(trim(row.get("month"))),
+                trim(row.get("changeType"))
+        );
+    }
+
+    private boolean isRankAllowanceChange(String changeType) {
+        String value = trim(changeType);
+        return CHANGE_POLICE_RANK_CHANGE.equals(value)
+                || CHANGE_POLICE_RANK_ALLOWANCE.equals(value)
+                || CHANGE_JUDGE_RANK.equals(value)
+                || CHANGE_JUDGE_ALLOWANCE.equals(value)
+                || CHANGE_PROSECUTOR_RANK.equals(value)
+                || CHANGE_PROSECUTOR_ALLOWANCE.equals(value)
+                || CHANGE_SUPERVISOR_RANK.equals(value)
+                || CHANGE_SUPERVISOR_RANK_LEGACY.equals(value)
+                || CHANGE_SUPERVISOR_ALLOWANCE.equals(value);
+    }
+
+    private String pairedRankAllowanceType(String changeType) {
+        String value = trim(changeType);
+        if (CHANGE_POLICE_RANK_CHANGE.equals(value)) {
+            return CHANGE_POLICE_RANK_ALLOWANCE;
+        }
+        if (CHANGE_POLICE_RANK_ALLOWANCE.equals(value)) {
+            return CHANGE_POLICE_RANK_CHANGE;
+        }
+        if (CHANGE_JUDGE_RANK.equals(value)) {
+            return CHANGE_JUDGE_ALLOWANCE;
+        }
+        if (CHANGE_JUDGE_ALLOWANCE.equals(value)) {
+            return CHANGE_JUDGE_RANK;
+        }
+        if (CHANGE_PROSECUTOR_RANK.equals(value)) {
+            return CHANGE_PROSECUTOR_ALLOWANCE;
+        }
+        if (CHANGE_PROSECUTOR_ALLOWANCE.equals(value)) {
+            return CHANGE_PROSECUTOR_RANK;
+        }
+        if (CHANGE_SUPERVISOR_RANK.equals(value) || CHANGE_SUPERVISOR_RANK_LEGACY.equals(value)) {
+            return CHANGE_SUPERVISOR_ALLOWANCE;
+        }
+        if (CHANGE_SUPERVISOR_ALLOWANCE.equals(value)) {
+            return CHANGE_SUPERVISOR_RANK;
+        }
+        return value;
     }
 
     private boolean isGeneratedPostHistoryType(String changeType) {

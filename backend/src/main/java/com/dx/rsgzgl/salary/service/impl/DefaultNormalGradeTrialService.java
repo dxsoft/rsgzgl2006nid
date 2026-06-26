@@ -132,6 +132,12 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         if (baseline == null) {
             throw new BusinessException("SALARY_BASELINE_NOT_FOUND", "No salary baseline found before target month.");
         }
+        if (expectedRow == null && isPostChangeCommand(command.changeType())) {
+            expectedRow = syntheticInstitutionPostChangeRow(command, parts, baselineRow);
+        }
+        if (isProbationaryPostCode(expectedRow)) {
+            return probationaryNewSalaryTrial(command, baseline, baselineRow, expected, expectedRow);
+        }
         if (isStandardAdjustment(expectedRow)) {
             return standardAdjustmentTrial(command, baseline, baselineRow, expected, expectedRow);
         }
@@ -399,21 +405,21 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
             ));
         }
 
-        BigDecimal expectedTotal = normalize(expected.totalAmount());
+        BigDecimal expectedTotal = expected == null ? normalize(calculatedTotal) : normalize(expected.totalAmount());
         BigDecimal difference = calculatedTotal.subtract(expectedTotal);
         return new NormalGradeTrialResult(
                 command.personCode(),
                 command.year(),
                 command.month(),
                 baseline == null ? null : baseline.id(),
-                expected.id(),
+                expected == null ? "" : expected.id(),
                 normalize(baselineTotal),
                 normalize(calculatedTotal),
                 expectedTotal,
                 normalize(difference),
-                difference.compareTo(BigDecimal.ZERO) == 0,
+                expected == null || difference.compareTo(BigDecimal.ZERO) == 0,
                 changes,
-                compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
+                expected == null ? List.of() : compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
         );
     }
 
@@ -543,21 +549,21 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         addAssessmentStartYearChange(changes, "XCKHNDZW", "\u4e0b\u6b21\u664b\u6863/\u85aa\u7ea7\u664b\u5347\u8003\u6838\u8d77\u7b97\u5e74", baselineRow, expectedRow, ruleNote);
 
         BigDecimal calculatedTotal = baselineTotal.subtract(beforeAmount).add(afterAmount);
-        BigDecimal expectedTotal = normalize(expected.totalAmount());
+        BigDecimal expectedTotal = expected == null ? normalize(calculatedTotal) : normalize(expected.totalAmount());
         BigDecimal difference = calculatedTotal.subtract(expectedTotal);
         return new NormalGradeTrialResult(
                 command.personCode(),
                 command.year(),
                 command.month(),
                 baseline.id(),
-                expected.id(),
+                expected == null ? "" : expected.id(),
                 normalize(baselineTotal),
                 normalize(calculatedTotal),
                 expectedTotal,
                 normalize(difference),
-                difference.compareTo(BigDecimal.ZERO) == 0,
+                expected == null || difference.compareTo(BigDecimal.ZERO) == 0,
                 changes,
-                compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
+                expected == null ? List.of() : compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
         );
     }
 
@@ -634,21 +640,21 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
             ));
         }
         BigDecimal calculatedTotal = baselineTotal.add(afterAmount);
-        BigDecimal expectedTotal = normalize(expected.totalAmount());
+        BigDecimal expectedTotal = expected == null ? normalize(calculatedTotal) : normalize(expected.totalAmount());
         BigDecimal difference = calculatedTotal.subtract(expectedTotal);
         return new NormalGradeTrialResult(
                 command.personCode(),
                 command.year(),
                 command.month(),
                 baseline == null ? null : baseline.id(),
-                expected.id(),
+                expected == null ? "" : expected.id(),
                 normalize(baselineTotal),
                 normalize(calculatedTotal),
                 expectedTotal,
                 normalize(difference),
-                difference.compareTo(BigDecimal.ZERO) == 0,
+                expected == null || difference.compareTo(BigDecimal.ZERO) == 0,
                 changes,
-                compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
+                expected == null ? List.of() : compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
         );
     }
 
@@ -667,7 +673,7 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         BigDecimal afterAmount = afterRankAllowance;
         BigDecimal baselineTotal = number(baselineRow.get("hj2"));
         String changeType = trim(expectedRow.get("jslb"));
-        String ruleNote = changeType + "\uff1a\u6cd5\u5b98/\u68c0\u5bdf\u5b98\u7b49\u7ea7\u6216\u6cd5\u68c0\u6d25\u8d34\u53d8\u5316\u65f6\uff0c\u6309 jxjtbz \u4e2d tbnd+jx \u67e5 jtbz\uff0ctbnd=" + standardYear;
+        String ruleNote = changeType + "\uff1a\u6cd5\u5b98/\u68c0\u5bdf\u5b98/\u76d1\u5bdf\u5b98\u7b49\u7ea7\u6216\u5bf9\u5e94\u6d25\u8d34\u53d8\u5316\u65f6\uff0c\u6309 jxjtbz \u4e2d tbnd+jx \u67e5 jtbz\uff0ctbnd=" + standardYear;
 
         List<SalaryRuleChange> changes = new ArrayList<>();
         Map<String, BigDecimal> calculatedAmounts = new LinkedHashMap<>();
@@ -1170,21 +1176,21 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         addAssessmentStartYearChange(changes, "XCKHNDZW", "\u4e0b\u6b21\u664b\u6863/\u85aa\u7ea7\u664b\u5347\u8003\u6838\u8d77\u7b97\u5e74", baselineRow, expectedRow, ruleNote);
 
         BigDecimal calculatedTotal = baselineTotal.subtract(beforeAmount).add(afterAmount);
-        BigDecimal expectedTotal = normalize(expected.totalAmount());
+        BigDecimal expectedTotal = expected == null ? normalize(calculatedTotal) : normalize(expected.totalAmount());
         BigDecimal difference = calculatedTotal.subtract(expectedTotal);
         return new NormalGradeTrialResult(
                 command.personCode(),
                 command.year(),
                 command.month(),
                 baseline == null ? null : baseline.id(),
-                expected.id(),
+                expected == null ? "" : expected.id(),
                 normalize(baselineTotal),
                 normalize(calculatedTotal),
                 expectedTotal,
                 normalize(difference),
-                difference.compareTo(BigDecimal.ZERO) == 0,
+                expected == null || difference.compareTo(BigDecimal.ZERO) == 0,
                 changes,
-                compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
+                expected == null ? List.of() : compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
         );
     }
 
@@ -1404,7 +1410,7 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         }
         BigDecimal beforePostAmount = number(baselineRow.get("zwgzse2"));
         BigDecimal beforeSalaryGradeAmount = number(baselineRow.get("jbgzse2"));
-        BigDecimal afterPostAmount = number(expectedRow.get("zwgzse2"));
+        BigDecimal afterPostAmount = regularizationPostSalary(command.orgCode(), standardYear, newPostCode, targetStep);
         String salaryPostCode = regularizationEducationPostCode(command.orgCode(), standardYear, newPostCode);
         BigDecimal afterSalaryGradeAmount = lookupSalaryGradeColumn(standardYear, salaryPostCode, targetStep);
         BigDecimal beforeAmount = beforePostAmount.add(beforeSalaryGradeAmount);
@@ -1460,21 +1466,21 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
         addAssessmentStartYearChange(changes, "XCKHNDZW", "\u4e0b\u6b21\u85aa\u7ea7\u664b\u5347\u8003\u6838\u8d77\u7b97\u5e74", baselineRow, expectedRow, ruleNote);
 
         BigDecimal calculatedTotal = baselineTotal.subtract(beforeAmount).add(afterAmount);
-        BigDecimal expectedTotal = normalize(expected.totalAmount());
+        BigDecimal expectedTotal = expected == null ? normalize(calculatedTotal) : normalize(expected.totalAmount());
         BigDecimal difference = calculatedTotal.subtract(expectedTotal);
         return new NormalGradeTrialResult(
                 command.personCode(),
                 command.year(),
                 command.month(),
                 baseline.id(),
-                expected.id(),
+                expected == null ? "" : expected.id(),
                 normalize(baselineTotal),
                 normalize(calculatedTotal),
                 expectedTotal,
                 normalize(difference),
-                difference.compareTo(BigDecimal.ZERO) == 0,
+                expected == null || difference.compareTo(BigDecimal.ZERO) == 0,
                 changes,
-                compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
+                expected == null ? List.of() : compareExpected(expected.id(), calculatedAmounts.keySet(), calculatedAmounts)
         );
     }
 
@@ -3745,6 +3751,10 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
                 && (changeType.contains("\u89c1\u4e60\u5de5\u8d44") || changeType.contains("\u65b0\u8fdb\u5de5\u8d44"));
     }
 
+    private boolean isProbationaryPostCode(Map<String, Object> expectedRow) {
+        return expectedRow != null && trim(expectedRow.get("zwbm2")).contains("F");
+    }
+
     private boolean isStandardAdjustment(Map<String, Object> expectedRow) {
         if (expectedRow == null) {
             return false;
@@ -3782,15 +3792,10 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
             return false;
         }
         String changeType = trim(expectedRow.get("jslb"));
-        String postCode = trim(expectedRow.get("zwbm2"));
         if (!changeType.contains("\u8b66\u8854\u53d8\u5316") && !changeType.contains("\u8b66\u8854\u6d25\u8d34")) {
             return false;
         }
-        if (postCode.length() < 2) {
-            return false;
-        }
-        return Set.of("01", "02", "03", "21", "22", "23", "24", "25", "26", "27", "28")
-                .contains(postCode.substring(0, 2));
+        return trim(expectedRow.get("jx")).contains("\u8b66");
     }
 
     private boolean isEducationChange(Map<String, Object> expectedRow) {
@@ -3823,18 +3828,18 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
             return false;
         }
         String changeType = trim(expectedRow.get("jslb"));
-        String postCode = trim(expectedRow.get("zwbm2"));
         if (!changeType.contains("\u6cd5\u5b98\u7b49\u7ea7")
                 && !changeType.contains("\u68c0\u5bdf\u7b49\u7ea7")
+                && !changeType.contains("\u68c0\u5bdf\u5b98\u7b49\u7ea7")
+                && !changeType.contains("\u76d1\u5bdf\u7b49\u7ea7")
+                && !changeType.contains("\u76d1\u5bdf\u5b98\u7b49\u7ea7")
                 && !changeType.contains("\u5ba1\u5224\u6d25\u8d34")
-                && !changeType.contains("\u68c0\u5bdf\u6d25\u8d34")) {
+                && !changeType.contains("\u68c0\u5bdf\u6d25\u8d34")
+                && !changeType.contains("\u76d1\u5bdf\u6d25\u8d34")) {
             return false;
         }
-        if (postCode.length() < 2) {
-            return false;
-        }
-        return Set.of("01", "02", "03", "21", "22", "23", "24", "25", "26", "27", "28")
-                .contains(postCode.substring(0, 2));
+        String rankName = trim(expectedRow.get("jx"));
+        return rankName.contains("\u6cd5") || rankName.contains("\u68c0") || rankName.contains("\u76d1");
     }
 
     private boolean isJudicialConversion(Map<String, Object> expectedRow) {
@@ -3921,6 +3926,54 @@ public class DefaultNormalGradeTrialService implements NormalGradeTrialService {
                 && newPostCode.length() >= 2
                 && SALARY_GRADE_PREFIXES.contains(newPostCode.substring(0, 2))
                 && !trim(oldPostCode).equals(newPostCode);
+    }
+
+    private boolean isPostChangeCommand(String changeType) {
+        String safeChangeType = trim(changeType);
+        return safeChangeType.contains("\u804c\u52a1\u53d8\u5316");
+    }
+
+    private Map<String, Object> syntheticInstitutionPostChangeRow(
+            NormalGradeTrialCommand command,
+            PersonCodeParts parts,
+            Map<String, Object> baselineRow
+    ) {
+        String oldPostCode = trim(baselineRow.get("zwbm2"));
+        String oldPostPrefix = postPrefix(oldPostCode);
+        if (!SALARY_GRADE_PREFIXES.contains(oldPostPrefix)) {
+            return null;
+        }
+        String targetPostCode = targetInstitutionPostCode(parts.orgCode(), parts.personNo(), command.year(), command.month());
+        String targetPostPrefix = postPrefix(targetPostCode);
+        if (!SALARY_GRADE_PREFIXES.contains(targetPostPrefix) || oldPostCode.equals(targetPostCode)) {
+            return null;
+        }
+        Map<String, Object> row = new LinkedHashMap<>(baselineRow);
+        row.put("dwbm", parts.orgCode());
+        row.put("grbm", parts.personNo());
+        row.put("jsnf", String.valueOf(command.year()));
+        row.put("jsyf", String.valueOf(command.month()));
+        row.put("jslb", "\u804c\u52a1\u53d8\u5316");
+        row.put("zwbm2", targetPostCode);
+        row.put("zwgw2", targetPostCode);
+        row.put("id", "");
+        return row;
+    }
+
+    private String targetInstitutionPostCode(String orgCode, String personNo, int year, int month) {
+        List<String> values = jdbcTemplate.queryForList("""
+                SELECT TRIM(zwbm)
+                FROM dryzwbh
+                WHERE dwbm = ?
+                  AND grbm = ?
+                  AND TRIM(COALESCE(zwbm, '')) <> ''
+                  AND TRIM(COALESCE(srny, '')) <> ''
+                  AND YEAR(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(srny), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH)) = ?
+                  AND MONTH(DATE_ADD(STR_TO_DATE(CONCAT(REPLACE(TRIM(srny), '.', ''), '01'), '%Y%m%d'), INTERVAL 1 MONTH)) = ?
+                ORDER BY REPLACE(TRIM(srny), '.', '') DESC, id DESC
+                LIMIT 1
+                """, String.class, orgCode, personNo, year, month);
+        return values.isEmpty() ? "" : trim(values.get(0));
     }
 
     private BigDecimal number(Object value) {

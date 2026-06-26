@@ -27,23 +27,11 @@
 
 <div id="appShell" class="app-shell hidden">
     <header class="topbar">
-        <div>
+        <div class="topbar-status">
             <h1>&#20154;&#20107;&#24037;&#36164;&#31649;&#29702;</h1>
             <p id="statusText">&#27491;&#22312;&#36830;&#25509;&#26381;&#21153;...</p>
         </div>
-        <div class="toolbar">
-            <input id="batchYearInput" type="number" min="2006" max="2099" value="2024" aria-label="&#23545;&#36134;&#24180;&#24230;">
-            <input id="batchMonthInput" type="number" min="1" max="12" value="7" aria-label="&#23545;&#36134;&#26376;&#20221;">
-            <input id="batchLimitInput" type="number" min="1" max="500" value="100" aria-label="&#23545;&#36134;&#20154;&#25968;">
-            <input id="batchChangeTypeInput" type="text" placeholder="&#21464;&#21160;&#31867;&#22411;" aria-label="&#21464;&#21160;&#31867;&#22411;">
-            <select id="acceptanceSampleSelect" aria-label="&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">
-                <option value="">&#25277;&#26597;&#26679;&#26412;</option>
-            </select>
-            <button id="loadAcceptanceSampleButton" type="button" title="&#36733;&#20837;&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">&#36733;&#20837;&#26679;&#26412;</button>
-            <button id="batchReconcileButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#25209;&#37327;&#23545;&#36134;</button>
-            <button id="normalGradeBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#25209;&#37327;&#26187;&#26723;</button>
-            <button id="exportBatchReconcileButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23548;&#20986;&#23545;&#36134;</button>
-            <button id="exportNormalGradeButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#23548;&#20986;&#26187;&#26723;</button>
+        <div class="topbar-actions">
             <button id="refreshButton" type="button" title="&#21047;&#26032;&#24403;&#21069;&#25968;&#25454;">&#21047;&#26032;</button>
         </div>
     </header>
@@ -71,54 +59,161 @@
 
         <main class="desktop-main">
             <section id="workbenchView" class="workbench-view" aria-label="&#24037;&#20316;&#21488;">
+                <section class="command-ribbon" aria-label="&#24037;&#36164;&#19994;&#21153;&#24555;&#25463;&#25805;&#20316;">
+                    <div class="ribbon-group period-group">
+                        <span>&#26399;&#38388;</span>
+                        <input id="batchYearInput" type="number" min="2006" max="2099" value="2024" aria-label="&#23545;&#36134;&#24180;&#24230;">
+                        <input id="batchMonthInput" type="number" min="1" max="12" value="7" aria-label="&#23545;&#36134;&#26376;&#20221;">
+                        <input id="batchLimitInput" type="number" min="1" max="500" value="100" aria-label="&#23545;&#36134;&#20154;&#25968;">
+                        <input id="batchChangeTypeInput" type="text" placeholder="&#21464;&#21160;&#31867;&#22411;" aria-label="&#21464;&#21160;&#31867;&#22411;">
+                    </div>
+                    <div class="ribbon-group">
+                        <span>&#24453;&#21150;&#29983;&#25104;</span>
+                        <button id="generateNormalGradeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#27491;&#24120;&#26187;&#26723;&#24453;&#21150;">&#26187;&#26723;</button>
+                        <button id="generateEntrySalaryTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#26032;&#36827;&#35265;&#20064;&#36716;&#27491;&#24453;&#21150;">&#26032;&#36827;</button>
+                        <button id="generatePostChangeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#32844;&#21153;&#32844;&#32423;&#21464;&#21160;&#24453;&#21150;">&#32844;&#21153;</button>
+                        <button id="generateAllowanceChangeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#27941;&#34917;&#36148;&#21464;&#21270;&#24453;&#21150;">&#27941;&#36148;</button>
+                        <button id="generateTransferSalaryTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#35843;&#20837;&#23450;&#36164;&#24453;&#21150;">&#35843;&#20837;</button>
+                        <button id="generatePunishmentReductionTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#38477;&#36164;&#22788;&#20998;&#31561;&#29305;&#27530;&#24453;&#21150;">&#22788;&#20998;</button>
+                    </div>
+                    <div class="ribbon-group">
+                        <span>&#25209;&#37327;&#26680;&#39564;</span>
+                        <button id="batchReconcileButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23545;&#36134;</button>
+                        <button id="normalGradeBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#26187;&#26723;</button>
+                        <button id="generatedTimelineBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#29983;&#25104;&#22522;&#30784;&#20449;&#24687;&#24212;&#21457;&#32447;">&#24212;&#21457;&#32447;</button>
+                        <button id="exportBatchReconcileButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23548;&#20986;&#23545;&#36134;</button>
+                        <button id="exportNormalGradeButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#23548;&#20986;&#26187;&#26723;</button>
+                        <button id="exportGeneratedTimelineButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#24212;&#21457;&#32447;&#25209;&#37327;&#26680;&#26597;">&#23548;&#20986;&#24212;&#21457;&#32447;</button>
+                    </div>
+                    <div class="ribbon-group sample-group">
+                        <span>&#39564;&#25910;&#25277;&#26597;</span>
+                        <select id="acceptanceSampleSelect" aria-label="&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">
+                            <option value="">&#25277;&#26597;&#26679;&#26412;</option>
+                        </select>
+                        <button id="loadAcceptanceSampleButton" type="button" title="&#36733;&#20837;&#19994;&#21153;&#25277;&#26597;&#26679;&#26412;">&#36733;&#20837;</button>
+                    </div>
+                </section>
                 <div class="workbench-header">
                     <div>
                         <h2>&#24037;&#20316;&#21488;</h2>
-                        <p>&#27719;&#24635;&#24453;&#21150;&#19994;&#21153;&#12289;&#24050;&#21150;&#19994;&#21153;&#21644;&#21487;&#21150;&#29702;&#30340;&#24037;&#36164;&#21464;&#21160;&#12290;</p>
+                        <p>&#24453;&#21150;&#12289;&#24050;&#21150;&#12289;&#21382;&#21490;&#20889;&#20837;&#24037;&#20316;&#21306;</p>
                     </div>
                     <form id="workbenchFilterForm" class="workbench-tools">
-                        <input id="workbenchKeywordInput" type="search" placeholder="&#22995;&#21517;&#12289;&#32534;&#21495;&#12289;&#21333;&#20301;" autocomplete="off">
-                        <select id="workbenchChangeTypeSelect" aria-label="&#21464;&#21160;&#31867;&#22411;">
-                            <option value="">&#20840;&#37096;&#21464;&#21160;</option>
-                            <option value="&#27491;&#24120;&#32423;&#21035;">&#27491;&#24120;&#32423;&#21035;</option>
-                            <option value="&#27491;&#24120;&#26723;&#27425;">&#27491;&#24120;&#26723;&#27425;</option>
-                            <option value="&#32844;&#21153;&#21464;&#21270;">&#32844;&#21153;&#21464;&#21270;</option>
-                            <option value="&#23398;&#21382;&#21464;&#21270;">&#23398;&#21382;&#21464;&#21270;</option>
-                            <option value="&#32844;&#32423;&#22871;&#25913;">&#32844;&#32423;&#22871;&#25913;</option>
-                            <option value="&#32844;&#32423;&#26187;&#21319;">&#32844;&#32423;&#26187;&#21319;</option>
-                            <option value="&#35686;&#21592;&#22871;&#25913;">&#35686;&#21592;&#22871;&#25913;</option>
-                            <option value="&#35843;&#20837;&#23450;&#36164;">&#35843;&#20837;&#23450;&#36164;</option>
-                            <option value="&#36716;&#27491;&#23450;&#32423;">&#36716;&#27491;&#23450;&#32423;</option>
-                            <option value="2006&#22871;&#25913;">2006&#22871;&#25913;</option>
-                        </select>
-                        <select id="workbenchCaseStatusSelect" aria-label="&#24050;&#21150;&#29366;&#24577;">
-                            <option value="DONE">&#24050;&#21150;</option>
-                            <option value="CANCELLED">&#24050;&#25764;&#22238;</option>
-                            <option value="ALL">&#20840;&#37096;&#24050;&#21150;/&#25764;&#22238;</option>
-                        </select>
-                        <select id="workbenchTrialStatusSelect" aria-label="&#35797;&#31639;&#29366;&#24577;">
-                            <option value="">&#20840;&#37096;&#35797;&#31639;</option>
-                            <option value="MATCH">&#21305;&#37197;</option>
-                            <option value="DIFFERENT">&#26377;&#24046;&#24322;</option>
-                            <option value="ERROR">&#35797;&#31639;&#24322;&#24120;</option>
-                            <option value="SKIPPED">&#26410;&#35797;&#31639;</option>
-                        </select>
-                        <select id="workbenchReviewStatusSelect" aria-label="&#22797;&#26680;&#29366;&#24577;">
-                            <option value="">&#20840;&#37096;&#22797;&#26680;</option>
-                            <option value="PENDING">&#24453;&#22797;&#26680;</option>
-                            <option value="REVIEWED">&#24050;&#22797;&#26680;</option>
-                        </select>
-                        <button id="workbenchApplyFilterButton" type="submit">&#31579;&#36873;</button>
-                        <button id="refreshTodoCacheButton" type="button">&#21047;&#26032;&#24453;&#21150;&#32531;&#23384;</button>
-                        <button id="workbenchRefreshButton" type="button">&#21047;&#26032;</button>
-                        <button id="exportTodoButton" type="button">&#23548;&#20986;&#24453;&#21150;</button>
-                        <button id="exportDoneButton" type="button">&#23548;&#20986;&#24050;&#21150;</button>
+                        <div class="filter-strip">
+                            <input id="workbenchKeywordInput" type="search" placeholder="&#22995;&#21517;&#12289;&#32534;&#21495;&#12289;&#21333;&#20301;" autocomplete="off">
+                            <select id="workbenchChangeTypeSelect" aria-label="&#21464;&#21160;&#31867;&#22411;">
+                                <option value="">&#20840;&#37096;&#21464;&#21160;</option>
+                                <option value="&#27491;&#24120;&#32423;&#21035;">&#27491;&#24120;&#32423;&#21035;</option>
+                                <option value="&#27491;&#24120;&#26723;&#27425;">&#27491;&#24120;&#26723;&#27425;</option>
+                                <option value="&#32844;&#21153;&#21464;&#21270;">&#32844;&#21153;&#21464;&#21270;</option>
+                                <option value="&#23398;&#21382;&#21464;&#21270;">&#23398;&#21382;&#21464;&#21270;</option>
+                                <option value="&#32844;&#32423;&#22871;&#25913;">&#32844;&#32423;&#22871;&#25913;</option>
+                                <option value="&#32844;&#32423;&#26187;&#21319;">&#32844;&#32423;&#26187;&#21319;</option>
+                                <option value="&#35686;&#21592;&#22871;&#25913;">&#35686;&#21592;&#22871;&#25913;</option>
+                                <option value="&#35843;&#20837;&#23450;&#36164;">&#35843;&#20837;&#23450;&#36164;</option>
+                                <option value="&#36716;&#27491;&#23450;&#32423;">&#36716;&#27491;&#23450;&#32423;</option>
+                                <option value="2006&#22871;&#25913;">2006&#22871;&#25913;</option>
+                            </select>
+                            <select id="workbenchSourceSelect" aria-label="&#19994;&#21153;&#26469;&#28304;">
+                                <option value="">&#20840;&#37096;&#26469;&#28304;</option>
+                                <option value="SALARY_EVENT">&#24037;&#36164;&#21464;&#21160;</option>
+                                <option value="SALARY_CASE">&#24037;&#36164;&#30003;&#21150;</option>
+                                <option value="SALARY_CLOSURE">&#24037;&#36164;&#38381;&#29615;</option>
+                                <option value="DATA_GOVERNANCE">&#25968;&#25454;&#27835;&#29702;</option>
+                                <option value="REPORT_SAMPLE_COMPARISON">&#25253;&#34920;&#26679;&#26412;&#23545;&#29031;</option>
+                                <option value="GENERATED_TIMELINE">&#33258;&#21160;&#28436;&#31639;&#32570;&#21475;</option>
+                                <option value="APPLICATION_TODO">&#30003;&#21150;&#24453;&#21150;</option>
+                                <option value="APPLICATION_DONE">&#30003;&#21150;&#24050;&#21150;</option>
+                            </select>
+                            <select id="workbenchCaseStatusSelect" aria-label="&#24050;&#21150;&#29366;&#24577;">
+                                <option value="DONE">&#24050;&#21150;</option>
+                                <option value="CANCELLED">&#24050;&#25764;&#22238;</option>
+                                <option value="ALL">&#20840;&#37096;&#24050;&#21150;/&#25764;&#22238;</option>
+                            </select>
+                            <select id="workbenchTrialStatusSelect" aria-label="&#35797;&#31639;&#29366;&#24577;">
+                                <option value="">&#20840;&#37096;&#35797;&#31639;</option>
+                                <option value="MATCH">&#21305;&#37197;</option>
+                                <option value="DIFFERENT">&#26377;&#24046;&#24322;</option>
+                                <option value="ERROR">&#35797;&#31639;&#24322;&#24120;</option>
+                                <option value="SKIPPED">&#26410;&#35797;&#31639;</option>
+                            </select>
+                            <select id="workbenchReviewStatusSelect" aria-label="&#22797;&#26680;&#29366;&#24577;">
+                                <option value="">&#20840;&#37096;&#22797;&#26680;</option>
+                                <option value="PENDING">&#24453;&#22797;&#26680;</option>
+                                <option value="REVIEWED">&#24050;&#22797;&#26680;</option>
+                            </select>
+                            <select id="workbenchWorkflowStatusSelect" aria-label="&#21150;&#29702;&#36827;&#24230;">
+                                <option value="">&#20840;&#37096;&#36827;&#24230;</option>
+                                <option value="REVIEW_PENDING">&#24453;&#22797;&#26680;</option>
+                                <option value="HISTORY_READY">&#21487;&#20889;&#20837;&#21382;&#21490;</option>
+                                <option value="HISTORY_PREPARED">&#24453;&#20889;&#20837;</option>
+                                <option value="HISTORY_WRITTEN">&#24050;&#20889;&#20837;</option>
+                                <option value="HISTORY_REVIEW_PENDING">&#20889;&#20837;&#21518;&#24453;&#26680;&#26597;</option>
+                                <option value="HISTORY_CLOSED">&#24050;&#38381;&#29615;</option>
+                                <option value="HISTORY_BLOCKED">&#20889;&#20837;&#38459;&#26029;</option>
+                                <option value="HISTORY_ROLLED_BACK">&#20889;&#20837;&#24050;&#25764;&#38144;</option>
+                                <option value="DATA_GOVERNANCE_REVIEWED">&#25968;&#25454;&#27835;&#29702;&#24050;&#26680;&#26597;</option>
+                                <option value="DATA_GOVERNANCE_IGNORED">&#25968;&#25454;&#27835;&#29702;&#24050;&#24573;&#30053;</option>
+                                <option value="CASE_CANCELLED">&#24050;&#25764;&#22238;</option>
+                                <option value="CASE_DONE">&#24050;&#21150;</option>
+                            </select>
+                            <select id="workbenchClosureStatusSelect" aria-label="&#38381;&#29615;&#29366;&#24577;">
+                                <option value="">&#20840;&#37096;&#38381;&#29615;</option>
+                                <option value="PENDING">&#24453;&#38381;&#29615;</option>
+                                <option value="BLOCKED">&#38381;&#29615;&#38459;&#26029;</option>
+                                <option value="CLOSED">&#24050;&#38381;&#29615;</option>
+                                <option value="CANCELLED">&#24050;&#25764;&#22238;</option>
+                            </select>
+                            <select id="workbenchNextActionSelect" aria-label="&#19979;&#19968;&#27493;&#21160;&#20316;">
+                                <option value="">&#20840;&#37096;&#19979;&#19968;&#27493;</option>
+                                <option value="REVIEW_TRIAL">&#22797;&#26680;&#35797;&#31639;</option>
+                                <option value="PRINT_OR_CREATE_HISTORY_PLAN">&#25171;&#21360;/&#20889;&#20837;&#39044;&#26816;</option>
+                                <option value="VIEW_HISTORY_PLAN">&#26597;&#30475;&#20889;&#20837;&#35745;&#21010;</option>
+                                <option value="EXECUTE_HISTORY_WRITE">&#20889;&#20837;&#21382;&#21490;</option>
+                                <option value="REVIEW_DIFFERENCE">&#26680;&#26597;&#20889;&#20837;&#24046;&#24322;</option>
+                            </select>
+                            <button id="workbenchApplyFilterButton" type="submit">&#31579;&#36873;</button>
+                        </div>
+                        <div class="workbench-action-strip">
+                            <button id="refreshTodoCacheButton" type="button">&#21047;&#26032;&#24453;&#21150;&#32531;&#23384;</button>
+                            <button id="workbenchRefreshButton" type="button">&#21047;&#26032;</button>
+                            <button id="exportTodoButton" type="button">&#23548;&#20986;&#24453;&#21150;</button>
+                            <button id="exportDoneButton" type="button">&#23548;&#20986;&#24050;&#21150;</button>
+                            <button id="refreshGeneratedIssuesButton" type="button">&#27785;&#28096;&#24212;&#21457;&#32447;</button>
+                            <button id="dataGovernanceScanButton" type="button">&#25968;&#25454;&#27835;&#29702;</button>
+                            <button id="dataGovernanceTasksButton" type="button">&#27835;&#29702;&#20219;&#21153;</button>
+                            <button id="exportDataGovernanceButton" type="button">&#23548;&#20986;&#27835;&#29702;</button>
+                            <button id="salaryFormsButton" type="button">&#19994;&#21153;&#34920;&#21333;</button>
+                            <button id="salaryFlowsButton" type="button">&#19994;&#21153;&#27969;&#31243;</button>
+                            <button id="reportPrintButton" type="button">&#25253;&#34920;&#25171;&#21360;</button>
+                            <button id="migrationAcceptanceButton" type="button">&#39564;&#25910;&#38392;&#21475;</button>
+                            <button id="migrationAcceptanceHistoryButton" type="button">&#39564;&#25910;&#21382;&#21490;</button>
+                            <button id="exportMigrationAcceptanceButton" type="button">&#23548;&#20986;&#39564;&#25910;</button>
+                            <button id="migrationRegressionButton" type="button">&#22238;&#24402;&#26679;&#26412;</button>
+                            <button id="migrationRegressionLibraryButton" type="button">&#22266;&#23450;&#26679;&#26412;</button>
+                            <button id="migrationRegressionDashboardButton" type="button">&#22238;&#24402;&#30475;&#26495;</button>
+                            <button id="migrationQualityOverviewButton" type="button">&#36136;&#37327;&#24635;&#35272;</button>
+                            <button id="migrationPreflightButton" type="button">&#19978;&#32447;&#24033;&#26816;</button>
+                            <button id="migrationReadinessButton" type="button">&#19978;&#32447;&#28165;&#21333;</button>
+                            <button id="historyDeliveryOverviewButton" type="button">&#20889;&#20837;&#20132;&#20184;&#24635;&#35272;</button>
+                            <button id="historyClosureAcceptanceButton" type="button">&#20889;&#20837;&#38381;&#29615;&#39564;&#25910;</button>
+                        </div>
                     </form>
                 </div>
                 <div id="workbenchFilterSummary" class="workbench-filter-summary"></div>
+                <div id="migrationToolResult" class="workbench-filter-summary"></div>
+                <div class="workspace-tabs" aria-label="&#24037;&#20316;&#21306;&#23450;&#20301;">
+                    <button type="button" data-workbench-jump="metrics">&#25351;&#26631;</button>
+                    <button type="button" data-workbench-jump="todo">&#24453;&#21150;</button>
+                    <button type="button" data-workbench-jump="done">&#24050;&#21150;</button>
+                    <button type="button" data-workbench-jump="history">&#21382;&#21490;&#20889;&#20837;</button>
+                    <span class="workspace-tab-spacer"></span>
+                    <button type="button" class="active" data-density-mode="compact">&#32039;&#20945;</button>
+                    <button type="button" data-density-mode="comfortable">&#33298;&#36866;</button>
+                </div>
                 <div id="workbenchMetrics" class="workbench-metrics"></div>
                 <div class="workbench-grid">
-                    <section class="workbench-panel">
+                    <section id="todoPanel" class="workbench-panel">
                         <div class="pane-title">
                             <h2>&#24453;&#21150;&#19994;&#21153;</h2>
                             <span id="todoCount">0</span>
@@ -126,7 +221,7 @@
                         <div id="todoWorkItems" class="work-item-list"></div>
                         <button id="loadMoreTodoButton" class="load-more-button" type="button">&#21152;&#36733;&#26356;&#22810;</button>
                     </section>
-                    <section class="workbench-panel">
+                    <section id="donePanel" class="workbench-panel">
                         <div class="pane-title">
                             <h2>&#24050;&#21150;&#19994;&#21153;</h2>
                             <span id="doneCount">0</span>
@@ -134,7 +229,7 @@
                         <div id="doneWorkItems" class="work-item-list"></div>
                         <button id="loadMoreDoneButton" class="load-more-button" type="button">&#21152;&#36733;&#26356;&#22810;</button>
                     </section>
-                    <section class="workbench-panel history-plan-panel">
+                    <section id="historyPanel" class="workbench-panel history-plan-panel">
                         <div class="pane-title">
                             <h2>&#21382;&#21490;&#20889;&#20837;&#35745;&#21010;</h2>
                             <div class="pane-actions">
@@ -182,6 +277,8 @@
                                 </select>
                                 <select id="historyPlanActionSelect" aria-label="&#19979;&#19968;&#27493;&#21160;&#20316;">
                                     <option value="">&#20840;&#37096;&#21160;&#20316;</option>
+                                    <option value="WRITE_HISTORY">&#20889;&#20837;&#21382;&#21490;</option>
+                                    <option value="VIEW_PLAN">&#26597;&#30475;&#20889;&#20837;&#35745;&#21010;</option>
                                     <option value="RETEST_FIRST">&#25353;&#24403;&#21069;&#22522;&#30784;&#22797;&#27979;</option>
                                     <option value="MAINTAIN_AND_RETEST">&#32500;&#25252;&#21518;&#22797;&#27979;</option>
                                     <option value="APPROVE_RETEST">&#26631;&#35760;&#22797;&#27979;&#36890;&#36807;</option>
@@ -193,8 +290,12 @@
                                 <button id="historyPlanBatchPreviewButton" type="button">&#25209;&#37327;&#39044;&#26816;</button>
                                 <button id="historyPlanBatchRetestButton" type="button">&#25209;&#37327;&#22797;&#27979;</button>
                                 <button id="historyPlanBatchRetestApproveButton" type="button">&#25209;&#37327;&#22797;&#27979;&#36890;&#36807;</button>
+                                <button id="historyPlanBatchReviewButton" type="button">&#25209;&#37327;&#26680;&#26597;&#24046;&#24322;</button>
+                                <button id="historyPlanBatchSpecialButton" type="button">&#26631;&#35760;&#29305;&#27530;&#24773;&#20917;</button>
                                 <button id="historyPlanBatchExecuteButton" type="button">&#25209;&#37327;&#20889;&#20837;</button>
                                 <button id="historyPlanBatchRollbackButton" type="button">&#25209;&#37327;&#25764;&#38144;</button>
+                                <button id="historyPendingQueuesButton" type="button">&#24453;&#22788;&#29702;</button>
+                                <button id="historyBatchLedgerButton" type="button">&#25209;&#27425;&#21488;&#36134;</button>
                                 <button id="historyPlanExportButton" type="button">&#23548;&#20986;</button>
                             </div>
                         </div>
@@ -483,6 +584,11 @@
             </section>
         </main>
     </div>
+    <footer class="desktop-statusbar">
+        <span id="desktopStatusModule">&#24037;&#20316;&#21488;</span>
+        <span id="desktopStatusUser">System User</span>
+        <span id="desktopStatusMessage">&#23601;&#32490;</span>
+    </footer>
 </div>
 <script src="/app.js"></script>
 </body>

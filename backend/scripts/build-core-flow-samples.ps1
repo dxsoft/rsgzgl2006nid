@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [string]$OutputPath = "target\core-flow-samples.tsv",
     [string]$CandidatePath = "target\core-flow-candidates.tsv",
@@ -6,8 +6,10 @@ param(
     [int]$CandidatePerType = 180,
     [string]$JdbcUrl = "jdbc:mysql://127.0.0.1:3306/gzjsgl?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true",
     [string]$DbUser = "root",
-    [string]$DbPassword = "dx262105",
-    [string]$JavaHome = "C:\Program Files\Java\jdk-21.0.10"
+    [string]$DbPassword = $env:DB_PASSWORD,
+    [string]$JavaHome = "C:\Program Files\Java\jdk-21.0.10",
+    [string]$Username = "admin",
+    [string]$Password = "admin"
 )
 
 $ErrorActionPreference = "Stop"
@@ -149,8 +151,19 @@ $rawRows | ForEach-Object {
 }
 [System.IO.File]::WriteAllLines((Resolve-Path (Split-Path -Parent $CandidatePath)).Path + "\" + (Split-Path -Leaf $CandidatePath), $candidateLines, [System.Text.UTF8Encoding]::new($false))
 
-$client = [System.Net.Http.HttpClient]::new()
+$handler = [System.Net.Http.HttpClientHandler]::new()
+$handler.UseCookies = $true
+$handler.CookieContainer = [System.Net.CookieContainer]::new()
+$client = [System.Net.Http.HttpClient]::new($handler)
 $client.Timeout = [TimeSpan]::FromSeconds(30)
+if (-not [string]::IsNullOrWhiteSpace($Username)) {
+    $loginBody = @{ username = $Username; password = $Password } | ConvertTo-Json -Compress
+    $loginContent = [System.Net.Http.StringContent]::new($loginBody, [System.Text.Encoding]::UTF8, "application/json")
+    $loginResponse = $client.PostAsync("$BaseUrl/api/auth/login", $loginContent).Result
+    if (-not $loginResponse.IsSuccessStatusCode) {
+        throw "Login failed: $($loginResponse.StatusCode)"
+    }
+}
 $selectedByType = @{
     "standard" = New-Object System.Collections.Generic.List[object]
     "post-change" = New-Object System.Collections.Generic.List[object]

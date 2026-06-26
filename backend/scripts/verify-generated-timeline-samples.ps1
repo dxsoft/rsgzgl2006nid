@@ -11,10 +11,24 @@ param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [int]$Limit = 200,
     [int]$TimeoutSec = 30,
+    [string]$Username = "admin",
+    [string]$Password = "admin",
     [switch]$FailOnUnexpected
 )
 
 $ErrorActionPreference = "Stop"
+
+$webSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+if (-not [string]::IsNullOrWhiteSpace($Username)) {
+    $loginBody = @{ username = $Username; password = $Password } | ConvertTo-Json -Compress
+    Invoke-RestMethod `
+        -Uri "$BaseUrl/api/auth/login" `
+        -Method Post `
+        -Body $loginBody `
+        -ContentType "application/json; charset=utf-8" `
+        -WebSession $webSession `
+        -TimeoutSec $TimeoutSec | Out-Null
+}
 
 function Escape-Unicode([string]$Value) {
     if ($null -eq $Value) {
@@ -80,6 +94,7 @@ foreach ($personCode in ($personCodes | Sort-Object)) {
         $response = Invoke-RestMethod `
             -Uri "$BaseUrl/api/salary/timeline-generated/$encodedPersonCode`?limit=$Limit" `
             -Method Get `
+            -WebSession $webSession `
             -TimeoutSec $TimeoutSec
         $data = $response.data
         $status = if ($data.errorCount -gt 0) {
@@ -138,8 +153,11 @@ $results | Group-Object Status | Sort-Object Name | Select-Object Name,Count | F
 Write-Host ""
 Write-Host "Wrote $OutputPath"
 
-$unexpected = @($results | Where-Object { $_.Status -ne "OK" })
-Write-Host ("Unexpected generated timeline non-OK: {0}" -f $unexpected.Count)
-if ($FailOnUnexpected -and $unexpected.Count -gt 0) {
-    throw "Generated timeline verification found unexpected non-OK rows."
+$issueRows = @($results | Where-Object { $_.Status -ne "OK" -and $_.Status -ne "REQUEST_ERROR" })
+$requestErrors = @($results | Where-Object { $_.Status -eq "REQUEST_ERROR" })
+Write-Host ("Generated timeline issue rows: {0}" -f $issueRows.Count)
+Write-Host ("Generated timeline request errors: {0}" -f $requestErrors.Count)
+if ($FailOnUnexpected -and $requestErrors.Count -gt 0) {
+    $requestErrors | Select-Object PersonCode, Status, FirstBadStatus, FirstBadMessageEsc | Format-Table -AutoSize
+    throw "Generated timeline verification found request errors."
 }

@@ -52,6 +52,8 @@ class SystemPermissionRegressionTests {
     private static final String WORKBENCH_ROLE = "TMP_TEST_WORKBENCH_ONLY";
     private static final String TODO_USER = "tmp_test_workbench_todo";
     private static final String TODO_ROLE = "TMP_TEST_WORKBENCH_TODO";
+    private static final String DONE_USER = "tmp_test_workbench_done";
+    private static final String DONE_ROLE = "TMP_TEST_WORKBENCH_DONE";
     private static final String SCOPED_WORKBENCH_USER = "tmp_test_workbench_scoped";
     private static final String SCOPED_WORKBENCH_ROLE = "TMP_TEST_WORKBENCH_SCOPED";
     private static final String ORG_USER = "tmp_test_org_001";
@@ -87,6 +89,7 @@ class SystemPermissionRegressionTests {
         cleanup();
         createUserRole(WORKBENCH_USER, WORKBENCH_ROLE, "WORKBENCH");
         createUserRole(TODO_USER, TODO_ROLE, "WORKBENCH", "SALARY_TODO");
+        createUserRole(DONE_USER, DONE_ROLE, "WORKBENCH", "SALARY_DONE");
         createUserRole(SCOPED_WORKBENCH_USER, SCOPED_WORKBENCH_ROLE, "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_HISTORY_WRITE", "SALARY_HISTORY_ROLLBACK", "SALARY_EXPORT", "SALARY_TRIAL", "SALARY_CONFIG", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "APPLICATION_TODO", "APPLICATION_DONE");
         createUserRole(ORG_USER, ORG_ROLE, "SALARY_PERSON");
         createUserRole(TRIAL_USER, TRIAL_ROLE, "SALARY_TRIAL");
@@ -95,6 +98,10 @@ class SystemPermissionRegressionTests {
                 INSERT IGNORE INTO sys_user_org(username, org_code)
                 VALUES (?, '001')
                 """, SCOPED_WORKBENCH_USER);
+        jdbcTemplate.update("""
+                INSERT IGNORE INTO sys_user_org(username, org_code)
+                VALUES (?, '001')
+                """, DONE_USER);
         jdbcTemplate.update("""
                 INSERT IGNORE INTO sys_user_org(username, org_code)
                 VALUES (?, '001')
@@ -223,6 +230,7 @@ class SystemPermissionRegressionTests {
     @Test
     void historyDeliveryExportButtonsArePermissionGatedInStaticUi() throws Exception {
         String app = Files.readString(Path.of("src", "main", "resources", "static", "app.js"), StandardCharsets.UTF_8);
+        String indexHtml = Files.readString(Path.of("src", "main", "resources", "static", "index.html"), StandardCharsets.UTF_8);
         String styles = Files.readString(Path.of("src", "main", "resources", "static", "styles.css"), StandardCharsets.UTF_8);
         int deliveryStart = app.indexOf("    showHistoryDeliveryOverview() {");
         int closureStart = app.indexOf("    showHistoryClosureAcceptance() {");
@@ -324,6 +332,9 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("data-workbench-audit-report-delivery"));
         assertTrue(app.contains("openMigrationDeliveryGovernanceDetail(item)"));
         assertTrue(app.contains("/migration-delivery-detail"));
+        assertTrue(app.contains("async openMigrationDeliveryGovernanceDetail(item)"));
+        assertTrue(app.contains("const canViewGovernanceTask = Permissions.has(\"SALARY_DONE\") || (Permissions.has(\"SALARY_GOVERNANCE\") && Permissions.has(\"SALARY_TODO\"));"));
+        assertTrue(app.contains("const canManageGovernanceTask = Permissions.has(\"SALARY_GOVERNANCE\") && Permissions.has(\"SALARY_TODO\");"));
         assertTrue(app.contains("data-migration-delivery-governance-retest"));
         assertTrue(app.contains("data-migration-delivery-governance-result"));
         assertTrue(app.contains("data-migration-delivery-governance-history-audits"));
@@ -483,6 +494,33 @@ class SystemPermissionRegressionTests {
         assertTrue(app.contains("loadReportMigrationSampleComparison()"));
         assertTrue(app.contains("reviewReportMigrationSampleComparison("));
         assertTrue(app.contains("batchReviewReportMigrationSampleComparison("));
+        assertTrue(app.contains("openDataGovernanceTaskDetail("));
+        assertTrue(app.contains("[\"DATA_GOVERNANCE\", \"REPORT_SAMPLE_COMPARISON\"].includes(item.dataset.source || \"\")"));
+        assertTrue(app.contains("const isDataGovernanceSource = [\"DATA_GOVERNANCE\", \"REPORT_SAMPLE_COMPARISON\"].includes(item.source || \"\");"));
+        assertTrue(app.contains("${item.source === \"DATA_GOVERNANCE\" ? `<button type=\"button\" data-data-governance-retest="));
+        assertTrue(app.contains("const canViewGovernanceTask = Permissions.has(\"SALARY_DONE\") || (Permissions.has(\"SALARY_GOVERNANCE\") && Permissions.has(\"SALARY_TODO\"));"));
+        assertTrue(app.contains("const canManageGovernanceTask = Permissions.has(\"SALARY_GOVERNANCE\") && Permissions.has(\"SALARY_TODO\");"));
+        assertTrue(app.contains("/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/detail"));
+        assertTrue(app.contains("REPORT_SAMPLE_COMPARISON"));
+        assertTrue(app.contains("workbenchSourceSelect"));
+        assertTrue(app.contains("source: els.workbenchSourceSelect.value || \"\""));
+        assertTrue(app.contains("source: filters.source"));
+        assertTrue(app.contains("Format.sourceText(filters.source)"));
+        assertTrue(indexHtml.contains("id=\"workbenchSourceSelect\""));
+        assertTrue(indexHtml.contains("value=\"DATA_GOVERNANCE\""));
+        assertTrue(app.contains("DATA_GOVERNANCE_REVIEWED: \"\\u6570\\u636e\\u6cbb\\u7406\\u5df2\\u6838\\u67e5\""));
+        assertTrue(app.contains("DATA_GOVERNANCE_IGNORED: \"\\u6570\\u636e\\u6cbb\\u7406\\u5df2\\u5ffd\\u7565\""));
+        assertTrue(indexHtml.contains("value=\"DATA_GOVERNANCE_REVIEWED\""));
+        assertTrue(indexHtml.contains("value=\"DATA_GOVERNANCE_IGNORED\""));
+        assertTrue(app.contains("data-report-sample-governance-comparison"));
+        assertTrue(app.contains("data-data-governance-maintenance"));
+        assertTrue(app.contains("data-data-governance-retest"));
+        assertTrue(app.contains("data-data-governance-status-summary"));
+        assertTrue(app.contains("work-item-governance-trace"));
+        assertTrue(app.contains("item.reviewedBy, item.reviewedAt"));
+        assertTrue(styles.contains(".work-item-governance-trace"));
+        assertTrue(styles.contains(".migration-delivery-detail-tag.warning"));
+        assertTrue(styles.contains(".migration-delivery-detail-tag.pending"));
         assertTrue(app.contains("report-migration-guide-csv"));
         assertTrue(app.contains("report-migration-matrix-csv"));
         assertTrue(app.contains("report-migration-acceptance-checklist-csv"));
@@ -2284,6 +2322,72 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"source\":\"REPORT_SAMPLE_COMPARISON\"")))
                 .andExpect(content().string(containsString("report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write")));
 
+        mockMvc.perform(get("/api/workbench/data-governance/tasks/report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write/detail")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"taskType\":\"REPORT_SAMPLE_COMPARISON\"")))
+                .andExpect(content().string(containsString("\"reportCode\":\"approvalBatch\"")))
+                .andExpect(content().string(containsString("\"sampleKey\":\"" + caseNo + "\"")))
+                .andExpect(content().string(containsString("\"reviewStatus\":\"SPECIAL\"")))
+                .andExpect(content().string(containsString("\"reviewReason\":\"unit-test report sample special\"")))
+                .andExpect(content().string(containsString("\"comparisonUrl\"")));
+
+        mockMvc.perform(post("/api/workbench/data-governance/tasks/report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write/review")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reviewStatus":"REVIEWED","reviewReason":"unit-test report sample governance closed"}
+                                """)
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"reviewStatus\":\"REVIEWED\"")))
+                .andExpect(content().string(containsString("unit-test report sample governance closed")));
+
+        mockMvc.perform(get("/api/workbench/items?status=DONE&keyword=unit-test report sample governance closed&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"source\":\"DATA_GOVERNANCE\"")))
+                .andExpect(content().string(containsString("report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write")))
+                .andExpect(content().string(containsString("\"reviewStatus\":\"REVIEWED\"")))
+                .andExpect(content().string(containsString("\"workflowStatus\":\"DATA_GOVERNANCE_REVIEWED\"")))
+                .andExpect(content().string(containsString("\"reviewReason\":\"unit-test report sample governance closed\"")))
+                .andExpect(content().string(containsString("\"reviewedBy\":\"" + SCOPED_WORKBENCH_USER + "\"")));
+
+        mockMvc.perform(get("/api/workbench/items?status=DONE&source=DATA_GOVERNANCE&keyword=unit-test report sample governance closed&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"total\":1")))
+                .andExpect(content().string(containsString("\"source\":\"DATA_GOVERNANCE\"")));
+
+        mockMvc.perform(get("/api/workbench/items?status=DONE&source=SALARY_CASE&keyword=unit-test report sample governance closed&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"total\":0")));
+
+        mockMvc.perform(get("/api/workbench/items.csv?status=DONE&source=DATA_GOVERNANCE&workflowStatus=DATA_GOVERNANCE_REVIEWED&keyword=unit-test report sample governance closed&limit=5")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\u5de5\u4f5c\u9879ID")))
+                .andExpect(content().string(containsString("\u6765\u6e90")))
+                .andExpect(content().string(containsString("\u6838\u67e5\u8bf4\u660e")))
+                .andExpect(content().string(containsString("\u6838\u67e5\u4eba")))
+                .andExpect(content().string(containsString("\u590d\u6d4b\u6458\u8981")))
+                .andExpect(content().string(containsString("\u6570\u636e\u6cbb\u7406")))
+                .andExpect(content().string(containsString("\u6570\u636e\u6cbb\u7406\u5df2\u6838\u67e5")))
+                .andExpect(content().string(containsString(SCOPED_WORKBENCH_USER)))
+                .andExpect(content().string(containsString("unit-test report sample governance closed")));
+
+        mockMvc.perform(get("/api/workbench/data-governance/tasks/report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write/detail")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"taskType\":\"REPORT_SAMPLE_COMPARISON\"")))
+                .andExpect(content().string(containsString("unit-test report sample governance closed")));
+
+        mockMvc.perform(get("/api/workbench/data-governance/tasks/report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write/detail")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, DONE_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"taskType\":\"REPORT_SAMPLE_COMPARISON\"")))
+                .andExpect(content().string(containsString("unit-test report sample governance closed")));
+
         mockMvc.perform(post("/api/reports/migration-sample-comparison/batch-review")
                         .param("orgCode", "001")
                         .param("year", "2099")
@@ -2648,6 +2752,20 @@ class SystemPermissionRegressionTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("\"workItemId\":\"" + deliveryGovernanceWorkItemId + "\"")))
                     .andExpect(content().string(containsString("\"retestStatus\"")));
+            mockMvc.perform(post("/api/workbench/data-governance/tasks/" + deliveryGovernanceWorkItemId + "/review")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"reviewStatus":"REVIEWED","reviewReason":"unit-test migration delivery governance closed"}
+                                    """)
+                            .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("\"reviewStatus\":\"REVIEWED\"")))
+                    .andExpect(content().string(containsString("unit-test migration delivery governance closed")));
+            mockMvc.perform(get("/api/workbench/data-governance/tasks/" + deliveryGovernanceWorkItemId + "/migration-delivery-detail")
+                            .sessionAttr(AuthSessionService.SESSION_USERNAME, DONE_USER))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("\"workItemId\":\"" + deliveryGovernanceWorkItemId + "\"")))
+                    .andExpect(content().string(containsString("unit-test migration delivery governance closed")));
         }
 
         mockMvc.perform(get("/api/system/audits?action=history-write-delivery-overview-csv&targetCode=OVERVIEW&limit=5")
@@ -4806,19 +4924,21 @@ class SystemPermissionRegressionTests {
                        OR work_item_id IN ('generated-timeline-unit-test', 'generated-timeline-unit-test-review')
                        OR work_item_id LIKE 'generated-timeline-00105-00008%'
                        OR work_item_id LIKE 'salary-migration-delivery-error-001-2099-1-%'
+                       OR work_item_id LIKE 'report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write'
                     """);
         }
         if (tableExists("salary_data_governance_task_review")) {
             jdbcTemplate.update("""
                     DELETE FROM salary_data_governance_task_review
                     WHERE work_item_id LIKE 'salary-migration-delivery-error-001-2099-1-%'
+                       OR work_item_id LIKE 'report-sample-comparison-approvalbatch-001-2099-01-gz-tmp-history-write'
                     """);
         }
         if (tableExists("sys_user_work_state")) {
             jdbcTemplate.update("""
                     DELETE FROM sys_user_work_state
-                    WHERE username IN (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, ADMIN_USER, WORKBENCH_USER, TODO_USER, SCOPED_WORKBENCH_USER,
+                    WHERE username IN (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, ADMIN_USER, WORKBENCH_USER, TODO_USER, DONE_USER, SCOPED_WORKBENCH_USER,
                     ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
         }
         jdbcTemplate.update("DELETE FROM dryjbxx WHERE dwbm = '001' AND grbm = 'UT001'");
@@ -4854,19 +4974,19 @@ class SystemPermissionRegressionTests {
                    OR summary LIKE '%unit-test base info update%'
                    OR summary LIKE '%unit-test latest base summary%'
                 """);
-        jdbcTemplate.update("DELETE FROM sys_user_org WHERE username IN (?, ?, ?, ?, ?, ?, ?)",
-                WORKBENCH_USER, TODO_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
-        jdbcTemplate.update("DELETE FROM sys_user_role WHERE username IN (?, ?, ?, ?, ?, ?, ?)",
-                WORKBENCH_USER, TODO_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
-        jdbcTemplate.update("DELETE FROM sys_user WHERE username IN (?, ?, ?, ?, ?, ?, ?)",
-                WORKBENCH_USER, TODO_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
-        jdbcTemplate.update("DELETE FROM sys_role_menu WHERE role_code IN (?, ?, ?, ?, ?, ?)",
-                WORKBENCH_ROLE, TODO_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE);
-        jdbcTemplate.update("DELETE FROM sys_role WHERE code IN (?, ?, ?, ?, ?, ?)",
-                WORKBENCH_ROLE, TODO_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE);
-        jdbcTemplate.update("DELETE FROM sys_audit_log WHERE target_code IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                WORKBENCH_USER, TODO_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER,
-                CREATED_USER, WORKBENCH_ROLE, TODO_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE,
+        jdbcTemplate.update("DELETE FROM sys_user_org WHERE username IN (?, ?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_USER, TODO_USER, DONE_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
+        jdbcTemplate.update("DELETE FROM sys_user_role WHERE username IN (?, ?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_USER, TODO_USER, DONE_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
+        jdbcTemplate.update("DELETE FROM sys_user WHERE username IN (?, ?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_USER, TODO_USER, DONE_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER, CREATED_USER);
+        jdbcTemplate.update("DELETE FROM sys_role_menu WHERE role_code IN (?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_ROLE, TODO_ROLE, DONE_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE);
+        jdbcTemplate.update("DELETE FROM sys_role WHERE code IN (?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_ROLE, TODO_ROLE, DONE_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE);
+        jdbcTemplate.update("DELETE FROM sys_audit_log WHERE target_code IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                WORKBENCH_USER, TODO_USER, DONE_USER, SCOPED_WORKBENCH_USER, ORG_USER, TRIAL_USER, RECONCILE_USER,
+                CREATED_USER, WORKBENCH_ROLE, TODO_ROLE, DONE_ROLE, SCOPED_WORKBENCH_ROLE, ORG_ROLE, TRIAL_ROLE, RECONCILE_ROLE,
                 HISTORY_WRITE_CASE_NO, RANK_ALLOWANCE_CASE_NO);
         jdbcTemplate.update("""
                 DELETE FROM sys_audit_log

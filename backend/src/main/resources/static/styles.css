@@ -3721,6 +3721,7 @@ button:disabled {
 .work-item-review,
 .work-item-workflow,
 .work-item-closure,
+.work-item-governance-trace,
 .work-item-next-action,
 .work-item-delivery-warning {
     width: fit-content;
@@ -3730,6 +3731,13 @@ button:disabled {
     background: var(--row);
     color: var(--muted);
     font-size: 12px;
+}
+
+.work-item-governance-trace {
+    max-width: 100%;
+    border-color: #c9d7f2;
+    background: #eef4ff;
+    color: #355070;
 }
 
 .work-item-next-action {
@@ -3792,6 +3800,18 @@ button:disabled {
 .migration-delivery-detail-tag.ready {
     border-color: color-mix(in srgb, var(--ok) 32%, var(--border));
     color: var(--ok);
+}
+
+.migration-delivery-detail-tag.warning {
+    border-color: color-mix(in srgb, var(--warning) 44%, var(--border));
+    background: color-mix(in srgb, var(--warning) 10%, var(--panel));
+    color: var(--warning);
+}
+
+.migration-delivery-detail-tag.pending {
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+    color: var(--accent-strong);
 }
 
 .migration-delivery-detail-tag.blocked {

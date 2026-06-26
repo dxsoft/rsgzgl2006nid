@@ -141,6 +141,11 @@ public class WorkbenchController {
         return ApiResponse.ok(workbenchService.salaryMigrationDeliveryGovernanceTaskDetail(workItemId));
     }
 
+    @GetMapping("/data-governance/tasks/{workItemId}/detail")
+    public ApiResponse<Map<String, Object>> dataGovernanceTaskDetail(@PathVariable String workItemId) {
+        return ApiResponse.ok(workbenchService.dataGovernanceTaskDetail(workItemId));
+    }
+
     @PostMapping("/data-governance/tasks/{workItemId}/review")
     public ApiResponse<WorkbenchGeneratedIssueReviewResponse> reviewDataGovernanceTask(
             @PathVariable String workItemId,
@@ -754,6 +759,7 @@ public class WorkbenchController {
             @RequestParam(defaultValue = "12") int limit,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String changeType,
+            @RequestParam(defaultValue = "") String source,
             @RequestParam(defaultValue = "") String caseStatus,
             @RequestParam(defaultValue = "") String trialStatus,
             @RequestParam(defaultValue = "") String reviewStatus,
@@ -761,7 +767,7 @@ public class WorkbenchController {
             @RequestParam(defaultValue = "") String closureStatus,
             @RequestParam(defaultValue = "") String nextAction
     ) {
-        return ApiResponse.ok(workbenchService.items(status, offset, limit, keyword, changeType, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction));
+        return ApiResponse.ok(workbenchService.items(status, offset, limit, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction));
     }
 
     @PostMapping("/salary-cases")
@@ -1521,6 +1527,7 @@ public class WorkbenchController {
             @RequestParam(defaultValue = "TODO") String status,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String changeType,
+            @RequestParam(defaultValue = "") String source,
             @RequestParam(defaultValue = "") String caseStatus,
             @RequestParam(defaultValue = "") String trialStatus,
             @RequestParam(defaultValue = "") String reviewStatus,
@@ -1530,7 +1537,7 @@ public class WorkbenchController {
             @RequestParam(defaultValue = "1000") int limit
     ) {
         int safeLimit = Math.min(Math.max(1, limit), 5000);
-        WorkbenchItemsPageResponse page = workbenchService.exportItems(status, safeLimit, keyword, changeType, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction);
+        WorkbenchItemsPageResponse page = workbenchService.exportItems(status, safeLimit, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction);
         byte[] body = withUtf8Bom(toCsv(page));
         String normalizedStatus = "DONE".equalsIgnoreCase(status) ? "done" : "todo";
         String filename = "workbench-" + normalizedStatus + ".csv";
@@ -1542,15 +1549,23 @@ public class WorkbenchController {
 
     private String toCsv(WorkbenchItemsPageResponse page) {
         StringBuilder csv = new StringBuilder();
-        csv.append("\u72b6\u6001,\u95ed\u73af\u72b6\u6001,\u95ed\u73af\u8bf4\u660e,\u4e0b\u4e00\u6b65,\u529e\u7406\u8fdb\u5ea6,\u8bd5\u7b97\u72b6\u6001,\u590d\u6838\u72b6\u6001,\u4e1a\u52a1\u7c7b\u578b,\u4eba\u5458\u7f16\u7801,\u59d3\u540d,\u5355\u4f4d\u7f16\u7801,\u5e74\u5ea6,\u6708\u4efd,\u6807\u9898,\u6458\u8981").append('\n');
+        csv.append("\u5de5\u4f5c\u9879ID,\u72b6\u6001,\u6765\u6e90,\u95ed\u73af\u72b6\u6001,\u95ed\u73af\u8bf4\u660e,\u4e0b\u4e00\u6b65,\u529e\u7406\u8fdb\u5ea6,\u8bd5\u7b97\u72b6\u6001,\u590d\u6838\u72b6\u6001,\u6838\u67e5\u8bf4\u660e,\u6838\u67e5\u4eba,\u6838\u67e5\u65f6\u95f4,\u590d\u6d4b\u72b6\u6001,\u590d\u6d4b\u6458\u8981,\u590d\u6d4b\u65f6\u95f4,\u4e1a\u52a1\u7c7b\u578b,\u4eba\u5458\u7f16\u7801,\u59d3\u540d,\u5355\u4f4d\u7f16\u7801,\u5e74\u5ea6,\u6708\u4efd,\u6807\u9898,\u6458\u8981").append('\n');
         for (WorkbenchItemResponse item : page.items()) {
-            csv.append(csv(statusText(item.status()))).append(',')
+            csv.append(csv(item.id())).append(',')
+                    .append(csv(statusText(item.status()))).append(',')
+                    .append(csv(sourceText(item.source()))).append(',')
                     .append(csv(closureStatusText(item.closureStatus()))).append(',')
                     .append(csv(item.closureMessage())).append(',')
                     .append(csv(item.nextActionLabel())).append(',')
                     .append(csv(workflowStatusText(item.workflowStatus()))).append(',')
                     .append(csv(trialStatusText(item.trialStatus()))).append(',')
                     .append(csv(reviewStatusText(item.reviewStatus()))).append(',')
+                    .append(csv(item.reviewReason())).append(',')
+                    .append(csv(item.reviewedBy())).append(',')
+                    .append(csv(item.reviewedAt())).append(',')
+                    .append(csv(retestStatusText(item.retestStatus()))).append(',')
+                    .append(csv(item.retestSummary())).append(',')
+                    .append(csv(item.retestedAt())).append(',')
                     .append(csv(item.businessType())).append(',')
                     .append(csv(item.personCode())).append(',')
                     .append(csv(item.personName())).append(',')
@@ -1561,6 +1576,40 @@ public class WorkbenchController {
                     .append(csv(item.summary())).append('\n');
         }
         return csv.toString();
+    }
+
+    private String retestStatusText(String status) {
+        if ("RESOLVED".equalsIgnoreCase(status)) {
+            return "\u590d\u6d4b\u5df2\u89e3\u51b3";
+        }
+        if ("STILL_DIFFERENT".equalsIgnoreCase(status)) {
+            return "\u590d\u6d4b\u4ecd\u6709\u5dee\u5f02";
+        }
+        if ("ERROR".equalsIgnoreCase(status)) {
+            return "\u590d\u6d4b\u5f02\u5e38";
+        }
+        if ("NOT_RETESTED".equalsIgnoreCase(status)) {
+            return "\u672a\u590d\u6d4b";
+        }
+        return status == null ? "" : status;
+    }
+
+    private String sourceText(String source) {
+        String safeSource = source == null ? "" : source.trim();
+        return switch (safeSource) {
+            case "SALARY_EVENT" -> "\u5de5\u8d44\u53d8\u52a8";
+            case "SALARY_CASE" -> "\u5de5\u8d44\u7533\u529e";
+            case "SALARY_CLOSURE" -> "\u5de5\u8d44\u95ed\u73af";
+            case "DATA_GOVERNANCE" -> "\u6570\u636e\u6cbb\u7406";
+            case "REPORT_SAMPLE_COMPARISON" -> "\u62a5\u8868\u6837\u672c\u5bf9\u7167";
+            case "GENERATED_TIMELINE" -> "\u81ea\u52a8\u6f14\u7b97\u7f3a\u53e3";
+            case "APPLICATION_TODO", "APPLICATION_DONE" -> "\u7533\u529e\u4e1a\u52a1";
+            case "dryzwbh" -> "\u4efb\u804c\u4fe1\u606f";
+            case "dndkh" -> "\u5e74\u5ea6\u8003\u6838";
+            case "dxl" -> "\u5b66\u5386\u4fe1\u606f";
+            case "hjxx" -> "\u5956\u60e9\u5904\u5206";
+            default -> safeSource;
+        };
     }
 
     private String toSalaryMigrationClosureChecklistCsv(List<HistoryClosureAcceptanceRow> rows) {
@@ -2971,6 +3020,18 @@ public class WorkbenchController {
         if ("REVIEWED".equalsIgnoreCase(status)) {
             return "\u5df2\u590d\u6838";
         }
+        if ("IGNORED".equalsIgnoreCase(status)) {
+            return "\u5df2\u5ffd\u7565";
+        }
+        if ("MATCHED".equalsIgnoreCase(status)) {
+            return "\u5df2\u786e\u8ba4\u4e00\u81f4";
+        }
+        if ("SPECIAL".equalsIgnoreCase(status)) {
+            return "\u7279\u6b8a\u60c5\u51b5";
+        }
+        if ("PENDING_LEGACY".equalsIgnoreCase(status)) {
+            return "\u5f85\u6838\u5bf9\u65e7\u7cfb\u7edf";
+        }
         return status == null ? "" : status;
     }
 
@@ -2981,11 +3042,20 @@ public class WorkbenchController {
         if ("REVIEW_PENDING".equalsIgnoreCase(status)) {
             return "\u5f85\u590d\u6838";
         }
+        if ("HISTORY_READY".equalsIgnoreCase(status)) {
+            return "\u53ef\u5199\u5165\u5386\u53f2";
+        }
         if ("HISTORY_PREPARED".equalsIgnoreCase(status)) {
             return "\u5f85\u5199\u5165";
         }
         if ("HISTORY_WRITTEN".equalsIgnoreCase(status)) {
             return "\u5df2\u5199\u5165";
+        }
+        if ("HISTORY_REVIEW_PENDING".equalsIgnoreCase(status)) {
+            return "\u5199\u5165\u540e\u5f85\u6838\u67e5";
+        }
+        if ("HISTORY_CLOSED".equalsIgnoreCase(status)) {
+            return "\u5df2\u95ed\u73af";
         }
         if ("HISTORY_EXECUTED".equalsIgnoreCase(status)) {
             return "\u5df2\u6267\u884c";
@@ -2998,6 +3068,12 @@ public class WorkbenchController {
         }
         if ("CASE_CANCELLED".equalsIgnoreCase(status)) {
             return "\u5df2\u64a4\u56de";
+        }
+        if ("DATA_GOVERNANCE_REVIEWED".equalsIgnoreCase(status)) {
+            return "\u6570\u636e\u6cbb\u7406\u5df2\u6838\u67e5";
+        }
+        if ("DATA_GOVERNANCE_IGNORED".equalsIgnoreCase(status)) {
+            return "\u6570\u636e\u6cbb\u7406\u5df2\u5ffd\u7565";
         }
         return status == null ? "" : status;
     }

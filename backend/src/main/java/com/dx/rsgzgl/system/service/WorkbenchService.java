@@ -67,6 +67,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
@@ -150,13 +151,13 @@ public class WorkbenchService {
         }
         if (hasMenu("SALARY_DONE")) {
             metrics.add(new WorkbenchMetricResponse("SALARY_DONE", "\u5de5\u8d44\u53d8\u52a8\u5df2\u529e", salaryDone, "\u8fd1\u671f\u5386\u53f2\u5de5\u8d44\u53d8\u52a8\u548c\u65b0\u529e\u7406\u5de5\u8d44\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_PENDING", "\u5de5\u8d44\u5f85\u95ed\u73af", countSalaryDone("", "", "DONE", "", "", "", "PENDING", ""), "\u5df2\u529e\u4f46\u5c1a\u672a\u5b8c\u6210\u6253\u5370\u3001\u5199\u5165\u6216\u6838\u67e5"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_BLOCKED", "\u5de5\u8d44\u95ed\u73af\u963b\u65ad", countSalaryDone("", "", "DONE", "", "", "", "BLOCKED", ""), "\u5199\u5165\u963b\u65ad\u6216\u5df2\u56de\u6eda\u7684\u5df2\u529e\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_CLOSED", "\u5de5\u8d44\u5df2\u95ed\u73af", countSalaryDone("", "", "DONE", "", "", "", "CLOSED", ""), "\u5df2\u5b8c\u6210\u529e\u7406\u3001\u6253\u5370\u3001\u5199\u5165\u548c\u6838\u67e5\u7684\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_TRIAL", "\u5f85\u590d\u6838\u8bd5\u7b97", countSalaryDone("", "", "DONE", "", "", "", "PENDING", "REVIEW_TRIAL"), "\u4e0b\u4e00\u6b65\u9700\u590d\u6838\u8bd5\u7b97\u5dee\u5f02\u6216\u5f02\u5e38"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_PRINT_OR_PLAN", "\u5f85\u6253\u5370/\u9884\u68c0", countSalaryDone("", "", "DONE", "", "", "", "PENDING", "PRINT_OR_CREATE_HISTORY_PLAN"), "\u4e0b\u4e00\u6b65\u9700\u6253\u5370\u5ba1\u6279\u8868\u6216\u751f\u6210\u5199\u5165\u9884\u68c0"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_EXECUTE_WRITE", "\u5f85\u5199\u5165\u5386\u53f2", countSalaryDone("", "", "DONE", "", "", "", "PENDING", "EXECUTE_HISTORY_WRITE"), "\u4e0b\u4e00\u6b65\u53ef\u6267\u884c\u5386\u53f2\u5199\u5165"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_DIFFERENCE", "\u5f85\u6838\u67e5\u5dee\u5f02", countSalaryDone("", "", "DONE", "", "", "", "PENDING", "REVIEW_DIFFERENCE"), "\u4e0b\u4e00\u6b65\u9700\u6838\u67e5\u5199\u5165\u540e\u5dee\u5f02"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_PENDING", "\u5de5\u8d44\u5f85\u95ed\u73af", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", ""), "\u5df2\u529e\u4f46\u5c1a\u672a\u5b8c\u6210\u6253\u5370\u3001\u5199\u5165\u6216\u6838\u67e5"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_BLOCKED", "\u5de5\u8d44\u95ed\u73af\u963b\u65ad", countSalaryDone("", "", "", "DONE", "", "", "", "BLOCKED", ""), "\u5199\u5165\u963b\u65ad\u6216\u5df2\u56de\u6eda\u7684\u5df2\u529e\u4e1a\u52a1"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_CLOSED", "\u5de5\u8d44\u5df2\u95ed\u73af", countSalaryDone("", "", "", "DONE", "", "", "", "CLOSED", ""), "\u5df2\u5b8c\u6210\u529e\u7406\u3001\u6253\u5370\u3001\u5199\u5165\u548c\u6838\u67e5\u7684\u4e1a\u52a1"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_TRIAL", "\u5f85\u590d\u6838\u8bd5\u7b97", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "REVIEW_TRIAL"), "\u4e0b\u4e00\u6b65\u9700\u590d\u6838\u8bd5\u7b97\u5dee\u5f02\u6216\u5f02\u5e38"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_PRINT_OR_PLAN", "\u5f85\u6253\u5370/\u9884\u68c0", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "PRINT_OR_CREATE_HISTORY_PLAN"), "\u4e0b\u4e00\u6b65\u9700\u6253\u5370\u5ba1\u6279\u8868\u6216\u751f\u6210\u5199\u5165\u9884\u68c0"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_EXECUTE_WRITE", "\u5f85\u5199\u5165\u5386\u53f2", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "EXECUTE_HISTORY_WRITE"), "\u4e0b\u4e00\u6b65\u53ef\u6267\u884c\u5386\u53f2\u5199\u5165"));
+            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_DIFFERENCE", "\u5f85\u6838\u67e5\u5dee\u5f02", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "REVIEW_DIFFERENCE"), "\u4e0b\u4e00\u6b65\u9700\u6838\u67e5\u5199\u5165\u540e\u5dee\u5f02"));
             metrics.add(new WorkbenchMetricResponse("SALARY_REVIEW_PENDING", "\u5f85\u590d\u6838\u98ce\u9669\u4e1a\u52a1", countPendingSalaryReview(), "\u8bd5\u7b97\u5dee\u5f02\u6216\u5f02\u5e38\u4e14\u5c1a\u672a\u590d\u6838"));
             metrics.add(new WorkbenchMetricResponse("SALARY_TRIAL_DIFFERENT", "\u8bd5\u7b97\u6709\u5dee\u5f02", countSalaryCaseTrialStatus("DIFFERENT"), "\u5df2\u529e\u8bb0\u5f55\u4e2d\u9700\u590d\u6838\u7684\u5dee\u5f02\u529e\u7406"));
             metrics.add(new WorkbenchMetricResponse("SALARY_TRIAL_ERROR", "\u8bd5\u7b97\u5f02\u5e38", countSalaryCaseTrialStatus("ERROR"), "\u5df2\u529e\u8bb0\u5f55\u4e2d\u5f3a\u5236\u529e\u7406\u7684\u5f02\u5e38"));
@@ -197,8 +198,8 @@ public class WorkbenchService {
 
     private List<WorkbenchItemResponse> salaryClosureTodoItems() {
         List<WorkbenchItemResponse> items = new ArrayList<>();
-        items.addAll(salaryDoneItems(0, 4, "", "", "DONE", "", "", "", "BLOCKED", ""));
-        items.addAll(salaryDoneItems(0, 4, "", "", "DONE", "", "", "", "PENDING", ""));
+        items.addAll(salaryDoneItems(0, 4, "", "", "", "DONE", "", "", "", "BLOCKED", ""));
+        items.addAll(salaryDoneItems(0, 4, "", "", "", "DONE", "", "", "", "PENDING", ""));
         return items.stream()
                 .map(this::salaryClosureTodoItem)
                 .limit(6)
@@ -496,7 +497,9 @@ public class WorkbenchService {
         requireSalaryTodoPermission();
         String safeWorkItemId = text(workItemId);
         Map<String, Object> todo = todoCacheRow(safeWorkItemId);
-        if (!"DATA_GOVERNANCE".equalsIgnoreCase(text(todo.get("source")))) {
+        String source = text(todo.get("source"));
+        if (!"DATA_GOVERNANCE".equalsIgnoreCase(source)
+                && !"REPORT_SAMPLE_COMPARISON".equalsIgnoreCase(source)) {
             throw new IllegalArgumentException("Only data governance todos can be reviewed.");
         }
         organizationAccessService.requireOrgAccess(text(todo.get("org_code")));
@@ -664,19 +667,23 @@ public class WorkbenchService {
     public Map<String, Object> salaryMigrationDeliveryGovernanceTaskDetail(String workItemId) {
         ensureSalaryTodoCacheTable();
         ensureDataGovernanceTaskReviewTable();
-        requireDataGovernancePermission();
-        requireSalaryTodoPermission();
         systemAuditService.ensureTable();
         String safeWorkItemId = text(workItemId);
         if (!safeWorkItemId.startsWith("salary-migration-delivery-error-")) {
             throw new IllegalArgumentException("Only migration delivery package governance tasks are supported.");
         }
-        Map<String, Object> todo = todoCacheRow(safeWorkItemId);
-        if (!"DATA_GOVERNANCE".equalsIgnoreCase(text(todo.get("source")))
-                || !"MIGRATION_DELIVERY_PACKAGE".equalsIgnoreCase(text(todo.get("source_id")))) {
+        Map<String, Object> todo = todoCacheRowIfExists(safeWorkItemId);
+        Map<String, Object> review = dataGovernanceReviewRow(safeWorkItemId);
+        if (todo.isEmpty() && review.isEmpty()) {
+            throw new IllegalArgumentException("Migration delivery package governance task not found: " + safeWorkItemId);
+        }
+        if (!todo.isEmpty() && (!"DATA_GOVERNANCE".equalsIgnoreCase(text(todo.get("source")))
+                || !"MIGRATION_DELIVERY_PACKAGE".equalsIgnoreCase(text(todo.get("source_id"))))) {
             throw new IllegalArgumentException("Only migration delivery package governance tasks are supported.");
         }
-        String orgCode = text(todo.get("org_code"));
+        boolean reviewedTask = Set.of("REVIEWED", "IGNORED").contains(text(review.get("review_status")).toUpperCase());
+        requireDataGovernanceTaskViewPermission(todo.isEmpty() || reviewedTask);
+        String orgCode = defaultText(text(todo.get("org_code")), text(review.get("org_code")));
         organizationAccessService.requireOrgAccess(orgCode);
         List<Map<String, Object>> auditRows = jdbcTemplate.queryForList("""
                 SELECT CONCAT('SYS-', id) AS audit_id,
@@ -699,23 +706,10 @@ public class WorkbenchService {
         if (latestSummary.isBlank()) {
             latestSummary = text(todo.get("note"));
         }
-        List<Map<String, Object>> reviewRows = jdbcTemplate.queryForList("""
-                SELECT review_status,
-                       review_reason,
-                       reviewed_by,
-                       reviewed_at,
-                       retest_status,
-                       retest_summary,
-                       retested_at
-                FROM salary_data_governance_task_review
-                WHERE work_item_id = ?
-                LIMIT 1
-                """, safeWorkItemId);
-        Map<String, Object> review = reviewRows.isEmpty() ? Map.of() : reviewRows.getFirst();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("workItemId", safeWorkItemId);
         result.put("orgCode", orgCode);
-        result.put("summary", text(todo.get("note")));
+        result.put("summary", defaultText(text(todo.get("note")), text(review.get("review_reason"))));
         result.put("historyStatus", defaultText(auditSummaryValue(latestSummary, "historyStatus"), "UNKNOWN"));
         result.put("reportStatus", defaultText(auditSummaryValue(latestSummary, "reportStatus"), "UNKNOWN"));
         result.put("pending", auditSummaryValue(latestSummary, "pending"));
@@ -741,6 +735,170 @@ public class WorkbenchService {
         result.put("retestedAt", text(review.get("retested_at")));
         result.put("closeSuggested", "RESOLVED".equalsIgnoreCase(text(review.get("retest_status"))));
         return result;
+    }
+
+    public Map<String, Object> dataGovernanceTaskDetail(String workItemId) {
+        ensureSalaryTodoCacheTable();
+        ensureDataGovernanceTaskReviewTable();
+        String safeWorkItemId = text(workItemId);
+        Map<String, Object> todo = todoCacheRowIfExists(safeWorkItemId);
+        Map<String, Object> reviewRow = dataGovernanceReviewRow(safeWorkItemId);
+        if (todo.isEmpty() && reviewRow.isEmpty()) {
+            throw new IllegalArgumentException("Data governance task not found: " + safeWorkItemId);
+        }
+        boolean reviewedTask = Set.of("REVIEWED", "IGNORED").contains(text(reviewRow.get("review_status")).toUpperCase());
+        requireDataGovernanceTaskViewPermission(todo.isEmpty() || reviewedTask);
+        String source = defaultText(text(todo.get("source")),
+                safeWorkItemId.startsWith("report-sample-comparison-") ? "REPORT_SAMPLE_COMPARISON" : "DATA_GOVERNANCE");
+        String orgCode = defaultText(text(todo.get("org_code")), text(reviewRow.get("org_code")));
+        organizationAccessService.requireOrgAccess(orgCode);
+        String sourceId = defaultText(text(todo.get("source_id")), text(reviewRow.get("issue_type")));
+        String personCode = defaultText(text(todo.get("person_code")), text(reviewRow.get("person_code")));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("workItemId", safeWorkItemId);
+        result.put("source", source);
+        result.put("sourceId", sourceId);
+        result.put("personCode", personCode);
+        result.put("personName", defaultText(text(todo.get("person_name")), personNameByCode(personCode)));
+        result.put("orgCode", orgCode);
+        result.put("eventYear", todo.get("event_year"));
+        result.put("eventMonth", todo.get("event_month"));
+        result.put("changeType", defaultText(text(todo.get("change_type")), "\u6570\u636e\u6cbb\u7406"));
+        result.put("summary", defaultText(text(todo.get("note")), text(reviewRow.get("review_reason"))));
+        result.put("review", dataGovernanceTaskReview(safeWorkItemId));
+        if ("REPORT_SAMPLE_COMPARISON".equalsIgnoreCase(source)) {
+            result.put("taskType", "REPORT_SAMPLE_COMPARISON");
+            Map<String, Object> sampleSource = new LinkedHashMap<>(todo);
+            sampleSource.putIfAbsent("source_id", sourceId);
+            sampleSource.putIfAbsent("org_code", orgCode);
+            sampleSource.putIfAbsent("person_code", personCode);
+            sampleSource.putIfAbsent("person_name", result.get("personName"));
+            sampleSource.putIfAbsent("note", result.get("summary"));
+            result.put("sample", reportSampleComparisonGovernanceDetail(sampleSource));
+        } else if (safeWorkItemId.startsWith("salary-migration-delivery-error-")) {
+            result.put("taskType", "MIGRATION_DELIVERY_PACKAGE");
+        } else {
+            result.put("taskType", "DATA_GOVERNANCE");
+        }
+        return result;
+    }
+
+    private Map<String, Object> reportSampleComparisonGovernanceDetail(Map<String, Object> todo) {
+        ensureReportMigrationSampleComparisonReviewTable();
+        String sourceId = text(todo.get("source_id"));
+        String reportCode = "";
+        String sampleKey = "";
+        int splitIndex = sourceId.indexOf(':');
+        if (splitIndex >= 0) {
+            reportCode = sourceId.substring(0, splitIndex);
+            sampleKey = sourceId.substring(splitIndex + 1);
+        }
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT report_code,
+                       sample_key,
+                       org_code,
+                       person_code,
+                       period_text,
+                       review_status,
+                       review_category,
+                       review_reason,
+                       reviewed_by,
+                       reviewed_at
+                FROM salary_report_migration_sample_review
+                WHERE report_code = ?
+                  AND sample_key = ?
+                  AND org_code = ?
+                ORDER BY updated_at DESC, id DESC
+                LIMIT 1
+                """, reportCode, sampleKey, text(todo.get("org_code")));
+        Map<String, Object> review = rows.isEmpty() ? Map.of() : rows.getFirst();
+        String safeReportCode = defaultText(text(review.get("report_code")), reportCode);
+        String safeSampleKey = defaultText(text(review.get("sample_key")), sampleKey);
+        String period = defaultText(text(review.get("period_text")), periodText(todo.get("event_year"), todo.get("event_month")));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("reportCode", safeReportCode);
+        result.put("sampleKey", safeSampleKey);
+        result.put("orgCode", defaultText(text(review.get("org_code")), text(todo.get("org_code"))));
+        result.put("personCode", defaultText(text(review.get("person_code")), text(todo.get("person_code"))));
+        result.put("personName", text(todo.get("person_name")));
+        result.put("period", period);
+        result.put("reviewStatus", defaultText(text(review.get("review_status")), "PENDING_LEGACY"));
+        result.put("reviewCategory", text(review.get("review_category")));
+        result.put("reviewReason", defaultText(text(review.get("review_reason")), text(todo.get("note"))));
+        result.put("reviewedBy", text(review.get("reviewed_by")));
+        result.put("reviewedAt", text(review.get("reviewed_at")));
+        result.put("printUrl", reportSampleComparisonPrintUrl(safeReportCode));
+        result.put("csvUrl", reportSampleComparisonCsvUrl(safeReportCode));
+        result.put("comparisonUrl", "/api/reports/migration-sample-comparison?orgCode=" + urlEncode(text(todo.get("org_code")))
+                + "&keyword=" + urlEncode(safeSampleKey)
+                + "&reviewStatus=ALL");
+        return result;
+    }
+
+    private String reportSampleComparisonPrintUrl(String reportCode) {
+        return switch (text(reportCode)) {
+            case "approvalBatch" -> "/api/reports/salary-case-approvals/print";
+            case "changeLedger" -> "/api/reports/salary-change-ledger/print";
+            case "personRoster" -> "/api/reports/person-roster/print";
+            case "salaryRoster" -> "/api/reports/salary-roster/print";
+            case "salaryHistory" -> "/api/reports/salary-history/print";
+            case "assessment" -> "/api/reports/assessment-summary/print";
+            case "standardTable" -> "/api/reports/standard-tables/print?tableName=bz06_jbt";
+            case "auditTrail" -> "/api/reports/audits";
+            default -> "";
+        };
+    }
+
+    private String reportSampleComparisonCsvUrl(String reportCode) {
+        return switch (text(reportCode)) {
+            case "approvalBatch" -> "/api/reports/salary-case-approval-roster.csv";
+            case "changeLedger" -> "/api/reports/salary-change-ledger.csv";
+            case "personRoster" -> "/api/reports/person-roster.csv";
+            case "salaryRoster" -> "/api/reports/salary-roster.csv";
+            case "salaryHistory" -> "/api/reports/salary-history.csv";
+            case "auditTrail" -> "/api/reports/audits.csv";
+            default -> "";
+        };
+    }
+
+    private void ensureReportMigrationSampleComparisonReviewTable() {
+        jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS salary_report_migration_sample_review (
+                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                    report_code VARCHAR(64) NOT NULL,
+                    sample_key VARCHAR(128) NOT NULL,
+                    org_code VARCHAR(64) NOT NULL DEFAULT '',
+                    person_code VARCHAR(128) NULL,
+                    period_text VARCHAR(32) NOT NULL DEFAULT '',
+                    review_status VARCHAR(32) NOT NULL DEFAULT 'PENDING_LEGACY',
+                    review_category VARCHAR(64) NULL,
+                    review_reason VARCHAR(1024) NULL,
+                    reviewed_by VARCHAR(64) NULL,
+                    reviewed_at DATETIME NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY uk_report_migration_sample_review (report_code, sample_key, org_code, period_text),
+                    KEY idx_report_migration_sample_review_org_status (org_code, review_status),
+                    KEY idx_report_migration_sample_review_time (updated_at)
+                )
+                """);
+    }
+
+    private String periodText(Object year, Object month) {
+        String safeYear = text(year);
+        String safeMonth = text(month);
+        if (safeYear.isBlank() || safeMonth.isBlank()) {
+            return "";
+        }
+        try {
+            return "%04d-%02d".formatted(Integer.parseInt(safeYear), Integer.parseInt(safeMonth));
+        } catch (NumberFormatException ex) {
+            return safeYear + "-" + safeMonth;
+        }
+    }
+
+    private String urlEncode(String value) {
+        return URLEncoder.encode(text(value), StandardCharsets.UTF_8);
     }
 
     public List<Map<String, Object>> salaryMigrationDeliveryClosureLedger(String orgCode, int limit) {
@@ -3820,7 +3978,7 @@ public class WorkbenchService {
         return migrationAcceptanceIssueRow(issueId);
     }
 
-    public WorkbenchItemsPageResponse items(String status, int offset, int limit, String keyword, String changeType, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+    public WorkbenchItemsPageResponse items(String status, int offset, int limit, String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
         ensureWorkbenchPerformanceIndexes();
         int safeOffset = Math.max(0, offset);
         int safeLimit = Math.min(Math.max(1, limit), 100);
@@ -3829,32 +3987,32 @@ public class WorkbenchService {
                 return new WorkbenchItemsPageResponse(0, safeOffset, safeLimit, List.of());
             }
             return new WorkbenchItemsPageResponse(
-                    countSalaryDone(keyword, changeType, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction),
+                    countSalaryDone(keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction),
                     safeOffset,
                     safeLimit,
-                salaryDoneItems(safeOffset, safeLimit, keyword, changeType, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction)
+                salaryDoneItems(safeOffset, safeLimit, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction)
             );
         }
         if (!hasMenu("SALARY_TODO")) {
             return new WorkbenchItemsPageResponse(0, safeOffset, safeLimit, List.of());
         }
-        return salaryTodoPage(safeOffset, safeLimit, keyword, changeType);
+        return salaryTodoPage(safeOffset, safeLimit, keyword, changeType, source);
     }
 
-    public WorkbenchItemsPageResponse exportItems(String status, int limit, String keyword, String changeType, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+    public WorkbenchItemsPageResponse exportItems(String status, int limit, String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
         ensureWorkbenchPerformanceIndexes();
         int safeLimit = Math.min(Math.max(1, limit), 5000);
         if ("DONE".equalsIgnoreCase(status)) {
             if (!hasMenu("SALARY_DONE")) {
                 return new WorkbenchItemsPageResponse(0, 0, safeLimit, List.of());
             }
-            List<WorkbenchItemResponse> items = salaryDoneItems(0, safeLimit, keyword, changeType, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction);
+            List<WorkbenchItemResponse> items = salaryDoneItems(0, safeLimit, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction);
             return new WorkbenchItemsPageResponse(items.size(), 0, safeLimit, items);
         }
         if (!hasMenu("SALARY_TODO")) {
             return new WorkbenchItemsPageResponse(0, 0, safeLimit, List.of());
         }
-        List<WorkbenchItemResponse> items = salaryTodoItems(0, safeLimit, keyword, changeType);
+        List<WorkbenchItemResponse> items = salaryTodoItems(0, safeLimit, keyword, changeType, source);
         return new WorkbenchItemsPageResponse(items.size(), 0, safeLimit, items);
     }
 
@@ -7931,12 +8089,14 @@ public class WorkbenchService {
                     WHERE ranked.rn = 1
                 ) latest_change ON latest_change.person_code = todo.person_code
                 WHERE __WORKBENCH_FILTER__
-                """.replace("__WORKBENCH_FILTER__", salaryTodoFilter()), Long.class, salaryTodoFilterParams(keyword, changeType));
+                  AND __SOURCE_FILTER__
+                """.replace("__WORKBENCH_FILTER__", salaryTodoFilter())
+                .replace("__SOURCE_FILTER__", sourceFilter("todo")), Long.class, salaryTodoFilterParams(keyword, changeType, ""));
         return cachedCount == null ? 0 : cachedCount;
     }
 
     private long countSalaryDone() {
-        return countSalaryDone("", "", "", "", "", "", "", "");
+        return countSalaryDone("", "", "", "", "", "", "", "", "");
     }
 
     private long countSalaryTodoForAcceptance() {
@@ -7965,7 +8125,18 @@ public class WorkbenchService {
                 WHERE __ORG_ACCESS__
                   AND UPPER(TRIM(p.plan_status)) = 'EXECUTED'
                 """.replace("__ORG_ACCESS__", organizationAccessService.orgCodeAccessSql("p.org_code")), Long.class);
-        return (count == null ? 0 : count) + (executed == null ? 0 : executed);
+        return (count == null ? 0 : count) + (executed == null ? 0 : executed) + countDataGovernanceDoneForAcceptance();
+    }
+
+    private long countDataGovernanceDoneForAcceptance() {
+        ensureDataGovernanceTaskReviewTable();
+        Long count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(1)
+                FROM salary_data_governance_task_review r
+                WHERE r.review_status IN ('REVIEWED', 'IGNORED')
+                  AND __ORG_ACCESS__
+                """.replace("__ORG_ACCESS__", organizationAccessService.orgCodeAccessSql("r.org_code")), Long.class);
+        return count == null ? 0 : count;
     }
 
     private long countApplicationCases(String status) {
@@ -8116,13 +8287,14 @@ public class WorkbenchService {
         return count == null ? 0 : count;
     }
 
-    private long countSalaryDone(String keyword, String changeType, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+    private long countSalaryDone(String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
         Long count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(1)
                 FROM (
                     __SALARY_DONE_ALL__
                 ) done
                 WHERE __WORKBENCH_FILTER__
+                  AND __SOURCE_FILTER__
                   AND __TRIAL_FILTER__
                   AND __REVIEW_FILTER__
                   AND __WORKFLOW_FILTER__
@@ -8130,11 +8302,12 @@ public class WorkbenchService {
                   AND __NEXT_ACTION_FILTER__
                 """.replace("__SALARY_DONE_ALL__", salaryDoneAllSql(caseStatus))
                 .replace("__WORKBENCH_FILTER__", workbenchFilter("done"))
+                .replace("__SOURCE_FILTER__", sourceFilter("done"))
                 .replace("__TRIAL_FILTER__", trialStatusFilter("done"))
                 .replace("__REVIEW_FILTER__", reviewStatusFilter("done"))
                 .replace("__WORKFLOW_FILTER__", workflowStatusFilter("done"))
                 .replace("__CLOSURE_FILTER__", closureStatusFilter("done"))
-                .replace("__NEXT_ACTION_FILTER__", nextActionFilter("done")), Long.class, doneFilterParams(keyword, changeType, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction));
+                .replace("__NEXT_ACTION_FILTER__", nextActionFilter("done")), Long.class, doneFilterParams(keyword, changeType, source, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction));
         return count == null ? 0 : count;
     }
 
@@ -8143,15 +8316,23 @@ public class WorkbenchService {
     }
 
     private List<WorkbenchItemResponse> salaryTodoItems(int offset, int limit, String keyword, String changeType) {
-        return salaryTodoPage(offset, limit, keyword, changeType).items();
+        return salaryTodoPage(offset, limit, keyword, changeType, "").items();
+    }
+
+    private List<WorkbenchItemResponse> salaryTodoItems(int offset, int limit, String keyword, String changeType, String source) {
+        return salaryTodoPage(offset, limit, keyword, changeType, source).items();
     }
 
     private WorkbenchItemsPageResponse salaryTodoPage(int offset, int limit, String keyword, String changeType) {
-        ensureSalaryTodoCacheLoaded();
-        return salaryTodoCachePage(offset, limit, keyword, changeType);
+        return salaryTodoPage(offset, limit, keyword, changeType, "");
     }
 
-    private WorkbenchItemsPageResponse salaryTodoCachePage(int offset, int limit, String keyword, String changeType) {
+    private WorkbenchItemsPageResponse salaryTodoPage(int offset, int limit, String keyword, String changeType, String source) {
+        ensureSalaryTodoCacheLoaded();
+        return salaryTodoCachePage(offset, limit, keyword, changeType, source);
+    }
+
+    private WorkbenchItemsPageResponse salaryTodoCachePage(int offset, int limit, String keyword, String changeType, String source) {
         ensurePersonBaseChangeLogTable();
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT *
@@ -8175,6 +8356,7 @@ public class WorkbenchService {
                         WHERE ranked.rn = 1
                     ) latest_change ON latest_change.person_code = todo.person_code
                     WHERE __WORKBENCH_FILTER__
+                      AND __SOURCE_FILTER__
                 ) todo_page
                 ORDER BY todo_page.event_year DESC,
                          todo_page.event_month DESC,
@@ -8193,7 +8375,8 @@ public class WorkbenchService {
                          todo_page.org_code,
                          todo_page.person_no
                 LIMIT ? OFFSET ?
-                """.replace("__WORKBENCH_FILTER__", salaryTodoFilter()), salaryTodoFilterParams(keyword, changeType, limit, offset));
+                """.replace("__WORKBENCH_FILTER__", salaryTodoFilter())
+                .replace("__SOURCE_FILTER__", sourceFilter("todo")), salaryTodoFilterParams(keyword, changeType, source, limit, offset));
         List<WorkbenchItemResponse> items = new ArrayList<>();
         long total = rows.isEmpty() ? 0 : longValue(rows.getFirst().get("total_count"));
         for (Map<String, Object> row : rows) {
@@ -8609,16 +8792,17 @@ public class WorkbenchService {
     }
 
     private List<WorkbenchItemResponse> salaryDoneItems(int offset, int limit) {
-        return salaryDoneItems(offset, limit, "", "", "", "", "", "", "", "");
+        return salaryDoneItems(offset, limit, "", "", "", "", "", "", "", "", "");
     }
 
-    private List<WorkbenchItemResponse> salaryDoneItems(int offset, int limit, String keyword, String changeType, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+    private List<WorkbenchItemResponse> salaryDoneItems(int offset, int limit, String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT *
                 FROM (
                     __SALARY_DONE_ALL__
                 ) done
                 WHERE __WORKBENCH_FILTER__
+                  AND __SOURCE_FILTER__
                   AND __TRIAL_FILTER__
                   AND __REVIEW_FILTER__
                   AND __WORKFLOW_FILTER__
@@ -8628,12 +8812,13 @@ public class WorkbenchService {
                 LIMIT ? OFFSET ?
                 """.replace("__SALARY_DONE_ALL__", salaryDoneAllSql(caseStatus))
                 .replace("__WORKBENCH_FILTER__", workbenchFilter("done"))
+                .replace("__SOURCE_FILTER__", sourceFilter("done"))
                 .replace("__TRIAL_FILTER__", trialStatusFilter("done"))
                 .replace("__REVIEW_FILTER__", reviewStatusFilter("done"))
                 .replace("__WORKFLOW_FILTER__", workflowStatusFilter("done"))
                 .replace("__CLOSURE_FILTER__", closureStatusFilter("done"))
                 .replace("__NEXT_ACTION_FILTER__", nextActionFilter("done"))
-                .replace("__DONE_ORDER__", salaryDoneOrderBy(closureStatus, nextAction)), doneFilterParams(keyword, changeType, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction, limit, offset));
+                .replace("__DONE_ORDER__", salaryDoneOrderBy(closureStatus, nextAction)), doneFilterParams(keyword, changeType, source, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction, limit, offset));
         List<WorkbenchItemResponse> items = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             String rowChangeType = text(row.get("change_type"));
@@ -8658,7 +8843,13 @@ public class WorkbenchService {
                     itemClosureStatus,
                     listItemClosureMessage(itemBusinessStatus, itemWorkflowStatus),
                     listItemNextActionCode(itemBusinessStatus, itemWorkflowStatus),
-                    listItemNextActionLabel(itemBusinessStatus, itemWorkflowStatus)
+                    listItemNextActionLabel(itemBusinessStatus, itemWorkflowStatus),
+                    text(row.get("review_reason")),
+                    text(row.get("reviewed_by")),
+                    text(row.get("reviewed_at")),
+                    text(row.get("retest_status")),
+                    text(row.get("retest_summary")),
+                    text(row.get("retested_at"))
             ));
         }
         return items;
@@ -8699,6 +8890,8 @@ public class WorkbenchService {
             case "CASE_DONE" -> "\u5f85\u6253\u5370\u6216\u5199\u5165";
             case "APPLICATION_DONE" -> "\u7533\u529e\u4e1a\u52a1\u5df2\u529e\u7ed3";
             case "APPLICATION_TODO" -> "\u7533\u529e\u4e1a\u52a1\u5f85\u529e\u7406";
+            case "DATA_GOVERNANCE_REVIEWED" -> "\u6570\u636e\u6cbb\u7406\u5df2\u6838\u67e5";
+            case "DATA_GOVERNANCE_IGNORED" -> "\u6570\u636e\u6cbb\u7406\u5df2\u5ffd\u7565";
             default -> safeWorkflowStatus.startsWith("HISTORY_") ? "\u5f85\u5b8c\u6210\u5de5\u8d44\u95ed\u73af" : "\u5df2\u529e\u7406";
         };
     }
@@ -8746,11 +8939,52 @@ public class WorkbenchService {
                        '' AS workflow_status,
                        hb.hj2,
                        hb.bbz AS handled_at,
+                       '' AS review_reason,
+                       '' AS reviewed_by,
+                       NULL AS reviewed_at,
+                       '' AS retest_status,
+                       '' AS retest_summary,
+                       NULL AS retested_at,
                        CONCAT('\u5386\u53f2\u5de5\u8d44\u5df2\u529e\uff0c\u5408\u8ba1 ', hb.hj2) AS note
                 FROM hisbase hb
                 LEFT JOIN dryjbxx p ON p.dwbm = hb.dwbm AND p.grbm = hb.grbm
                 WHERE CAST(TRIM(hb.jsnf) AS UNSIGNED) >= YEAR(CURDATE()) - 1
                   AND TRIM(hb.jslb) NOT IN ('\u6d25\u8d34\u53d8\u5316', '\u8c03\u6807\u664b\u5347')
+                """;
+    }
+
+    private String dataGovernanceDoneSql() {
+        ensureDataGovernanceTaskReviewTable();
+        return """
+                SELECT r.work_item_id AS id,
+                       'DATA_GOVERNANCE' AS source,
+                       'DONE' AS business_status,
+                       r.person_code,
+                       r.org_code,
+                       TRIM(COALESCE(p.xm, '')) AS person_name,
+                       YEAR(COALESCE(r.reviewed_at, r.retested_at, r.created_at)) AS event_year,
+                       MONTH(COALESCE(r.reviewed_at, r.retested_at, r.created_at)) AS event_month,
+                       '\u6570\u636e\u6cbb\u7406' AS change_type,
+                       '' AS trial_status,
+                       r.review_status,
+                       CASE
+                           WHEN r.review_status = 'IGNORED' THEN 'DATA_GOVERNANCE_IGNORED'
+                           ELSE 'DATA_GOVERNANCE_REVIEWED'
+                       END AS workflow_status,
+                       0 AS hj2,
+                       COALESCE(r.reviewed_at, r.retested_at, r.created_at) AS handled_at,
+                       r.review_reason,
+                       r.reviewed_by,
+                       r.reviewed_at,
+                       r.retest_status,
+                       r.retest_summary,
+                       r.retested_at,
+                       CONCAT(r.issue_type,
+                              CASE WHEN COALESCE(r.review_reason, '') = '' THEN '' ELSE CONCAT('\uff1a', r.review_reason) END,
+                              CASE WHEN COALESCE(r.retest_summary, '') = '' THEN '' ELSE CONCAT('\uff1b\u590d\u6d4b\uff1a', r.retest_summary) END) AS note
+                FROM salary_data_governance_task_review r
+                LEFT JOIN dryjbxx p ON CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) = r.person_code
+                WHERE r.review_status IN ('REVIEWED', 'IGNORED')
                 """;
     }
 
@@ -8772,8 +9006,13 @@ public class WorkbenchService {
                 UNION ALL
 
                 __SALARY_DONE_BASE__
+
+                UNION ALL
+
+                __DATA_GOVERNANCE_DONE__
                 """.replace("__SALARY_CASE_DONE__", salaryCaseDoneSql(caseStatusPredicate))
-                .replace("__SALARY_DONE_BASE__", salaryDoneBaseSql());
+                .replace("__SALARY_DONE_BASE__", salaryDoneBaseSql())
+                .replace("__DATA_GOVERNANCE_DONE__", dataGovernanceDoneSql());
     }
 
     private String salaryCaseDoneSql(String caseStatusPredicate) {
@@ -8857,6 +9096,12 @@ public class WorkbenchService {
                        END AS workflow_status,
                        0 AS hj2,
                        handled_at,
+                       '' AS review_reason,
+                       '' AS reviewed_by,
+                       NULL AS reviewed_at,
+                       '' AS retest_status,
+                       '' AS retest_summary,
+                       NULL AS retested_at,
                        CONCAT(summary,
                               CASE WHEN COALESCE(trial_summary, '') = '' THEN '' ELSE CONCAT('；试算：', trial_summary) END,
                               CASE WHEN COALESCE(difference_reason, '') = '' THEN '' ELSE CONCAT('; differenceReason: ', difference_reason) END,
@@ -8928,6 +9173,10 @@ public class WorkbenchService {
         return "(? = '' OR __ALIAS__.workflow_status = ?)".replace("__ALIAS__", alias);
     }
 
+    private String sourceFilter(String alias) {
+        return "(? = '' OR __ALIAS__.source = ?)".replace("__ALIAS__", alias);
+    }
+
     private String closureStatusFilter(String alias) {
         String expression = """
                 CASE
@@ -8987,14 +9236,17 @@ public class WorkbenchService {
         return filterParams(minTodoYearMonth(), maxTodoYearMonth(), keyword, changeType, tail);
     }
 
-    private Object[] doneFilterParams(String keyword, String changeType, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction, Object... tail) {
+    private Object[] doneFilterParams(String keyword, String changeType, String source, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction, Object... tail) {
         List<Object> params = new ArrayList<>();
         addFilterParams(params, keyword, changeType);
+        String safeSource = text(source);
         String safeTrialStatus = text(trialStatus).toUpperCase();
         String safeReviewStatus = text(reviewStatus).toUpperCase();
         String safeWorkflowStatus = text(workflowStatus).toUpperCase();
         String safeClosureStatus = text(closureStatus).toUpperCase();
         String safeNextAction = text(nextAction).toUpperCase();
+        params.add(safeSource);
+        params.add(safeSource);
         params.add(safeTrialStatus);
         params.add(safeTrialStatus);
         params.add(safeReviewStatus);
@@ -9025,16 +9277,19 @@ public class WorkbenchService {
         return params.toArray();
     }
 
-    private Object[] salaryTodoFilterParams(String keyword, String changeType, Object... tail) {
+    private Object[] salaryTodoFilterParams(String keyword, String changeType, String source, Object... tail) {
         List<Object> params = new ArrayList<>();
         String safeKeyword = text(keyword);
         String safeChangeType = text(changeType);
+        String safeSource = text(source);
         params.add(safeKeyword);
         for (int i = 0; i < 7; i++) {
             params.add(safeKeyword);
         }
         params.add(safeChangeType);
         params.add(safeChangeType);
+        params.add(safeSource);
+        params.add(safeSource);
         params.addAll(List.of(tail));
         return params.toArray();
     }
@@ -10839,6 +11094,50 @@ public class WorkbenchService {
         return rows.getFirst();
     }
 
+    private Map<String, Object> todoCacheRowIfExists(String workItemId) {
+        ensureSalaryTodoCacheTable();
+        String safeWorkItemId = text(workItemId);
+        if (safeWorkItemId.isBlank()) {
+            return Map.of();
+        }
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT *
+                FROM salary_todo_candidate_cache
+                WHERE work_item_id = ?
+                LIMIT 1
+                """, safeWorkItemId);
+        return rows.isEmpty() ? Map.of() : rows.getFirst();
+    }
+
+    private Map<String, Object> dataGovernanceReviewRow(String workItemId) {
+        ensureDataGovernanceTaskReviewTable();
+        String safeWorkItemId = text(workItemId);
+        if (safeWorkItemId.isBlank()) {
+            return Map.of();
+        }
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT *
+                FROM salary_data_governance_task_review
+                WHERE work_item_id = ?
+                LIMIT 1
+                """, safeWorkItemId);
+        return rows.isEmpty() ? Map.of() : rows.getFirst();
+    }
+
+    private String personNameByCode(String personCode) {
+        String safePersonCode = text(personCode);
+        if (safePersonCode.isBlank()) {
+            return "";
+        }
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT TRIM(COALESCE(xm, '')) AS person_name
+                FROM dryjbxx
+                WHERE CONCAT(TRIM(dwbm), '-', TRIM(grbm)) = ?
+                LIMIT 1
+                """, safePersonCode);
+        return rows.isEmpty() ? "" : text(rows.getFirst().get("person_name"));
+    }
+
     private WorkbenchGeneratedIssueReviewResponse generatedIssueReview(String workItemId) {
         ensureGeneratedTimelineIssueReviewTable();
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
@@ -11302,6 +11601,23 @@ public class WorkbenchService {
         if (!hasMenu("SALARY_TODO")) {
             throw new IllegalArgumentException("Salary todo permission is required.");
         }
+    }
+
+    private void requireSalaryDonePermission() {
+        if (!hasMenu("SALARY_DONE")) {
+            throw new IllegalArgumentException("Salary done permission is required.");
+        }
+    }
+
+    private void requireDataGovernanceTaskViewPermission(boolean reviewedTask) {
+        if (reviewedTask) {
+            if (hasMenu("SALARY_DONE") || (hasMenu("SALARY_TODO") && hasMenu("SALARY_GOVERNANCE"))) {
+                return;
+            }
+            throw new IllegalArgumentException("Salary todo or done permission is required.");
+        }
+        requireDataGovernancePermission();
+        requireSalaryTodoPermission();
     }
 
     private void requireSalaryTrialPermission() {

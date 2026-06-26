@@ -376,6 +376,7 @@ const els = {
     workbenchFilterForm: document.querySelector("#workbenchFilterForm"),
     workbenchKeywordInput: document.querySelector("#workbenchKeywordInput"),
     workbenchChangeTypeSelect: document.querySelector("#workbenchChangeTypeSelect"),
+    workbenchSourceSelect: document.querySelector("#workbenchSourceSelect"),
     workbenchCaseStatusSelect: document.querySelector("#workbenchCaseStatusSelect"),
     workbenchTrialStatusSelect: document.querySelector("#workbenchTrialStatusSelect"),
     workbenchReviewStatusSelect: document.querySelector("#workbenchReviewStatusSelect"),
@@ -800,13 +801,21 @@ const Format = {
     reviewStatusText(status) {
         return {
             PENDING: "\u5f85\u590d\u6838",
-            REVIEWED: "\u5df2\u590d\u6838"
+            REVIEWED: "\u5df2\u590d\u6838",
+            IGNORED: "\u5df2\u5ffd\u7565",
+            PENDING_LEGACY: "\u5f85\u65e7\u7cfb\u7edf\u6838\u5bf9",
+            MATCHED: "\u5df2\u4e00\u81f4",
+            SPECIAL: "\u7279\u6b8a\u60c5\u51b5"
         }[status] || status || "-"
     },
     reviewStatusClass(status) {
         return {
             PENDING: "pending",
-            REVIEWED: "reviewed"
+            REVIEWED: "reviewed",
+            IGNORED: "ignored",
+            PENDING_LEGACY: "pending",
+            MATCHED: "reviewed",
+            SPECIAL: "warning"
         }[status] || ""
     },
     acceptanceStatusText(status) {
@@ -918,8 +927,26 @@ const Format = {
             HISTORY_EXECUTED: "\u5df2\u6267\u884c",
             HISTORY_ROLLED_BACK: "\u5199\u5165\u5df2\u64a4\u9500",
             HISTORY_BLOCKED: "\u5199\u5165\u963b\u65ad",
+            DATA_GOVERNANCE_REVIEWED: "\u6570\u636e\u6cbb\u7406\u5df2\u6838\u67e5",
+            DATA_GOVERNANCE_IGNORED: "\u6570\u636e\u6cbb\u7406\u5df2\u5ffd\u7565",
             CASE_CANCELLED: "\u5df2\u64a4\u56de"
         }[status] || status || ""
+    },
+    sourceText(source) {
+        return {
+            SALARY_EVENT: "\u5de5\u8d44\u53d8\u52a8",
+            SALARY_CASE: "\u5de5\u8d44\u7533\u529e",
+            SALARY_CLOSURE: "\u5de5\u8d44\u95ed\u73af",
+            DATA_GOVERNANCE: "\u6570\u636e\u6cbb\u7406",
+            REPORT_SAMPLE_COMPARISON: "\u62a5\u8868\u6837\u672c\u5bf9\u7167",
+            GENERATED_TIMELINE: "\u81ea\u52a8\u6f14\u7b97\u7f3a\u53e3",
+            APPLICATION_TODO: "\u7533\u529e\u5f85\u529e",
+            APPLICATION_DONE: "\u7533\u529e\u5df2\u529e",
+            dryzwbh: "\u4efb\u804c\u4fe1\u606f",
+            dndkh: "\u5e74\u5ea6\u8003\u6838",
+            dxl: "\u5b66\u5386\u4fe1\u606f",
+            hjxx: "\u5956\u60e9\u5904\u5206"
+        }[source] || source || ""
     },
     workflowStatusClass(status) {
         return {
@@ -933,6 +960,8 @@ const Format = {
             HISTORY_EXECUTED: "reviewed",
             HISTORY_ROLLED_BACK: "skipped",
             HISTORY_BLOCKED: "error",
+            DATA_GOVERNANCE_REVIEWED: "reviewed",
+            DATA_GOVERNANCE_IGNORED: "skipped",
             CASE_CANCELLED: "skipped"
         }[status] || "pending"
     },
@@ -2098,6 +2127,7 @@ const WorkbenchPanel = {
         if (metricCode === "SALARY_REVIEW_PENDING") {
             els.workbenchKeywordInput.value = "";
             els.workbenchChangeTypeSelect.value = "";
+            els.workbenchSourceSelect.value = "";
             els.workbenchCaseStatusSelect.value = "DONE";
             els.workbenchTrialStatusSelect.value = "";
             els.workbenchReviewStatusSelect.value = "PENDING";
@@ -2109,6 +2139,7 @@ const WorkbenchPanel = {
         if (metricCode === "SALARY_TRIAL_DIFFERENT" || metricCode === "SALARY_TRIAL_ERROR") {
             els.workbenchKeywordInput.value = "";
             els.workbenchChangeTypeSelect.value = "";
+            els.workbenchSourceSelect.value = "";
             els.workbenchCaseStatusSelect.value = "DONE";
             els.workbenchTrialStatusSelect.value = metricCode === "SALARY_TRIAL_DIFFERENT" ? "DIFFERENT" : "ERROR";
             els.workbenchReviewStatusSelect.value = "";
@@ -2130,6 +2161,7 @@ const WorkbenchPanel = {
         }
         els.workbenchKeywordInput.value = "";
         els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
         els.workbenchCaseStatusSelect.value = "DONE";
         els.workbenchTrialStatusSelect.value = "";
         els.workbenchReviewStatusSelect.value = "";
@@ -2150,6 +2182,7 @@ const WorkbenchPanel = {
         }
         els.workbenchKeywordInput.value = "";
         els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
         els.workbenchCaseStatusSelect.value = "DONE";
         els.workbenchTrialStatusSelect.value = "";
         els.workbenchReviewStatusSelect.value = "";
@@ -2172,6 +2205,7 @@ const WorkbenchPanel = {
         }
         els.workbenchKeywordInput.value = "";
         els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
         els.workbenchCaseStatusSelect.value = "DONE";
         els.workbenchTrialStatusSelect.value = "";
         els.workbenchReviewStatusSelect.value = "";
@@ -2773,7 +2807,9 @@ const WorkbenchPanel = {
         }
     },
     async openMigrationDeliveryGovernanceDetail(item) {
-        if (!Permissions.has("SALARY_GOVERNANCE") || !Permissions.has("SALARY_TODO")) {
+        const canViewGovernanceTask = Permissions.has("SALARY_DONE") || (Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO"));
+        const canManageGovernanceTask = Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO");
+        if (!canViewGovernanceTask) {
             setStatus(TEXT.menuPlaceholder);
             return;
         }
@@ -2807,7 +2843,7 @@ const WorkbenchPanel = {
                         <p>${Format.html(workItemId || "-")}</p>
                     </div>
                     <div class="case-detail-actions">
-                        <button type="button" class="case-snapshot-button primary" data-migration-delivery-governance-retest="${Format.html(workItemId)}">\u590d\u6d4b</button>
+                        ${canManageGovernanceTask ? `<button type="button" class="case-snapshot-button primary" data-migration-delivery-governance-retest="${Format.html(workItemId)}">\u590d\u6d4b</button>` : ""}
                         ${Permissions.has("SYSTEM_AUDIT") ? `<button type="button" class="case-snapshot-button" data-migration-delivery-governance-audits>\u603b\u4ea4\u4ed8\u5ba1\u8ba1</button>` : ""}
                     </div>
                 </div>
@@ -2849,8 +2885,9 @@ const WorkbenchPanel = {
                     <div class="work-item-actions migration-delivery-detail-actions">
                         ${historyStatus === "ERROR" && Permissions.has("SYSTEM_AUDIT") ? `<button type="button" data-migration-delivery-governance-history-audits>\u5386\u53f2\u9a8c\u6536\u5ba1\u8ba1</button>` : ""}
                         ${reportStatus === "ERROR" && Permissions.has("SYSTEM_AUDIT") ? `<button type="button" data-migration-delivery-governance-report-audits>\u62a5\u8868\u4ea4\u4ed8\u5ba1\u8ba1</button>` : ""}
-                        <button type="button" class="${closeSuggested ? "primary" : ""}" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="REVIEWED">${closeSuggested ? "\u786e\u8ba4\u5173\u95ed" : "\u786e\u8ba4"}</button>
-                        <button type="button" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="IGNORED">\u5ffd\u7565</button>
+                        ${canManageGovernanceTask ? `<button type="button" class="${closeSuggested ? "primary" : ""}" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="REVIEWED">${closeSuggested ? "\u786e\u8ba4\u5173\u95ed" : "\u786e\u8ba4"}</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="IGNORED">\u5ffd\u7565</button>` : ""}
+                        ${!canManageGovernanceTask && !Permissions.has("SYSTEM_AUDIT") ? `<span>\u5df2\u5904\u7406\u8bb0\u5f55\u53ef\u8ffd\u6eaf</span>` : ""}
                     </div>
                     <small class="audit-raw-summary">${Format.html(detail.summary || summary || "")}</small>
                 </div>
@@ -2914,6 +2951,169 @@ const WorkbenchPanel = {
         document.body.appendChild(overlay);
         overlay.querySelector(".case-detail-close").focus();
         setStatus("\u5df2\u6253\u5f00\u8fc1\u79fb\u4ea4\u4ed8\u5f02\u5e38\u8be6\u60c5");
+    },
+    async openDataGovernanceTaskDetail(item) {
+        const canViewGovernanceTask = Permissions.has("SALARY_DONE") || (Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO"));
+        const canManageGovernanceTask = Permissions.has("SALARY_GOVERNANCE") && Permissions.has("SALARY_TODO");
+        const canMaintainGovernancePerson = canManageGovernanceTask && Permissions.has("SALARY_PERSON");
+        if (!canViewGovernanceTask) {
+            setStatus(TEXT.menuPlaceholder);
+            return;
+        }
+        const workItemId = item.dataset.workId || "";
+        let detail = null;
+        try {
+            detail = await Api.request(`/api/workbench/data-governance/tasks/${encodeURIComponent(workItemId)}/detail`);
+        } catch (error) {
+            setStatus(error.message);
+            return;
+        }
+        if (detail.taskType === "MIGRATION_DELIVERY_PACKAGE") {
+            await WorkbenchPanel.openMigrationDeliveryGovernanceDetail(item);
+            return;
+        }
+        const personCode = item.dataset.personCode || detail.personCode || "";
+        const sample = detail.sample || {};
+        const field = (label, value) => `
+            <div class="case-detail-field">
+                <span>${Format.html(label)}</span>
+                <strong>${Format.html(value || "-")}</strong>
+            </div>
+        `;
+        const actionButton = (label, url, action) => url ? `<button type="button" data-report-sample-governance-${action}="${Format.html(url)}">${Format.html(label)}</button>` : "";
+        const isReportSampleComparison = detail.taskType === "REPORT_SAMPLE_COMPARISON";
+        const maintenanceTarget = WorkbenchPanel.governanceMaintenanceTarget(item.dataset.changeType || detail.changeType, item.dataset.summary || detail.summary);
+        const review = detail.review || {};
+        const reviewStatus = sample.reviewStatus || review.reviewStatus || "PENDING";
+        const retestStatus = review.retestStatus || "";
+        const reviewedBy = sample.reviewedBy || review.reviewedBy || "";
+        const reviewedAt = sample.reviewedAt || review.reviewedAt || "";
+        const closeSuggested = retestStatus === "RESOLVED";
+        const governanceStatusClass = (value) => {
+            const safeValue = String(value || "").toUpperCase();
+            if (["REVIEWED", "MATCHED", "RESOLVED"].includes(safeValue)) {
+                return "ready";
+            }
+            if (["SPECIAL", "FOUND"].includes(safeValue)) {
+                return "warning";
+            }
+            if (["IGNORED"].includes(safeValue)) {
+                return "pending";
+            }
+            return "";
+        };
+        const governanceStatusTag = (label, value, display) => value ? `
+            <span class="migration-delivery-detail-tag ${governanceStatusClass(value)}">
+                <b>${Format.html(label)}</b>${Format.html(display || value)}
+            </span>
+        ` : "";
+        const overlay = document.createElement("div");
+        overlay.className = "case-detail-overlay";
+        overlay.innerHTML = `
+            <div class="case-detail-panel migration-delivery-governance-detail">
+                <button type="button" class="case-detail-close" aria-label="Close">&times;</button>
+                <div class="case-detail-header">
+                    <div>
+                        <span class="case-detail-kicker">\u6570\u636e\u6cbb\u7406</span>
+                        <h3>${isReportSampleComparison ? "\u62a5\u8868\u6837\u672c\u5bf9\u7167" : "\u57fa\u7840\u6570\u636e\u6838\u67e5"}</h3>
+                        <p>${Format.html(workItemId || "-")}</p>
+                    </div>
+                    <div class="case-detail-actions">
+                        ${isReportSampleComparison ? actionButton("\u5bf9\u7167", sample.comparisonUrl, "comparison") : ""}
+                        ${isReportSampleComparison ? actionButton("\u6253\u5370", sample.printUrl, "print") : ""}
+                        ${isReportSampleComparison ? actionButton("CSV", sample.csvUrl, "csv") : ""}
+                        ${!isReportSampleComparison && personCode && canMaintainGovernancePerson ? `<button type="button" class="primary" data-data-governance-maintenance="${Format.html(personCode)}">\u5b9a\u4f4d\u4eba\u5458</button>` : ""}
+                    </div>
+                </div>
+                <div class="migration-delivery-detail-status" data-data-governance-status-summary>
+                    ${governanceStatusTag("\u6838\u67e5", reviewStatus, Format.reviewStatusText(reviewStatus))}
+                    ${governanceStatusTag("\u590d\u6d4b", retestStatus)}
+                    ${reviewedAt ? governanceStatusTag("\u767b\u8bb0", reviewedAt, reviewedBy ? `${reviewedBy} ${reviewedAt}` : reviewedAt) : ""}
+                </div>
+                ${closeSuggested ? `
+                    <div class="migration-delivery-close-suggested">
+                        <strong>\u590d\u6d4b\u901a\u8fc7</strong>
+                        <span>\u57fa\u7840\u6570\u636e\u95ee\u9898\u5df2\u6062\u590d\uff0c\u53ef\u786e\u8ba4\u5173\u95ed\u672c\u6cbb\u7406\u4efb\u52a1\u3002</span>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>${isReportSampleComparison ? "\u6837\u672c\u4fe1\u606f" : "\u5f85\u529e\u4fe1\u606f"}</h4>
+                    <div class="case-detail-grid">
+                        ${isReportSampleComparison ? field("\u62a5\u8868", sample.reportCode) : field("\u7c7b\u578b", detail.changeType)}
+                        ${isReportSampleComparison ? field("\u6837\u672c", sample.sampleKey) : field("\u6765\u6e90", detail.sourceId)}
+                        ${field("\u5355\u4f4d", sample.orgCode || detail.orgCode)}
+                        ${field("\u671f\u95f4", sample.period || `${detail.eventYear || ""}-${detail.eventMonth || ""}`.replace(/-$/, ""))}
+                        ${field("\u4eba\u5458", `${sample.personCode || detail.personCode || ""} ${sample.personName || detail.personName || ""}`.trim())}
+                        ${field("\u72b6\u6001", Format.reviewStatusText(reviewStatus))}
+                    </div>
+                </div>
+                <div class="case-detail-section">
+                    <h4>\u6838\u67e5\u539f\u56e0</h4>
+                    <div class="migration-delivery-detail-audit">
+                        <strong>${Format.html(sample.reviewCategory || reviewStatus || "-")}</strong>
+                        <span>${Format.html(sample.reviewReason || review.reviewReason || detail.summary || "")}</span>
+                        ${reviewedBy || reviewedAt ? `<span>${Format.html(reviewedBy || "-")} ${Format.html(reviewedAt || "")}</span>` : ""}
+                    </div>
+                </div>
+                ${(review.retestStatus || review.retestSummary || review.retestedAt) ? `
+                    <div class="case-detail-section">
+                        <h4>\u590d\u6d4b\u8bb0\u5f55</h4>
+                        <div class="migration-delivery-detail-audit">
+                            <strong>${Format.html(review.retestStatus || "-")}</strong>
+                            <span>${Format.html(review.retestSummary || "")}</span>
+                            ${review.retestedAt ? `<span>${Format.html(review.retestedAt)}</span>` : ""}
+                        </div>
+                    </div>
+                ` : ""}
+                <div class="case-detail-section">
+                    <h4>\u5904\u7406\u5165\u53e3</h4>
+                    <div class="work-item-actions migration-delivery-detail-actions">
+                        ${!isReportSampleComparison && personCode && canMaintainGovernancePerson ? `<button type="button" class="primary" data-data-governance-maintenance="${Format.html(personCode)}">\u5b9a\u4f4d\u5904\u7406</button>` : ""}
+                        ${!isReportSampleComparison && canManageGovernanceTask ? `<button type="button" data-data-governance-retest="${Format.html(workItemId)}">\u590d\u6d4b</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" class="${closeSuggested ? "primary" : ""}" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="REVIEWED">${closeSuggested ? "\u786e\u8ba4\u5173\u95ed" : "\u786e\u8ba4\u5df2\u6838\u67e5"}</button>` : ""}
+                        ${canManageGovernanceTask ? `<button type="button" data-data-governance-review="${Format.html(workItemId)}" data-data-governance-review-status="IGNORED">\u6682\u4e0d\u5904\u7406</button>` : ""}
+                        ${!canManageGovernanceTask && !canMaintainGovernancePerson ? `<span>\u5df2\u5904\u7406\u8bb0\u5f55\u53ef\u8ffd\u6eaf</span>` : ""}
+                    </div>
+                    <small class="audit-raw-summary">${Format.html(detail.summary || "")}</small>
+                </div>
+            </div>
+        `;
+        overlay.addEventListener("click", async (event) => {
+            if (event.target === overlay || event.target.closest(".case-detail-close")) {
+                overlay.remove();
+                return;
+            }
+            const linkButton = event.target.closest("button[data-report-sample-governance-comparison],button[data-report-sample-governance-print],button[data-report-sample-governance-csv]");
+            if (linkButton) {
+                const url = linkButton.dataset.reportSampleGovernanceComparison || linkButton.dataset.reportSampleGovernancePrint || linkButton.dataset.reportSampleGovernanceCsv;
+                if (url) {
+                    window.open(url, "_blank", "noopener");
+                }
+                return;
+            }
+            const maintenanceButton = event.target.closest("button[data-data-governance-maintenance]");
+            if (maintenanceButton) {
+                const maintenancePersonCode = maintenanceButton.dataset.dataGovernanceMaintenance || "";
+                overlay.remove();
+                setStatus(TEXT.openingWorkItem);
+                await WorkbenchPanel.openPersonMaintenance(maintenancePersonCode, maintenanceTarget);
+                return;
+            }
+            const retestButton = event.target.closest("button[data-data-governance-retest]");
+            if (retestButton) {
+                await WorkbenchPanel.retestDataGovernanceTask(retestButton);
+                overlay.remove();
+                return;
+            }
+            const reviewButton = event.target.closest("button[data-data-governance-review]");
+            if (reviewButton) {
+                await WorkbenchPanel.reviewDataGovernanceTask(reviewButton, reviewButton.dataset.dataGovernanceReviewStatus || "REVIEWED");
+                overlay.remove();
+            }
+        });
+        document.body.appendChild(overlay);
+        overlay.querySelector(".case-detail-close").focus();
+        setStatus(isReportSampleComparison ? "\u5df2\u6253\u5f00\u62a5\u8868\u6837\u672c\u6cbb\u7406\u8be6\u60c5" : "\u5df2\u6253\u5f00\u57fa\u7840\u6570\u636e\u6cbb\u7406\u8be6\u60c5");
     },
     exportDataGovernanceScan() {
         if (!Permissions.has("SALARY_EXPORT") || !Permissions.has("SALARY_GOVERNANCE")) {
@@ -6133,7 +6333,8 @@ const WorkbenchPanel = {
         const canComplete = item.status === "TODO" && WorkbenchPanel.isSalaryTodoSource(item.source) && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_DONE");
         const canReviewGeneratedIssue = item.status === "TODO" && item.source === "GENERATED_TIMELINE" && Permissions.has("SALARY_TODO");
         const canRetestGeneratedIssue = canReviewGeneratedIssue && Permissions.has("SALARY_TRIAL");
-        const canReviewDataGovernance = item.status === "TODO" && item.source === "DATA_GOVERNANCE" && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_GOVERNANCE");
+        const isDataGovernanceSource = ["DATA_GOVERNANCE", "REPORT_SAMPLE_COMPARISON"].includes(item.source || "");
+        const canReviewDataGovernance = item.status === "TODO" && isDataGovernanceSource && Permissions.has("SALARY_TODO") && Permissions.has("SALARY_GOVERNANCE");
         const canHandleClosure = item.status === "TODO" && item.source === "SALARY_CLOSURE" && Permissions.has("SALARY_DONE");
         const canUseSalaryDone = item.status !== "TODO" && item.source === "SALARY_CASE" && Permissions.has("SALARY_DONE");
         const canUseSalaryClosure = canUseSalaryDone || canHandleClosure;
@@ -6146,6 +6347,9 @@ const WorkbenchPanel = {
         const workflowClass = Format.workflowStatusClass(item.workflowStatus);
         const closureText = item.closureStatus ? Format.closureStatusText(item.closureStatus) : "";
         const closureClass = Format.closureStatusClass(item.closureStatus);
+        const governanceTraceText = item.status !== "TODO" && isDataGovernanceSource
+            ? [item.reviewedBy, item.reviewedAt, item.retestSummary ? `\u590d\u6d4b\uff1a${item.retestSummary}` : ""].filter(Boolean).join(" | ")
+            : "";
         const nextActionText = item.nextActionLabel || "";
         const hasNextAction = Boolean(item.nextActionCode || item.nextActionLabel);
         const isMigrationDeliveryGovernance = item.source === "DATA_GOVERNANCE" && String(item.id || "").startsWith("salary-migration-delivery-error-");
@@ -6184,6 +6388,7 @@ const WorkbenchPanel = {
                     ${workflowText ? `<span class="work-item-workflow ${Format.html(workflowClass)}">${Format.html(workflowText)}</span>` : ""}
                     ${trialText ? `<span class="work-item-trial ${Format.html(trialClass)}">${Format.html(trialText)}</span>` : ""}
                     ${reviewText ? `<span class="work-item-review ${Format.html(reviewClass)}">${Format.html(reviewText)}</span>` : ""}
+                    ${governanceTraceText ? `<span class="work-item-governance-trace" title="${Format.html(item.reviewReason || governanceTraceText)}">${Format.html(governanceTraceText)}</span>` : ""}
                 </button>
                 ${canComplete ? `<button type="button" class="work-item-complete" data-complete-work-id="${Format.html(item.id)}">\u9884\u68c0\u529e\u7406</button>` : ""}
                 ${canReviewGeneratedIssue ? `<div class="work-item-actions">
@@ -6192,7 +6397,7 @@ const WorkbenchPanel = {
                     <button type="button" data-generated-issue-review="${Format.html(item.id)}" data-generated-issue-review-status="IGNORED">\u5ffd\u7565</button>
                 </div>` : ""}
                 ${canReviewDataGovernance ? `<div class="work-item-actions">
-                    <button type="button" data-data-governance-retest="${Format.html(item.id)}">\u590d\u6d4b</button>
+                    ${item.source === "DATA_GOVERNANCE" ? `<button type="button" data-data-governance-retest="${Format.html(item.id)}">\u590d\u6d4b</button>` : ""}
                     ${migrationDeliveryGovernanceActions}
                     <button type="button" data-data-governance-review="${Format.html(item.id)}" data-data-governance-review-status="REVIEWED">\u786e\u8ba4</button>
                     <button type="button" data-data-governance-review="${Format.html(item.id)}" data-data-governance-review-status="IGNORED">\u5ffd\u7565</button>
@@ -8991,6 +9196,7 @@ const WorkbenchPanel = {
         return {
             keyword: (els.workbenchKeywordInput.value || "").trim(),
             changeType: els.workbenchChangeTypeSelect.value || "",
+            source: els.workbenchSourceSelect.value || "",
             caseStatus: els.workbenchCaseStatusSelect.value || "DONE",
             trialStatus: els.workbenchTrialStatusSelect.value || "",
             reviewStatus: els.workbenchReviewStatusSelect.value || "",
@@ -9019,6 +9225,9 @@ const WorkbenchPanel = {
         }
         if (filters.changeType) {
             parts.push(`\u53d8\u52a8\uff1a${filters.changeType}`);
+        }
+        if (filters.source) {
+            parts.push(`\u6765\u6e90\uff1a${Format.sourceText(filters.source)}`);
         }
         parts.push(`\u5df2\u529e\u72b6\u6001\uff1a${Format.businessStatusText(filters.caseStatus)}`);
         if (filters.trialStatus) {
@@ -9124,6 +9333,7 @@ const WorkbenchPanel = {
         }
         els.workbenchKeywordInput.value = "";
         els.workbenchChangeTypeSelect.value = "";
+        els.workbenchSourceSelect.value = "";
         els.workbenchCaseStatusSelect.value = "DONE";
         els.workbenchTrialStatusSelect.value = "";
         els.workbenchReviewStatusSelect.value = "";
@@ -9157,6 +9367,7 @@ const WorkbenchPanel = {
             limit: 12,
             keyword: filters.keyword,
             changeType: filters.changeType,
+            source: filters.source,
             caseStatus: isDone ? filters.caseStatus : "",
             trialStatus: isDone ? filters.trialStatus : "",
             reviewStatus: isDone ? filters.reviewStatus : "",
@@ -9217,6 +9428,7 @@ const WorkbenchPanel = {
             status,
             keyword: filters.keyword,
             changeType: filters.changeType,
+            source: filters.source,
             caseStatus: isDone ? filters.caseStatus : "",
             trialStatus: isDone ? filters.trialStatus : "",
             reviewStatus: isDone ? filters.reviewStatus : "",
@@ -13709,12 +13921,12 @@ const WorkbenchPanel = {
     async openWorkItem(button) {
         try {
             const item = button.closest(".work-item") || button;
-            if (item.dataset.source === "DATA_GOVERNANCE" && String(item.dataset.workId || "").startsWith("salary-migration-delivery-error-")) {
-                await WorkbenchPanel.openMigrationDeliveryGovernanceDetail(item);
+            if (["DATA_GOVERNANCE", "REPORT_SAMPLE_COMPARISON"].includes(item.dataset.source || "")) {
+                await WorkbenchPanel.openDataGovernanceTaskDetail(item);
                 return;
             }
             const personCode = item.dataset.personCode || "";
-            if (!personCode || !["SALARY_EVENT", "SALARY_CASE", "SALARY_CLOSURE", "DATA_GOVERNANCE"].includes(item.dataset.source || "")) {
+            if (!personCode || !["SALARY_EVENT", "SALARY_CASE", "SALARY_CLOSURE"].includes(item.dataset.source || "")) {
                 setStatus(TEXT.menuPlaceholder);
                 return;
             }
@@ -13724,14 +13936,6 @@ const WorkbenchPanel = {
             }
             if (item.dataset.source === "SALARY_CASE" && ["DONE", "CANCELLED"].includes(item.dataset.status || "")) {
                 await WorkbenchPanel.openCaseDetail(item.dataset.workId);
-                return;
-            }
-            if (item.dataset.source === "DATA_GOVERNANCE") {
-                setStatus(TEXT.openingWorkItem);
-                await WorkbenchPanel.openPersonMaintenance(
-                    personCode,
-                    WorkbenchPanel.governanceMaintenanceTarget(item.dataset.changeType, item.dataset.summary)
-                );
                 return;
             }
             setStatus(TEXT.openingWorkItem);

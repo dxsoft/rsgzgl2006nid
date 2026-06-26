@@ -9,6 +9,7 @@
     [switch]$FullCoreMigration,
     [switch]$SkipMavenRegression,
     [switch]$SkipCoreMigration,
+    [switch]$SkipOnlineBusinessClosure,
     [switch]$SkipPackage
 )
 
@@ -240,6 +241,20 @@ if (-not $SkipCoreMigration) {
         }
         $env:DB_PASSWORD = $DbPassword
         Invoke-NativeCommand "powershell" $args
+    }
+}
+
+if (-not $SkipOnlineBusinessClosure) {
+    Invoke-ReadinessStep "Online business closure gate" {
+        $args = @(
+            "-ExecutionPolicy", "Bypass",
+            "-File", (Join-Path $PSScriptRoot "verify-online-business-closure.ps1"),
+            "-BaseUrl", $BaseUrl,
+            "-TimeoutSec", "$TimeoutSec",
+            "-Username", $Username,
+            "-Password", $Password
+        )
+        Invoke-NativeCommand "powershell" $args ($MavenTimeoutSec * 10)
     }
 }
 

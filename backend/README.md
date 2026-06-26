@@ -106,7 +106,7 @@ Run the launch readiness gate before production history-write batches:
 powershell -ExecutionPolicy Bypass -File ..\scripts\verify-launch-readiness.ps1
 ```
 
-The report is written to `target\launch-readiness-report.txt`.
+The report is written to `target\launch-readiness-report.txt`. The gate checks launch documents, online service access, history-write permissions, Maven regression tests, the core migration gate, the online business closure gate, and package creation. Use `-SkipOnlineBusinessClosure` only for a fast local precheck when the full online report/history/sample gates will be run separately.
 
 Additional launch artifacts can be produced from the repository root:
 

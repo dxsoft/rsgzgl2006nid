@@ -111,6 +111,11 @@ Only run the Maven regression gates:
 powershell -ExecutionPolicy Bypass -File scripts\verify-core-migration.ps1 -SkipSamples
 ```
 
+This short run is the required Maven-only gate when launch readiness is run
+with `-SkipMavenRegression`. The history-write safety regression can take more
+than five minutes on the shared MySQL dataset; keep the caller timeout above
+the script's Maven timeout budget.
+
 Run launch readiness after Maven has already been verified separately:
 
 ```powershell

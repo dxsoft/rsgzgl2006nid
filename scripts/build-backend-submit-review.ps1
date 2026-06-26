@@ -15,8 +15,11 @@ try {
     if (-not (Test-Path -LiteralPath $firstBatchManifest)) {
         throw "First batch path manifest is missing: $firstBatchManifest"
     }
-    $firstBatchPaths = @(Get-Content -LiteralPath $firstBatchManifest | Where-Object {
-        -not [string]::IsNullOrWhiteSpace($_) -and -not $_.TrimStart().StartsWith("#")
+    $firstBatchPaths = @(Get-Content -LiteralPath $firstBatchManifest | ForEach-Object {
+        $line = $_.Trim().Replace("\", "/")
+        if (-not [string]::IsNullOrWhiteSpace($line) -and -not $line.StartsWith("#")) {
+            $line
+        }
     })
 
     $secondBatchPrefixes = @("scripts/")

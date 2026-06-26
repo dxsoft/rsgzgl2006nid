@@ -17,9 +17,30 @@ try {
         Write-Host "Required path manifest is missing: $requiredPathManifest" -ForegroundColor Red
         exit 1
     }
-    $requiredPaths = @(Get-Content -LiteralPath $requiredPathManifest | Where-Object {
-        -not [string]::IsNullOrWhiteSpace($_) -and -not $_.TrimStart().StartsWith("#")
+    $requiredPaths = @(Get-Content -LiteralPath $requiredPathManifest | ForEach-Object {
+        $line = $_.Trim().Replace("\", "/")
+        if (-not [string]::IsNullOrWhiteSpace($line) -and -not $line.StartsWith("#")) {
+            $line
+        }
     })
+    $duplicateRequiredPaths = @($requiredPaths | Group-Object | Where-Object { $_.Count -gt 1 } | ForEach-Object { $_.Name })
+    if ($duplicateRequiredPaths.Count -gt 0) {
+        Write-Host "Required path manifest contains duplicate entries:" -ForegroundColor Red
+        $duplicateRequiredPaths | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        exit 1
+    }
+    $sortedRequiredPaths = @($requiredPaths | Sort-Object)
+    $outOfOrderRequiredPaths = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $requiredPaths.Count; $i++) {
+        if ($requiredPaths[$i] -ne $sortedRequiredPaths[$i]) {
+            $outOfOrderRequiredPaths.Add(("line {0}: expected '{1}' but found '{2}'" -f ($i + 1), $sortedRequiredPaths[$i], $requiredPaths[$i]))
+        }
+    }
+    if ($outOfOrderRequiredPaths.Count -gt 0) {
+        Write-Host "Required path manifest is not sorted:" -ForegroundColor Red
+        $outOfOrderRequiredPaths | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        exit 1
+    }
 
     $missing = @($requiredPaths | Where-Object { -not (Test-Path -LiteralPath $_) })
     if ($missing.Count -gt 0) {

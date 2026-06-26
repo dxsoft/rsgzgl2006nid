@@ -331,6 +331,12 @@ button:disabled {
     display: none;
 }
 
+#salaryWorkspace #salaryConfigPanel,
+#salaryWorkspace #fieldConfigList,
+#salaryWorkspace #fieldConfigEditor {
+    display: none !important;
+}
+
 .workbench-header {
     display: grid;
     grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);

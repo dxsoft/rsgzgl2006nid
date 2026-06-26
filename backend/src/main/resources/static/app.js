@@ -14594,6 +14594,9 @@ const SystemPanel = {
 
 const SystemShell = {
     icon(code) {
+        if (code === "SALARY_CONFIG") {
+            return "\u7cfb";
+        }
         if (code.startsWith("SALARY")) {
             return "\u5de5";
         }
@@ -14649,10 +14652,12 @@ const SystemShell = {
         els.systemView.classList.toggle("hidden", nextView !== "system");
         els.menuTree.innerHTML = SystemShell.renderMenus(state.menus);
         if (nextView === "workbench") {
+            SystemPanel.hideSalaryConfig();
             await WorkbenchPanel.load();
         } else if (nextView === "system") {
             await SystemPanel.load(state.activeMenuCode);
         } else {
+            SystemPanel.hideSalaryConfig();
             Permissions.applySalary();
             if (!state.orgs.length) {
                 await OrgPanel.load();

@@ -45,6 +45,11 @@ function toNumber(value) {
   return value === null || value === undefined || value === "" ? "" : value;
 }
 
+function isRecognizedBusinessType(value) {
+  const text = String(value ?? "").trim();
+  return text && !text.includes("?") && !text.includes("\uFFFD");
+}
+
 let cookie = "";
 if (username) {
   const login = await request(`${baseUrl}/api/auth/login`, {
@@ -60,7 +65,7 @@ const done = await request(`${baseUrl}/api/workbench/items?status=DONE&limit=${s
 });
 const doneItems = done.data?.data?.items || [];
 const realItems = doneItems
-  .filter((item) => item.source === "SALARY_EVENT" && item.businessType && item.personCode)
+  .filter((item) => item.source === "SALARY_EVENT" && isRecognizedBusinessType(item.businessType) && item.personCode)
   .sort((a, b) => {
     const type = String(a.businessType).localeCompare(String(b.businessType), "zh-Hans-CN");
     if (type !== 0) return type;

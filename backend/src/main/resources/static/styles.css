@@ -5841,12 +5841,12 @@ button:disabled {
 
 @media (max-width: 1080px) {
     .desktop-body {
-        grid-template-columns: 190px minmax(0, 1fr);
+        grid-template-columns: 200px minmax(0, 1fr);
     }
 
     .command-ribbon {
-        flex-wrap: wrap;
-        overflow-x: visible;
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 
     .workbench-metrics {
@@ -5872,7 +5872,7 @@ button:disabled {
     }
 
     .workspace {
-        grid-template-columns: minmax(200px, 260px) 1fr;
+        grid-template-columns: minmax(190px, 250px) minmax(300px, 1fr);
     }
 
     .base-change-form {
@@ -5915,12 +5915,40 @@ button:disabled {
         grid-column: 1 / -1;
         border-top: 1px solid var(--border);
     }
+
+    .system-editor,
+    .system-editor.audit-filter {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow-x: auto;
+    }
+
+    .report-center-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .report-center-titlebar,
+    .report-center-toolbar {
+        width: 100%;
+    }
 }
 
 @media (max-width: 760px) {
     .topbar {
         align-items: flex-start;
         flex-direction: column;
+        gap: 6px;
+    }
+
+    .topbar-status {
+        width: 100%;
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .topbar-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 
     .desktop-statusbar {
@@ -5971,11 +5999,18 @@ button:disabled {
         justify-content: flex-start;
     }
 
-    .filter-strip input,
-    .filter-strip select,
+    .filter-strip input {
+        flex: 0 0 190px;
+        min-width: 190px;
+    }
+
+    .filter-strip select {
+        flex: 0 0 124px;
+    }
+
     .filter-strip button,
     .workbench-action-strip button {
-        flex: 1 1 100%;
+        flex: 0 0 auto;
     }
 
     .workbench-metrics {
@@ -6013,6 +6048,10 @@ button:disabled {
     .org-pane,
     .people-pane {
         max-height: 48vh;
+    }
+
+    .detail-pane {
+        max-height: none;
     }
 
     .profile-grid {
@@ -6059,6 +6098,15 @@ button:disabled {
         grid-template-columns: 1fr;
     }
 
+    .case-detail-overlay {
+        padding: 8px;
+    }
+
+    .case-detail-dialog {
+        width: 100%;
+        max-height: calc(100vh - 16px);
+    }
+
     .case-detail-grid div,
     .case-detail-grid div:nth-child(3n) {
         border-right: 0;
@@ -6082,5 +6130,23 @@ button:disabled {
     .case-trial > div {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .system-view,
+    .workbench-view {
+        padding: 8px;
+    }
+
+    .system-table {
+        min-width: 640px;
+    }
+
+    .report-center {
+        padding: 8px;
+    }
+
+    .report-center-grid,
+    .report-center-catalog {
+        grid-template-columns: 1fr;
     }
 }

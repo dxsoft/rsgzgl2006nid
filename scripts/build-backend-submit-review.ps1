@@ -33,6 +33,23 @@ try {
         "scripts/build-backend-submit-review.ps1",
         "scripts/check-backend-version-control.ps1",
         "scripts/prepare-backend-first-batch-stage.ps1",
+        "scripts/start-backend-dev.ps1",
+        "scripts/stop-backend-dev.ps1",
+        "scripts/verify-auto-regression-samples.ps1",
+        "scripts/verify-business-acceptance-samples.ps1",
+        "scripts/verify-case-report-ui-contract.ps1",
+        "scripts/verify-core-migration.ps1",
+        "scripts/verify-generated-timeline-level-contract.ps1",
+        "scripts/verify-generated-timeline-samples.ps1",
+        "scripts/verify-history-write-rehearsal.ps1",
+        "scripts/verify-launch-readiness.ps1",
+        "scripts/verify-online-business-closure.ps1",
+        "scripts/verify-report-csv-exports.ps1",
+        "scripts/verify-report-history-queue-closure.ps1",
+        "scripts/verify-report-print-archive-ledger.ps1",
+        "scripts/verify-report-print-archive-samples.ps1",
+        "scripts/verify-report-print-pages.ps1",
+        "scripts/verify-salary-samples.ps1",
         ".gitignore"
     )
 

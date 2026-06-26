@@ -22,6 +22,18 @@ mvn spring-boot:run
 
 Default URL: `http://localhost:18080`.
 
+From the repository root, use the managed dev helper when running online verification scripts:
+
+```powershell
+$env:DB_PASSWORD='your-local-password'
+powershell -ExecutionPolicy Bypass -File scripts\start-backend-dev.ps1
+powershell -ExecutionPolicy Bypass -File scripts\verify-report-csv-exports.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-pages.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\stop-backend-dev.ps1
+```
+
+The helper writes PID and log files under `backend\target`, waits for `GET /api/health`, and stops only the process recorded in its managed PID file.
+
 To run the packaged jar in the background on Windows:
 
 ```powershell

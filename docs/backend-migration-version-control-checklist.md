@@ -29,6 +29,8 @@
 - `scripts/build-backend-submit-review.ps1`
 - `scripts/check-backend-version-control.ps1`
 - `scripts/prepare-backend-first-batch-stage.ps1`
+- `scripts/start-backend-dev.ps1`
+- `scripts/stop-backend-dev.ps1`
 
 ## 不应纳入版本管理的范围
 

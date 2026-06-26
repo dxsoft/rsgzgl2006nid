@@ -51,6 +51,15 @@ function First-Csv-Line([string]$Content) {
     return (("" + $Content).TrimStart([char]0xfeff) -split "`r?`n" | Select-Object -First 1)
 }
 
+function Csv-Has-Line([string]$Content, [string]$ExpectedPart) {
+    foreach ($line in (("" + $Content).TrimStart([char]0xfeff) -split "`r?`n")) {
+        if ($line.Contains($ExpectedPart)) {
+            return $true
+        }
+    }
+    return $false
+}
+
 function U([int[]]$Codes) {
     return -join ($Codes | ForEach-Object { [char]$_ })
 }
@@ -73,6 +82,29 @@ function Test-Csv(
             Add-Result $Rows $Code "OK" "Length=$($response.RawContentLength)"
         } else {
             Add-Result $Rows $Code "FAIL" "Header=$head"
+        }
+    } catch {
+        Add-Result $Rows $Code "REQUEST_ERROR" $_.Exception.Message
+    }
+}
+
+function Test-CsvAnyLine(
+    [System.Collections.Generic.List[object]]$Rows,
+    [string]$Code,
+    [string]$Path,
+    [string]$ExpectedLinePart
+) {
+    try {
+        $response = Invoke-WebRequest `
+            -Uri "$BaseUrl$Path" `
+            -Method Get `
+            -WebSession $webSession `
+            -TimeoutSec $TimeoutSec `
+            -UseBasicParsing
+        if ($response.StatusCode -eq 200 -and (Csv-Has-Line $response.Content $ExpectedLinePart)) {
+            Add-Result $Rows $Code "OK" "Length=$($response.RawContentLength)"
+        } else {
+            Add-Result $Rows $Code "FAIL" "Expected line part not found: $ExpectedLinePart"
         }
     } catch {
         Add-Result $Rows $Code "REQUEST_ERROR" $_.Exception.Message
@@ -126,7 +158,7 @@ Test-Csv $results "salary-roster-dynamic" "/api/reports/salary-roster.csv?orgCod
 Test-Csv $results "person-roster" "/api/reports/person-roster.csv?orgCode=$OrgCode&year=$Year&month=$Month&limit=5" (U @(0x8eab, 0x4efd, 0x8bc1, 0x53f7))
 Test-Csv $results "salary-change-ledger" "/api/reports/salary-change-ledger.csv?orgCode=$OrgCode&year=$Year&month=$Month&limit=5" (U @(0x529e, 0x7406, 0x7f16, 0x53f7))
 Test-Csv $results "salary-case-approval-roster" "/api/reports/salary-case-approval-roster.csv?orgCode=$OrgCode&year=$Year&month=$Month&limit=5" (U @(0x5199, 0x5165, 0x8ba1, 0x5212))
-Test-Csv $results "report-print-archive" "/api/reports/print-archive.csv?printStatus=ALL&limit=5" "caseNo"
+Test-CsvAnyLine $results "report-print-archive" "/api/reports/print-archive.csv?printStatus=ALL&limit=5" '"caseNo","personCode","personName","orgCode"'
 
 $results | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 

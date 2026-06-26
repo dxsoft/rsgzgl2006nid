@@ -92,11 +92,12 @@ try {
         -WebSession $webSession `
         -TimeoutSec $TimeoutSec `
         -UseBasicParsing
-    $head = ($csv.Content -split "`n" | Select-Object -First 1)
-    if ($csv.StatusCode -eq 200 -and $head -like '*"caseNo","personCode","personName","orgCode"*') {
+    $hasDataHeader = @(("" + $csv.Content).TrimStart([char]0xfeff) -split "`r?`n" |
+        Where-Object { $_.Contains('"caseNo","personCode","personName","orgCode"') }).Count -gt 0
+    if ($csv.StatusCode -eq 200 -and $hasDataHeader) {
         Add-Result $results "ledger-csv-contract" "OK" "Length=$($csv.RawContentLength)"
     } else {
-        Add-Result $results "ledger-csv-contract" "FAIL" "Unexpected CSV header: $head"
+        Add-Result $results "ledger-csv-contract" "FAIL" "CSV data header was not found."
     }
 } catch {
     Add-Result $results "ledger-request" "REQUEST_ERROR" $_.Exception.Message

@@ -186,14 +186,10 @@ Invoke-ReadinessStep "Required launch documents" {
 
 if ($StartBackend) {
     Invoke-ReadinessStep "Start managed backend" {
-        $args = @(
-            "-ExecutionPolicy", "Bypass",
-            "-File", (Join-Path $PSScriptRoot "start-backend-dev.ps1"),
-            "-DbPassword", $DbPassword,
-            "-Port", "" + (Resolve-BaseUrlPort $BaseUrl),
-            "-TimeoutSec", "120"
-        )
-        Invoke-NativeCommand "powershell" $args 180
+        & (Join-Path $PSScriptRoot "start-backend-dev.ps1") `
+            -DbPassword $DbPassword `
+            -Port (Resolve-BaseUrlPort $BaseUrl) `
+            -TimeoutSec 120
     }
 }
 
@@ -300,11 +296,7 @@ if (-not $SkipPackage) {
 
 if ($StopBackendAfter) {
     Invoke-ReadinessStep "Stop managed backend" {
-        $args = @(
-            "-ExecutionPolicy", "Bypass",
-            "-File", (Join-Path $PSScriptRoot "stop-backend-dev.ps1")
-        )
-        Invoke-NativeCommand "powershell" $args 60
+        & (Join-Path $PSScriptRoot "stop-backend-dev.ps1")
     }
 }
 

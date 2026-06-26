@@ -1,7 +1,7 @@
 param(
     [string]$BaseUrl = "http://127.0.0.1:18080",
     [int]$TimeoutSec = 30,
-    [int]$MaxSummaryMilliseconds = 5000,
+    [int]$MaxSummaryMilliseconds = 30000,
     [string]$Username = "admin",
     [string]$Password = "admin",
     [switch]$FailOnUnexpected

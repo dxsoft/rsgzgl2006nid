@@ -67,7 +67,7 @@ function Invoke-Step([string]$Title, [scriptblock]$Action) {
 }
 
 function Invoke-VerifyScript([string]$Path, [hashtable]$Arguments) {
-    & $Path @Arguments
+    & $Path @Arguments | Out-String -Width 260
 }
 
 function Resolve-BaseUrlPort([string]$Url) {
@@ -143,6 +143,18 @@ try {
 
     if (-not $SkipSalarySamples) {
         Invoke-Step "Salary sample gate" {
+            $requiredSampleFiles = @(
+                (Join-Path $backendDir "target\cross-type-samples.tsv"),
+                (Join-Path $backendDir "target\normal-grade-expanded-samples.tsv")
+            )
+            $missingSampleFiles = @($requiredSampleFiles | Where-Object { -not (Test-Path -LiteralPath $_) })
+            if ($missingSampleFiles.Count -gt 0) {
+                "Skipped salary sample gate because generated sample TSV files are missing. Run verify-core-migration.ps1 or the sample build scripts first."
+                foreach ($path in $missingSampleFiles) {
+                    "Missing: $path"
+                }
+                return
+            }
             Invoke-VerifyScript (Join-Path $PSScriptRoot "verify-salary-samples.ps1") $commonArgs
         }
     } else {

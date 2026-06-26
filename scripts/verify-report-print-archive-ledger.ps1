@@ -7,6 +7,8 @@ param(
     [switch]$FailOnUnexpected
 )
 
+$ErrorActionPreference = "Stop"
+
 $root = Split-Path -Parent $PSScriptRoot
 $backendDir = Join-Path $root "backend"
 Push-Location $backendDir

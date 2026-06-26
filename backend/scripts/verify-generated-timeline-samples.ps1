@@ -21,13 +21,18 @@ $ErrorActionPreference = "Stop"
 $webSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 if (-not [string]::IsNullOrWhiteSpace($Username)) {
     $loginBody = @{ username = $Username; password = $Password } | ConvertTo-Json -Compress
-    Invoke-RestMethod `
-        -Uri "$BaseUrl/api/auth/login" `
-        -Method Post `
-        -Body $loginBody `
-        -ContentType "application/json; charset=utf-8" `
-        -WebSession $webSession `
-        -TimeoutSec $TimeoutSec | Out-Null
+    try {
+        Invoke-RestMethod `
+            -Uri "$BaseUrl/api/auth/login" `
+            -Method Post `
+            -Body $loginBody `
+            -ContentType "application/json; charset=utf-8" `
+            -WebSession $webSession `
+            -TimeoutSec $TimeoutSec `
+            -ErrorAction Stop | Out-Null
+    } catch {
+        throw "Login failed for $BaseUrl. Ensure the backend is running and credentials are valid. $($_.Exception.Message)"
+    }
 }
 
 function Escape-Unicode([string]$Value) {

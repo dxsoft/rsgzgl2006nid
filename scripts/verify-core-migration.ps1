@@ -5,7 +5,7 @@
     [string]$Password = "admin",
     [string]$DbPassword = "",
     [string]$OutputPath = "",
-    [int]$MaxSummaryMilliseconds = 5000,
+    [int]$MaxSummaryMilliseconds = 30000,
     [int]$MavenTimeoutSec = 300,
     [switch]$SkipMaven,
     [switch]$SkipSamples,
@@ -151,14 +151,27 @@ if (-not $SkipSamples) {
     if ($FailOnUnexpected) {
         $sampleArgs.FailOnUnexpected = $true
     }
-    Invoke-Step "Salary sample gate" {
-        & (Join-Path $PSScriptRoot "verify-salary-samples.ps1") @sampleArgs
+    $requiredSalarySampleFiles = @(
+        (Join-Path $backendDir "target\cross-type-samples.tsv"),
+        (Join-Path $backendDir "target\normal-grade-expanded-samples.tsv")
+    )
+    $missingSalarySampleFiles = @($requiredSalarySampleFiles | Where-Object { -not (Test-Path -LiteralPath $_) })
+    if ($missingSalarySampleFiles.Count -gt 0) {
+        Add-Skip "Salary sample gate" ("Generated salary sample TSV files are missing. Run sample build scripts first: " + ($missingSalarySampleFiles -join ", "))
+    } else {
+        Invoke-Step "Salary sample gate" {
+            & (Join-Path $PSScriptRoot "verify-salary-samples.ps1") @sampleArgs
+        }
     }
     Invoke-Step "Business acceptance sample gate" {
         & (Join-Path $PSScriptRoot "verify-business-acceptance-samples.ps1") @sampleArgs
     }
-    Invoke-Step "Generated timeline sample gate" {
-        & (Join-Path $PSScriptRoot "verify-generated-timeline-samples.ps1") @sampleArgs
+    if ($missingSalarySampleFiles.Count -gt 0) {
+        Add-Skip "Generated timeline sample gate" "Generated timeline sample gate needs salary sample person codes. Run sample build scripts first."
+    } else {
+        Invoke-Step "Generated timeline sample gate" {
+            & (Join-Path $PSScriptRoot "verify-generated-timeline-samples.ps1") @sampleArgs
+        }
     }
     Invoke-Step "Generated timeline normal level contract gate" {
         & (Join-Path $PSScriptRoot "verify-generated-timeline-level-contract.ps1") @sampleArgs

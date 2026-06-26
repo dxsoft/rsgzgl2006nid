@@ -35,7 +35,8 @@ try {
         "scripts/check-backend-version-control.ps1",
         "scripts/prepare-backend-first-batch-stage.ps1",
         "scripts/start-backend-dev.ps1",
-        "scripts/stop-backend-dev.ps1"
+        "scripts/stop-backend-dev.ps1",
+        "scripts/verify-online-business-closure.ps1"
     )
 
     $missing = @($requiredPaths | Where-Object { -not (Test-Path -LiteralPath $_) })

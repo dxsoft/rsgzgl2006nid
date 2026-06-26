@@ -27,12 +27,17 @@ From the repository root, use the managed dev helper when running online verific
 ```powershell
 $env:DB_PASSWORD='your-local-password'
 powershell -ExecutionPolicy Bypass -File scripts\start-backend-dev.ps1
-powershell -ExecutionPolicy Bypass -File scripts\verify-report-csv-exports.ps1 -FailOnUnexpected
-powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-pages.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\verify-online-business-closure.ps1
 powershell -ExecutionPolicy Bypass -File scripts\stop-backend-dev.ps1
 ```
 
 The helper writes PID and log files under `backend\target`, waits for `GET /api/health`, and stops only the process recorded in its managed PID file.
+`verify-online-business-closure.ps1` runs the online report, print, history-queue, archive, acceptance, and salary-sample gates. It can also manage the backend lifecycle directly:
+
+```powershell
+$env:DB_PASSWORD='your-local-password'
+powershell -ExecutionPolicy Bypass -File scripts\verify-online-business-closure.ps1 -StartBackend -StopBackendAfter
+```
 
 To run the packaged jar in the background on Windows:
 

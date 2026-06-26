@@ -5246,6 +5246,7 @@ button:disabled {
 .config-band {
     background: var(--panel);
     border: 1px solid var(--border);
+    border-radius: 3px;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
@@ -5259,7 +5260,7 @@ button:disabled {
 .profile-grid div {
     min-width: 0;
     padding: 9px 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
 }
 
 .profile-grid dt {
@@ -5281,34 +5282,57 @@ button:disabled {
 .field-config-list {
     max-height: 220px;
     overflow: auto;
+    background: #fbfcfd;
 }
 
 .base-change-form {
     display: grid;
     grid-template-columns: 128px 82px 74px minmax(96px, 140px) minmax(180px, 1fr) 72px;
-    gap: 8px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    gap: 7px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     align-items: center;
+    background: #fbfcfd;
 }
 
 .base-change-form input,
-.base-change-form select {
+.base-change-form select,
+.person-base-info-form input,
+.person-post-form input,
+.education-form input,
+.assessment-form input,
+.assessment-form select {
     width: 100%;
-    min-height: 34px;
+    min-height: 32px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 0 8px;
     background: #fff;
 }
 
+.base-change-form input:focus,
+.base-change-form select:focus,
+.person-base-info-form input:focus,
+.person-post-form input:focus,
+.education-form input:focus,
+.assessment-form input:focus,
+.assessment-form select:focus {
+    outline: 2px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-color: var(--accent);
+}
+
 .base-change-row {
+    position: relative;
     display: grid;
     gap: 4px;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
+    padding: 9px 12px 9px 14px;
+    border-bottom: 1px solid var(--border-soft);
     background: var(--panel);
+}
+
+.base-change-row:hover {
+    background: #f7fbfa;
 }
 
 .base-change-main {
@@ -5331,27 +5355,18 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(180px, 2fr) 64px;
     gap: 7px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
     align-items: center;
     background: #fbfcfd;
-}
-
-.person-base-info-form input {
-    width: 100%;
-    min-height: 34px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0 8px;
-    background: #fff;
 }
 
 .base-status-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(72px, 0.8fr)) repeat(2, minmax(160px, 1.5fr));
     gap: 7px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
     background: #fbfcfd;
 }
 
@@ -5359,7 +5374,7 @@ button:disabled {
     min-width: 0;
     display: grid;
     gap: 2px;
-    padding: 8px 10px;
+    padding: 7px 9px;
     border: 1px solid var(--border);
     border-radius: 5px;
     background: #f8fafc;
@@ -5387,7 +5402,7 @@ button:disabled {
 
 .base-status-action {
     min-width: 0;
-    min-height: 54px;
+    min-height: 50px;
     border: 1px solid var(--accent);
     border-radius: 6px;
     background: #eff6ff;
@@ -5404,29 +5419,22 @@ button:disabled {
 .person-post-form {
     display: grid;
     grid-template-columns: 76px minmax(120px, 1fr) minmax(120px, 1fr) 88px 76px 76px 64px 64px 82px minmax(140px, 1fr) 64px 64px;
-    gap: 8px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    gap: 7px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     align-items: center;
-}
-
-.person-post-form input {
-    width: 100%;
-    min-height: 34px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0 8px;
-    background: #fff;
+    background: #fbfcfd;
 }
 
 .person-post-row {
+    position: relative;
     display: grid;
     gap: 4px;
     width: 100%;
-    padding: 10px 12px;
+    padding: 9px 12px 9px 14px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: var(--panel);
     text-align: left;
@@ -5435,6 +5443,16 @@ button:disabled {
 .person-post-row:hover,
 .person-post-row.active {
     background: var(--selected);
+}
+
+.person-post-row.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
 }
 
 .person-post-main {
@@ -5456,29 +5474,22 @@ button:disabled {
 .education-form {
     display: grid;
     grid-template-columns: 76px minmax(120px, 1fr) minmax(150px, 1fr) 96px 96px 64px 108px 76px minmax(140px, 1fr) 64px 64px;
-    gap: 8px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    gap: 7px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     align-items: center;
-}
-
-.education-form input {
-    width: 100%;
-    min-height: 34px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0 8px;
-    background: #fff;
+    background: #fbfcfd;
 }
 
 .education-row {
+    position: relative;
     display: grid;
     gap: 4px;
     width: 100%;
-    padding: 10px 12px;
+    padding: 9px 12px 9px 14px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: var(--panel);
     text-align: left;
@@ -5487,6 +5498,16 @@ button:disabled {
 .education-row:hover,
 .education-row.active {
     background: var(--selected);
+}
+
+.education-row.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
 }
 
 .education-main {
@@ -5508,30 +5529,22 @@ button:disabled {
 .assessment-form {
     display: grid;
     grid-template-columns: 92px 128px minmax(180px, 1fr) 64px 64px;
-    gap: 8px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    gap: 7px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     align-items: center;
-}
-
-.assessment-form input,
-.assessment-form select {
-    width: 100%;
-    min-height: 34px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0 8px;
-    background: #fff;
+    background: #fbfcfd;
 }
 
 .assessment-row {
+    position: relative;
     display: grid;
     gap: 4px;
     width: 100%;
-    padding: 10px 12px;
+    padding: 9px 12px 9px 14px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: var(--panel);
     text-align: left;
@@ -5540,6 +5553,16 @@ button:disabled {
 .assessment-row:hover,
 .assessment-row.active {
     background: var(--selected);
+}
+
+.assessment-row.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
 }
 
 .assessment-main {

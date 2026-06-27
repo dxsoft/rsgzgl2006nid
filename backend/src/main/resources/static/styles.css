@@ -5197,6 +5197,8 @@ button:disabled {
 .section-heading p {
     margin: 0;
     color: var(--muted);
+    line-height: 1.45;
+    max-width: 760px;
 }
 
 .org-tree {
@@ -5398,15 +5400,16 @@ button:disabled {
 
 .profile-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
     margin: 0;
+    background: var(--border-soft);
 }
 
 .profile-grid div {
     min-width: 0;
-    padding: 9px 12px;
-    border-top: 1px solid var(--border-soft);
+    padding: 10px 12px;
+    background: #ffffff;
 }
 
 .profile-grid dt {
@@ -5435,7 +5438,7 @@ button:disabled {
 
 .base-change-form {
     display: grid;
-    grid-template-columns: 128px 82px 74px minmax(96px, 140px) minmax(180px, 1fr) 72px;
+    grid-template-columns: 128px 82px 74px minmax(110px, 150px) minmax(220px, 1fr) 72px;
     gap: 7px;
     padding: 9px 12px;
     border-top: 1px solid var(--border-soft);
@@ -5502,12 +5505,22 @@ button:disabled {
 
 .person-base-info-form {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(180px, 2fr) 64px;
-    gap: 7px;
-    padding: 9px 12px;
+    grid-template-columns: repeat(6, minmax(96px, 1fr));
+    gap: 8px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border-soft);
     align-items: center;
     background: #fbfcfd;
+}
+
+.person-base-info-form #baseCurrentPostInput,
+.person-base-info-form #basePostLevelInput,
+.person-base-info-form #baseInfoSummaryInput {
+    grid-column: span 2;
+}
+
+.person-base-info-form #saveBaseInfoButton {
+    grid-column: -2 / -1;
 }
 
 .base-status-summary {
@@ -5567,13 +5580,24 @@ button:disabled {
 
 .person-post-form {
     display: grid;
-    grid-template-columns: 76px minmax(120px, 1fr) minmax(120px, 1fr) 88px 76px 76px 64px 64px 82px minmax(140px, 1fr) 64px 64px;
-    gap: 7px;
-    padding: 9px 12px;
+    grid-template-columns: 82px minmax(150px, 1fr) minmax(130px, 1fr) 92px 82px 82px;
+    gap: 8px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border-soft);
     border-bottom: 1px solid var(--border-soft);
     align-items: center;
     background: #fbfcfd;
+}
+
+.person-post-form #personPostCurrentCodeInput,
+.person-post-form #personPostExcludedYearsInput,
+.person-post-form #personPostCurrentFlagInput,
+.person-post-form #personPostPayrollFlagInput {
+    grid-column: span 1;
+}
+
+.person-post-form #personPostSummaryInput {
+    grid-column: span 3;
 }
 
 .person-post-row {
@@ -5620,15 +5644,37 @@ button:disabled {
     color: var(--muted);
 }
 
+.person-post-main span,
+.education-main span,
+.assessment-main span {
+    flex: 0 0 auto;
+    min-height: 20px;
+    padding: 1px 6px;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    background: #ffffff;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
 .education-form {
     display: grid;
-    grid-template-columns: 76px minmax(120px, 1fr) minmax(150px, 1fr) 96px 96px 64px 108px 76px minmax(140px, 1fr) 64px 64px;
-    gap: 7px;
-    padding: 9px 12px;
+    grid-template-columns: 82px minmax(150px, 1fr) minmax(180px, 1.2fr) 96px 96px 72px;
+    gap: 8px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border-soft);
     border-bottom: 1px solid var(--border-soft);
     align-items: center;
     background: #fbfcfd;
+}
+
+.education-form #educationTypeInput,
+.education-form #educationNoteInput {
+    grid-column: span 1;
+}
+
+.education-form #educationSummaryInput {
+    grid-column: span 3;
 }
 
 .education-row {
@@ -5677,9 +5723,9 @@ button:disabled {
 
 .assessment-form {
     display: grid;
-    grid-template-columns: 92px 128px minmax(180px, 1fr) 64px 64px;
-    gap: 7px;
-    padding: 9px 12px;
+    grid-template-columns: 96px 140px minmax(220px, 1fr) 72px 72px;
+    gap: 8px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border-soft);
     border-bottom: 1px solid var(--border-soft);
     align-items: center;
@@ -6200,6 +6246,15 @@ button:disabled {
     }
 
     .base-change-form input:nth-of-type(3) {
+        grid-column: auto;
+    }
+
+    .person-base-info-form #baseCurrentPostInput,
+    .person-base-info-form #basePostLevelInput,
+    .person-base-info-form #baseInfoSummaryInput,
+    .person-base-info-form #saveBaseInfoButton,
+    .person-post-form #personPostSummaryInput,
+    .education-form #educationSummaryInput {
         grid-column: auto;
     }
 

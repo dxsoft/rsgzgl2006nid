@@ -4687,7 +4687,7 @@ button:disabled {
 .case-review-reason select,
 .case-cancel-reason textarea {
     width: 100%;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
     padding: 8px 10px;
     background: var(--panel);
@@ -4851,7 +4851,7 @@ button:disabled {
 .case-suggestion-card button {
     justify-self: start;
     min-height: 28px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 9px;
     color: var(--accent-strong);
@@ -5063,7 +5063,7 @@ button:disabled {
 .case-history-issue-list p {
     margin: 0;
     padding: 9px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     overflow-wrap: anywhere;
 }
 
@@ -6015,7 +6015,7 @@ button:disabled {
 
     .detail-pane {
         grid-column: 1 / -1;
-        border-top: 1px solid var(--border);
+        border-top: 1px solid var(--border-soft);
     }
 
     .system-editor,
@@ -6062,7 +6062,7 @@ button:disabled {
         display: flex;
         align-items: center;
         border-right: 0;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--border-soft);
     }
 
     .desktop-statusbar span:last-child {
@@ -6076,7 +6076,7 @@ button:disabled {
     .desktop-menu {
         max-height: 240px;
         border-right: 0;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--border-soft);
     }
 
     .workbench-header {
@@ -6222,7 +6222,7 @@ button:disabled {
 
     .case-trial-cards div {
         border-right: 0;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--border-soft);
     }
 
     .case-trial-cards div:last-child {

@@ -6014,6 +6014,10 @@ button:disabled {
     background: rgba(20, 29, 35, 0.28);
 }
 
+.code-option-overlay.hidden {
+    display: none;
+}
+
 .code-option-dialog {
     width: min(680px, 100%);
     max-height: min(720px, calc(100vh - 36px));

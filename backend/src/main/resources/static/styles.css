@@ -15,6 +15,7 @@
     --row: #fbfcfd;
     --selected: #e4f1ee;
     --selected-strong: #cfe6e1;
+    --focus-ring: color-mix(in srgb, var(--accent) 22%, transparent);
     --shadow: 0 8px 18px rgba(20, 35, 44, 0.06);
     --chrome: #edf1f4;
     --chrome-strong: #dce4e8;
@@ -99,11 +100,15 @@ button:hover {
     background: #fbfdfc;
 }
 
+button:active {
+    background: var(--selected);
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 1px;
 }
 
@@ -4706,7 +4711,8 @@ button:disabled {
 .case-review-reason textarea:focus,
 .case-review-reason select:focus,
 .case-cancel-reason textarea:focus {
-    outline: 2px solid rgba(27, 107, 95, 0.18);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
     border-color: var(--accent);
 }
 
@@ -5460,7 +5466,8 @@ button:disabled {
 .education-form input:focus,
 .assessment-form input:focus,
 .assessment-form select:focus {
-    outline: 2px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
     border-color: var(--accent);
 }
 

@@ -907,8 +907,9 @@ button:disabled {
 
 #migrationToolResult {
     min-height: 34px;
-    border: 1px solid var(--border);
-    background: #f8fafb;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: #ffffff;
     color: var(--text);
 }
 
@@ -948,7 +949,7 @@ button:disabled {
     min-width: 0;
     height: 28px;
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -970,7 +971,7 @@ button:disabled {
     min-width: 0;
     height: 28px;
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -986,7 +987,7 @@ button:disabled {
     min-width: 0;
     height: 28px;
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -1001,7 +1002,7 @@ button:disabled {
     display: grid;
     gap: 3px;
     padding: 7px;
-    border: 1px solid #d7dde3;
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
     background: #fff;
 }
@@ -1039,9 +1040,10 @@ button:disabled {
     display: grid;
     gap: 8px;
     padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
     background: #fff;
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .migration-acceptance-workspace-head {
@@ -1059,9 +1061,9 @@ button:disabled {
     display: grid;
     gap: 6px;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: #f8fafc;
+    background: #fbfcfd;
 }
 
 .migration-acceptance-progress-head {
@@ -1097,7 +1099,7 @@ button:disabled {
 
 .migration-acceptance-progress-steps button {
     padding: 3px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--muted);
@@ -1120,7 +1122,7 @@ button:disabled {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left-width: 4px;
     border-radius: 4px;
     background: #fff;
@@ -1149,7 +1151,7 @@ button:disabled {
     display: grid;
     gap: 8px;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #f8fafc;
 }
@@ -1165,7 +1167,7 @@ button:disabled {
     gap: 2px;
     min-width: 0;
     padding: 7px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--muted);
@@ -1228,7 +1230,7 @@ button:disabled {
     display: grid;
     gap: 2px;
     padding: 7px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #f8fafc;
     color: var(--muted);
@@ -1255,7 +1257,7 @@ button:disabled {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #f8fafc;
 }
@@ -1280,7 +1282,7 @@ button:disabled {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -1293,7 +1295,7 @@ button:disabled {
     display: grid;
     gap: 6px;
     padding: 10px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left-width: 4px;
     border-radius: 4px;
     background: #fff;
@@ -1365,7 +1367,7 @@ button:disabled {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -1390,7 +1392,7 @@ button:disabled {
     display: grid;
     gap: 3px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left-width: 4px;
     border-radius: 4px;
     background: #fff;
@@ -1423,7 +1425,7 @@ button:disabled {
     display: grid;
     gap: 4px;
     padding: 10px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left-width: 4px;
     border-radius: 4px;
     background: #fff;
@@ -1456,9 +1458,9 @@ button:disabled {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 8px;
     padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--chrome);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: #fbfcfd;
 }
 
 .migration-quality-package-files .section-title {
@@ -1475,7 +1477,7 @@ button:disabled {
     gap: 3px;
     min-width: 0;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -1495,8 +1497,9 @@ button:disabled {
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 8px;
     padding: 10px;
-    border: 1px solid var(--border);
-    background: var(--chrome);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: #fbfcfd;
 }
 
 .history-closure-package-files > span {
@@ -1504,7 +1507,8 @@ button:disabled {
     gap: 4px;
     min-width: 0;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #fff;
 }
 
@@ -1520,8 +1524,8 @@ button:disabled {
 .history-closure-package-files em {
     flex: 0 0 auto;
     padding: 1px 6px;
-    border: 1px solid var(--border);
-    background: var(--row);
+    border: 1px solid var(--border-soft);
+    background: #ffffff;
     color: var(--muted);
     font-style: normal;
     font-size: 12px;
@@ -2766,7 +2770,7 @@ button:disabled {
     align-items: stretch;
     gap: 6px;
     padding: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: #fbfcfd;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.03);
 }
@@ -2870,7 +2874,7 @@ button:disabled {
     gap: 4px;
     min-height: 78px;
     padding: 9px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 5px;
     background: var(--panel);
     color: inherit;

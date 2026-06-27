@@ -467,8 +467,8 @@ button:disabled {
     align-items: center;
     gap: 10px;
     padding: 9px 10px;
-    border: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f8fafb);
+    border: 1px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .workbench-header h2 {
@@ -488,8 +488,8 @@ button:disabled {
     gap: 12px;
     min-height: 58px;
     padding: 11px 14px;
-    border: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f8fafb);
+    border: 1px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .system-header h2 {
@@ -503,7 +503,7 @@ button:disabled {
 }
 
 .system-content {
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--panel);
     overflow: auto;
     min-height: 0;
@@ -516,8 +516,8 @@ button:disabled {
     gap: 8px;
     align-items: center;
     padding: 10px;
-    border-bottom: 1px solid var(--border);
-    background: #fbfcfd;
+    border-bottom: 1px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .system-editor[data-create-role-form] {
@@ -532,7 +532,7 @@ button:disabled {
 .system-editor select {
     width: 100%;
     min-height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     background: var(--panel);
@@ -1329,7 +1329,7 @@ button:disabled {
     min-height: 74px;
     width: 100%;
     padding: 9px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left-width: 4px;
     border-radius: 4px;
     background: #fff;
@@ -2021,7 +2021,7 @@ button:disabled {
     display: grid;
     gap: 3px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--muted);
@@ -2046,7 +2046,7 @@ button:disabled {
     grid-template-columns: minmax(120px, 0.6fr) minmax(160px, 0.8fr) minmax(220px, 1.6fr);
     gap: 8px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -2063,7 +2063,7 @@ button:disabled {
     gap: 8px;
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--text);
@@ -2107,7 +2107,7 @@ button:disabled {
 
 .migration-regression-diff small {
     padding-top: 5px;
-    border-top: 1px dashed var(--border);
+    border-top: 1px dashed var(--border-soft);
     color: var(--muted);
 }
 
@@ -2131,7 +2131,7 @@ button:disabled {
     grid-template-columns: 150px 120px minmax(160px, 1fr) auto;
     gap: 6px;
     padding-top: 6px;
-    border-top: 1px dashed var(--border);
+    border-top: 1px dashed var(--border-soft);
 }
 
 .migration-regression-review-form select,
@@ -2139,7 +2139,7 @@ button:disabled {
     min-width: 0;
     height: 28px;
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
 }
@@ -2154,7 +2154,7 @@ button:disabled {
     display: grid;
     gap: 2px;
     padding: 7px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     text-align: left;
@@ -2964,7 +2964,7 @@ button:disabled {
     min-height: 0;
     display: grid;
     grid-template-rows: auto 1fr auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--panel);
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }

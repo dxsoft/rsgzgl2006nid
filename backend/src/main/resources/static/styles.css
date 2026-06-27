@@ -3274,7 +3274,7 @@ button:disabled {
     grid-template-columns: minmax(160px, 0.8fr) repeat(4, minmax(140px, 1fr));
     gap: 8px;
     padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     background: color-mix(in srgb, var(--panel) 92%, var(--row));
 }
 
@@ -3283,10 +3283,10 @@ button:disabled {
     display: grid;
     gap: 6px;
     min-width: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 8px;
-    background: var(--row);
+    background: #ffffff;
 }
 
 .history-review-ledger-total {
@@ -3380,7 +3380,7 @@ button:disabled {
     max-width: 100%;
     min-height: 22px;
     padding: 0 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: var(--panel);
     font-size: 12px;
@@ -3425,7 +3425,7 @@ button:disabled {
     align-items: center;
     gap: 6px;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--surface);
 }
 
@@ -3438,7 +3438,7 @@ button:disabled {
 .batch-confirm-group em,
 .batch-confirm-group small {
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--panel);
     color: var(--text);
     font-style: normal;
@@ -3457,9 +3457,9 @@ button:disabled {
     gap: 4px;
     min-height: 68px;
     padding: 8px 9px;
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--border);
-    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .batch-final-card.ready {
@@ -3501,7 +3501,7 @@ button:disabled {
 
 .batch-final-issues em {
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--panel);
     color: var(--text);
     font-style: normal;
@@ -3520,9 +3520,9 @@ button:disabled {
     gap: 4px;
     min-height: 64px;
     padding: 8px 9px;
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--border);
-    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .batch-safety-token > div.ready {
@@ -3559,9 +3559,9 @@ button:disabled {
 .batch-safety-expiry-status {
     margin: 0 0 8px;
     padding: 7px 9px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left: 4px solid var(--accent);
-    background: var(--surface);
+    background: #ffffff;
     color: var(--accent-strong);
     font-size: 12px;
 }
@@ -3586,8 +3586,8 @@ button:disabled {
     display: grid;
     gap: 5px;
     padding: 9px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    background: #ffffff;
 }
 
 .batch-followup-card span,
@@ -3643,7 +3643,7 @@ button:disabled {
 .history-plan-header span {
     min-width: 0;
     padding: 0 8px;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--border-soft);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3684,7 +3684,7 @@ button:disabled {
 }
 
 .history-plan-select.placeholder {
-    background: var(--row);
+    background: #ffffff;
 }
 
 .history-plan-select input {
@@ -3758,7 +3758,7 @@ button:disabled {
 .history-plan-approve {
     align-self: center;
     min-height: 28px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 10px;
     color: var(--accent-strong);
@@ -3793,9 +3793,9 @@ button:disabled {
     flex-wrap: wrap;
     min-height: 30px;
     padding: 2px 4px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
 }
 
 .history-plan-next-actions span {
@@ -3820,7 +3820,7 @@ button:disabled {
     display: inline-flex;
     align-items: center;
     min-height: 28px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 7px;
     color: var(--text);
@@ -3847,7 +3847,7 @@ button:disabled {
 
 .history-plan-maintenance.suggested span {
     color: var(--muted);
-    background: var(--row);
+    background: #ffffff;
 }
 
 .history-plan-status span {
@@ -4161,8 +4161,8 @@ button:disabled {
 
 .work-item-workflow.skipped,
 .work-item-closure.skipped {
-    border-color: var(--border);
-    background: var(--row);
+    border-color: var(--border-soft);
+    background: #ffffff;
     color: var(--muted);
 }
 

@@ -2680,7 +2680,7 @@ button:disabled {
     align-items: center;
     gap: 0;
     min-height: 34px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     background: var(--chrome);
     overflow-x: auto;
 }
@@ -2689,7 +2689,7 @@ button:disabled {
     min-width: 82px;
     min-height: 32px;
     border: 0;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--border-soft);
     border-radius: 0;
     background: transparent;
     color: var(--muted);
@@ -2800,7 +2800,7 @@ button:disabled {
     grid-template-rows: auto auto;
     align-items: stretch;
     gap: 4px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #ffffff;
     overflow: hidden;
@@ -2837,7 +2837,7 @@ button:disabled {
     justify-content: center;
     min-height: 26px;
     padding: 0 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: var(--panel);
     color: var(--muted);
@@ -2990,7 +2990,7 @@ button:disabled {
     flex: 0 0 auto;
     min-height: 30px;
     max-width: 150px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     background: var(--panel);
@@ -3010,7 +3010,7 @@ button:disabled {
 .people-pane > .pane-title {
     min-height: 42px;
     padding: 8px 10px;
-    background: linear-gradient(#fbfcfd, var(--chrome));
+    background: #ffffff;
 }
 
 .workbench-panel > .pane-title h2,
@@ -3027,7 +3027,7 @@ button:disabled {
     min-width: 34px;
     min-height: 22px;
     padding: 0 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: var(--panel);
     color: var(--accent-strong);
@@ -3067,7 +3067,7 @@ button:disabled {
     align-items: center;
     min-height: 24px;
     padding: 0 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     color: var(--muted);
     background: #ffffff;
@@ -4183,7 +4183,7 @@ button:disabled {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
     background: var(--panel);
     box-shadow: 0 22px 52px rgba(20, 35, 44, 0.26);
@@ -5024,7 +5024,7 @@ button:disabled {
     gap: 6px;
     min-width: 0;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #ffffff;
 }

@@ -595,9 +595,9 @@ button:disabled {
     gap: 4px;
     min-height: 22px;
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--chrome);
+    background: #ffffff;
     color: var(--text);
     font-size: 12px;
 }
@@ -622,7 +622,7 @@ button:disabled {
 .system-select {
     min-width: 86px;
     min-height: 30px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 7px;
     background: var(--panel);
@@ -649,10 +649,10 @@ button:disabled {
     width: 260px;
     max-height: 240px;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 5px;
     padding: 8px;
-    background: #fbfcfd;
+    background: #ffffff;
 }
 
 .system-org-tree.compact {
@@ -739,8 +739,8 @@ button:disabled {
     gap: 8px;
     min-height: 68px;
     padding: 7px;
-    border: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f8fafb);
+    border: 1px solid var(--border-soft);
+    background: #ffffff;
     overflow-x: auto;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
@@ -5707,7 +5707,7 @@ button:disabled {
 
 .config-heading {
     align-items: flex-start;
-    background: linear-gradient(#ffffff, #f8fafb);
+    background: #ffffff;
 }
 
 .config-tools {
@@ -5733,7 +5733,7 @@ button:disabled {
 .config-tools input {
     width: 82px;
     min-height: 30px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
 }
@@ -5749,7 +5749,7 @@ button:disabled {
 }
 
 .field-config-row:hover {
-    background: #fbfcfd;
+    background: var(--selected);
 }
 
 .field-config-row.needs-review {
@@ -5805,7 +5805,7 @@ button:disabled {
     display: grid;
     gap: 12px;
     padding: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
     background: #fbfcfd;
 }
 
@@ -5842,7 +5842,7 @@ button:disabled {
 .editor-grid select {
     width: 100%;
     min-height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     background: var(--panel);
@@ -5851,7 +5851,7 @@ button:disabled {
 .config-audit {
     display: grid;
     gap: 8px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
     padding-top: 10px;
 }
 
@@ -5859,15 +5859,17 @@ button:disabled {
     display: grid;
     max-height: 180px;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: var(--panel);
+    overflow: hidden auto;
 }
 
 .audit-row {
     display: grid;
     gap: 3px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .audit-main {
@@ -5905,7 +5907,8 @@ button:disabled {
 .loading,
 .error {
     padding: 14px;
-    border: 1px dashed var(--border);
+    border: 1px dashed var(--border-soft);
+    border-radius: 6px;
     background: #fbfcfd;
     color: var(--muted);
 }

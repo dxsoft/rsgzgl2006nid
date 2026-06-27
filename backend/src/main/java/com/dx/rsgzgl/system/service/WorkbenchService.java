@@ -151,13 +151,6 @@ public class WorkbenchService {
         }
         if (hasMenu("SALARY_DONE")) {
             metrics.add(new WorkbenchMetricResponse("SALARY_DONE", "\u5de5\u8d44\u53d8\u52a8\u5df2\u529e", salaryDone, "\u8fd1\u671f\u5386\u53f2\u5de5\u8d44\u53d8\u52a8\u548c\u65b0\u529e\u7406\u5de5\u8d44\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_PENDING", "\u5de5\u8d44\u5f85\u95ed\u73af", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", ""), "\u5df2\u529e\u4f46\u5c1a\u672a\u5b8c\u6210\u6253\u5370\u3001\u5199\u5165\u6216\u6838\u67e5"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_BLOCKED", "\u5de5\u8d44\u95ed\u73af\u963b\u65ad", countSalaryDone("", "", "", "DONE", "", "", "", "BLOCKED", ""), "\u5199\u5165\u963b\u65ad\u6216\u5df2\u56de\u6eda\u7684\u5df2\u529e\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_CLOSURE_CLOSED", "\u5de5\u8d44\u5df2\u95ed\u73af", countSalaryDone("", "", "", "DONE", "", "", "", "CLOSED", ""), "\u5df2\u5b8c\u6210\u529e\u7406\u3001\u6253\u5370\u3001\u5199\u5165\u548c\u6838\u67e5\u7684\u4e1a\u52a1"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_TRIAL", "\u5f85\u590d\u6838\u8bd5\u7b97", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "REVIEW_TRIAL"), "\u4e0b\u4e00\u6b65\u9700\u590d\u6838\u8bd5\u7b97\u5dee\u5f02\u6216\u5f02\u5e38"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_PRINT_OR_PLAN", "\u5f85\u6253\u5370/\u9884\u68c0", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "PRINT_OR_CREATE_HISTORY_PLAN"), "\u4e0b\u4e00\u6b65\u9700\u6253\u5370\u5ba1\u6279\u8868\u6216\u751f\u6210\u5199\u5165\u9884\u68c0"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_EXECUTE_WRITE", "\u5f85\u5199\u5165\u5386\u53f2", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "EXECUTE_HISTORY_WRITE"), "\u4e0b\u4e00\u6b65\u53ef\u6267\u884c\u5386\u53f2\u5199\u5165"));
-            metrics.add(new WorkbenchMetricResponse("SALARY_NEXT_REVIEW_DIFFERENCE", "\u5f85\u6838\u67e5\u5dee\u5f02", countSalaryDone("", "", "", "DONE", "", "", "", "PENDING", "REVIEW_DIFFERENCE"), "\u4e0b\u4e00\u6b65\u9700\u6838\u67e5\u5199\u5165\u540e\u5dee\u5f02"));
             metrics.add(new WorkbenchMetricResponse("SALARY_REVIEW_PENDING", "\u5f85\u590d\u6838\u98ce\u9669\u4e1a\u52a1", countPendingSalaryReview(), "\u8bd5\u7b97\u5dee\u5f02\u6216\u5f02\u5e38\u4e14\u5c1a\u672a\u590d\u6838"));
             metrics.add(new WorkbenchMetricResponse("SALARY_TRIAL_DIFFERENT", "\u8bd5\u7b97\u6709\u5dee\u5f02", countSalaryCaseTrialStatus("DIFFERENT"), "\u5df2\u529e\u8bb0\u5f55\u4e2d\u9700\u590d\u6838\u7684\u5dee\u5f02\u529e\u7406"));
             metrics.add(new WorkbenchMetricResponse("SALARY_TRIAL_ERROR", "\u8bd5\u7b97\u5f02\u5e38", countSalaryCaseTrialStatus("ERROR"), "\u5df2\u529e\u8bb0\u5f55\u4e2d\u5f3a\u5236\u529e\u7406\u7684\u5f02\u5e38"));
@@ -186,9 +179,6 @@ public class WorkbenchService {
         }
         if (hasMenu("SALARY_TODO")) {
             items.addAll(salaryTodoItems(0, 6));
-        }
-        if (hasMenu("SALARY_DONE")) {
-            items.addAll(salaryClosureTodoItems());
         }
         return items.stream()
                 .sorted(Comparator.comparingInt(this::workbenchItemYearMonth).reversed())
@@ -238,9 +228,6 @@ public class WorkbenchService {
         List<WorkbenchItemResponse> items = new ArrayList<>();
         if (hasMenu("APPLICATION_DONE")) {
             items.addAll(applicationCases("DONE", 6));
-        }
-        if (hasMenu("SALARY_DONE")) {
-            items.addAll(salaryDoneItems(0, 6));
         }
         return items.stream()
                 .sorted(Comparator.comparingInt(this::workbenchItemYearMonth).reversed())
@@ -4817,6 +4804,9 @@ public class WorkbenchService {
         int queryLimit = safeComparisonStatus.isBlank() && safeReviewStatus.isBlank() && safeMismatchField.isBlank() && safeMaintenanceTarget.isBlank() && safeRetestStatus.isBlank() && safePriority.isBlank() && !actionCodePostFilter && safePendingQueue.isBlank() && safePrintQueue.isBlank() && safeStatusQueue.isBlank()
                 ? safeLimit
                 : Math.min(5000, Math.max(safeLimit * 10, 500));
+        boolean requiresDetailedPlan = !safeMismatchField.isBlank()
+                || !safeMaintenanceTarget.isBlank()
+                || !safePrintQueue.isBlank();
         return jdbcTemplate.queryForList("""
                 SELECT *
                 FROM salary_history_write_plan p
@@ -4840,7 +4830,7 @@ public class WorkbenchService {
                 safeStatus, safeStatus, safeStatus,
                 safeKeyword, safeKeyword, safeKeyword, safeKeyword, safeKeyword, safeKeyword, safeKeyword, safeKeyword,
                 queryLimit).stream()
-                .map(this::historyWritePlanResponse)
+                .map(row -> requiresDetailedPlan ? historyWritePlanResponse(row) : historyWritePlanListResponse(row))
                 .filter(plan -> safeComparisonStatus.isBlank() || safeComparisonStatus.equalsIgnoreCase(text(plan.comparisonStatus())))
                 .filter(plan -> historyWriteReviewStatusMatches(plan, safeReviewStatus))
                 .filter(plan -> historyWriteMismatchFieldMatches(plan, safeMismatchField))
@@ -6596,6 +6586,124 @@ public class WorkbenchService {
                 maintenanceSuggestionJson,
                 text(row.get("issues_json")),
                 text(row.get("preview_json"))
+        );
+    }
+
+    private WorkbenchHistoryWritePlanResponse historyWritePlanListResponse(Map<String, Object> row) {
+        String cachedComparisonStatus = text(row.get("comparison_status"));
+        String comparisonStatus = cachedComparisonStatus.isBlank() ? historyWriteComparisonStatus(row) : cachedComparisonStatus;
+        Integer cachedMismatchCount = number(row.get("comparison_mismatch_count"));
+        Integer mismatchCount = cachedMismatchCount == null
+                ? (cachedComparisonStatus.isBlank() ? historyWriteComparisonMismatchCount(row) : 0)
+                : cachedMismatchCount;
+        String retestStatus = historyWriteRetestStatus(text(row.get("case_no")));
+        HistoryWriteWorkflow workflow = historyWriteWorkflow(
+                text(row.get("plan_status")),
+                text(row.get("preview_status")),
+                booleanValue(row.get("writable")),
+                text(row.get("execution_result")),
+                comparisonStatus,
+                mismatchCount,
+                text(row.get("comparison_review_status")),
+                retestStatus
+        );
+        return new WorkbenchHistoryWritePlanResponse(
+                text(row.get("plan_no")),
+                text(row.get("case_no")),
+                text(row.get("work_item_id")),
+                text(row.get("person_code")),
+                text(row.get("org_code")),
+                number(row.get("event_year")),
+                number(row.get("event_month")),
+                text(row.get("business_type")),
+                text(row.get("preview_status")),
+                booleanValue(row.get("writable")),
+                text(row.get("plan_status")),
+                text(row.get("execution_result")),
+                comparisonStatus,
+                mismatchCount,
+                text(row.get("inserted_history_id")),
+                text(row.get("previous_history_id")),
+                text(row.get("next_history_id")),
+                text(row.get("prepared_by")),
+                text(row.get("prepared_at")),
+                text(row.get("executed_by")),
+                text(row.get("executed_at")),
+                text(row.get("rolled_back_by")),
+                text(row.get("rolled_back_at")),
+                text(row.get("execution_message")),
+                text(row.get("rollback_message")),
+                text(row.get("comparison_review_status")),
+                text(row.get("comparison_review_category")),
+                text(row.get("comparison_review_reason")),
+                text(row.get("comparison_reviewed_by")),
+                text(row.get("comparison_reviewed_at")),
+                retestStatus,
+                workflow.priority(),
+                workflow.actionCode(),
+                workflow.nextAction(),
+                reportPrintArchiveSummary(text(row.get("case_no"))),
+                "[]",
+                text(row.get("issues_json")),
+                ""
+        );
+    }
+
+    private WorkbenchReportPrintArchiveResponse reportPrintArchiveSummary(String caseNo) {
+        ensureReportPrintBatchTables();
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT item.batch_no,
+                       item.validation_status,
+                       item.summary,
+                       item.created_at,
+                       batch.report_type,
+                       batch.printed_by
+                FROM salary_report_print_batch_item item
+                JOIN salary_report_print_batch batch ON batch.batch_no = item.batch_no
+                WHERE item.case_no = ?
+                ORDER BY item.created_at DESC, item.id DESC
+                LIMIT 1
+                """, text(caseNo));
+        Long count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(1)
+                FROM salary_report_print_batch_item
+                WHERE case_no = ?
+                """, Long.class, text(caseNo));
+        int printCount = count == null ? 0 : count.intValue();
+        if (rows.isEmpty()) {
+            return new WorkbenchReportPrintArchiveResponse(
+                    true,
+                    false,
+                    false,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    printCount,
+                    "UNPRINTED",
+                    "\u5f85\u6253\u5370\u5ba1\u6279\u8868"
+            );
+        }
+        Map<String, Object> latest = rows.getFirst();
+        String reportType = text(latest.get("report_type"));
+        boolean reprinted = "SALARY_CASE_APPROVAL_REPRINT".equalsIgnoreCase(reportType);
+        String validationStatus = text(latest.get("validation_status"));
+        String status = "BLOCKED".equalsIgnoreCase(validationStatus) ? "BLOCKED" : "PRINTED";
+        return new WorkbenchReportPrintArchiveResponse(
+                true,
+                true,
+                reprinted,
+                reprinted ? "salary-case-approvals-reprint" : "salary-case-approvals-print",
+                text(latest.get("batch_no")),
+                "REPORT_PRINT_BATCH",
+                text(latest.get("batch_no")),
+                text(latest.get("printed_by")),
+                text(latest.get("created_at")),
+                printCount,
+                status,
+                text(latest.get("summary")).isBlank() ? "\u5df2\u7559\u5b58\u6253\u5370\u8bb0\u5f55" : text(latest.get("summary"))
         );
     }
 
@@ -11414,8 +11522,13 @@ public class WorkbenchService {
             return;
         }
         ensureBusinessCaseTable();
+        ensureHistoryWritePlanTable();
         addIndexIfMissing("salary_business_case", "idx_salary_case_work_status", "work_item_id, status");
         addIndexIfMissing("salary_business_case", "idx_salary_case_status_trial_review_org", "status, trial_status, review_status, org_code");
+        addIndexIfMissing("salary_history_write_plan", "idx_history_plan_status_time", "plan_status, prepared_at, id");
+        addIndexIfMissing("salary_history_write_plan", "idx_history_plan_org_status_time", "org_code, plan_status, prepared_at, id");
+        addIndexIfMissing("salary_history_write_plan", "idx_history_plan_write_queue", "plan_status, writable, comparison_status, comparison_review_status");
+        addIndexIfMissing("salary_history_write_plan", "idx_history_plan_case_no", "case_no");
         addIndexIfMissing("hisbase", "idx_hisbase_workbench_person_period_type", "dwbm, grbm, jsnf, jsyf, jslb");
         addIndexIfMissing("dryzwbh", "idx_dryzwbh_workbench_person_date", "dwbm, grbm, srny, id");
         addIndexIfMissing("dxl", "idx_dxl_workbench_person_date", "dwbm, grbm, bysj, xllb");

@@ -52,6 +52,8 @@
     reviewReasonRequired: "\u8bf7\u586b\u5199\u590d\u6838\u8bf4\u660e\u3002",
     noWorkItems: "\u6682\u65e0\u4e1a\u52a1\u8bb0\u5f55\u3002",
     workbenchReady: "\u5de5\u4f5c\u53f0\u5df2\u66f4\u65b0",
+    workbenchPartialReady: "\u5de5\u4f5c\u53f0\u5df2\u90e8\u5206\u66f4\u65b0\uff0c\u90e8\u5206\u6162\u67e5\u8be2\u53ef\u7a0d\u540e\u5237\u65b0",
+    workbenchSectionTimeout: "\u52a0\u8f7d\u8d85\u65f6\uff0c\u8bf7\u7a0d\u540e\u5237\u65b0\u3002",
     loadingMore: "\u6b63\u5728\u52a0\u8f7d\u66f4\u591a\u4e1a\u52a1...",
     noMoreItems: "\u6ca1\u6709\u66f4\u591a\u8bb0\u5f55\u3002",
     salaryWorkspaceReady: "\u5df2\u8fdb\u5165\u4eba\u5458\u5de5\u8d44",
@@ -170,6 +172,8 @@ const ACCEPTANCE_SAMPLES = [
     { label: "\u5956\u52b1\u664b\u5347 00806-00089 2024-10", personCode: "00806-00089", orgCode: "00806", year: 2024, month: 10, changeType: "\u5956\u52b1\u664b\u5347" },
     { label: "\u5176\u5b83\u60c5\u51b5 02406-00058 2023-01", personCode: "02406-00058", orgCode: "02406", year: 2023, month: 1, changeType: "\u5176\u5b83\u60c5\u51b5" }
 ];
+
+const WORKBENCH_SECTION_TIMEOUT_MS = 8000;
 
 const state = {
     activeView: "workbench",
@@ -9131,6 +9135,33 @@ const WorkbenchPanel = {
         params.set("limit", "5000");
         window.location.href = `/api/workbench/history-write-plans.csv?${params.toString()}`;
     },
+    loadWithTimeout(label, task, onTimeout) {
+        let settled = false;
+        const work = Promise.resolve()
+            .then(task)
+            .finally(() => {
+                settled = true;
+            });
+        const timeout = new Promise((resolve) => {
+            window.setTimeout(() => {
+                if (!settled) {
+                    onTimeout?.();
+                    resolve({ label, timedOut: true });
+                }
+            }, WORKBENCH_SECTION_TIMEOUT_MS);
+        });
+        return Promise.race([work, timeout]).catch((error) => {
+            onTimeout?.(error);
+            return { label, error };
+        });
+    },
+    renderWorkbenchLoadIssue(container, error) {
+        if (!container) {
+            return;
+        }
+        const message = error?.message || TEXT.workbenchSectionTimeout;
+        container.innerHTML = `<div class="loading">${Format.html(message)}</div>`;
+    },
     async load() {
         const requestId = ++state.workbenchRequestId;
         WorkbenchPanel.syncHistoryQueueWithWorkbenchFilters();
@@ -9144,7 +9175,7 @@ const WorkbenchPanel = {
         if (els.historyWritePlans) {
             els.historyWritePlans.innerHTML = `<div class="loading">${TEXT.loadingWorkbench}</div>`;
         }
-        const loads = [Api.request("/api/workbench/summary").then((summary) => {
+        const loads = [WorkbenchPanel.loadWithTimeout("summary", () => Api.request("/api/workbench/summary").then((summary) => {
             if (requestId !== state.workbenchRequestId) {
                 return;
             }
@@ -9155,23 +9186,41 @@ const WorkbenchPanel = {
             });
             state.workbench = { ...summary, metrics };
             WorkbenchPanel.renderMetrics(metrics);
+        }), () => {
+            if (requestId === state.workbenchRequestId) {
+                WorkbenchPanel.renderWorkbenchLoadIssue(els.workbenchMetrics);
+            }
         })];
         if (Permissions.has("SALARY_TODO") || Permissions.has("APPLICATION_TODO")) {
-            loads.push(Api.request("/api/workbench/metrics/salary-todo").then((metric) => {
+            loads.push(WorkbenchPanel.loadWithTimeout("todo-metric", () => Api.request("/api/workbench/metrics/salary-todo").then((metric) => {
                 if (requestId !== state.workbenchRequestId) {
                     return;
                 }
                 WorkbenchPanel.updateMetric(metric);
+            }), null));
+            loads.push(WorkbenchPanel.loadWithTimeout("todo-page", () => WorkbenchPanel.loadPage("TODO", true, requestId), (error) => {
+                if (requestId === state.workbenchRequestId) {
+                    WorkbenchPanel.renderWorkbenchLoadIssue(els.todoWorkItems, error);
+                    els.todoCount.textContent = "0";
+                }
             }));
-            loads.push(WorkbenchPanel.loadPage("TODO", true, requestId));
         } else {
             els.todoWorkItems.innerHTML = `<div class="loading">${TEXT.noWorkItems}</div>`;
             els.todoCount.textContent = "0";
         }
         if (Permissions.has("SALARY_DONE") || Permissions.has("APPLICATION_DONE")) {
-            loads.push(WorkbenchPanel.loadPage("DONE", true, requestId));
+            loads.push(WorkbenchPanel.loadWithTimeout("done-page", () => WorkbenchPanel.loadPage("DONE", true, requestId), (error) => {
+                if (requestId === state.workbenchRequestId) {
+                    WorkbenchPanel.renderWorkbenchLoadIssue(els.doneWorkItems, error);
+                    els.doneCount.textContent = "0";
+                }
+            }));
             if (Permissions.has("SALARY_DONE")) {
-                loads.push(WorkbenchPanel.loadHistoryWritePlans(requestId));
+                loads.push(WorkbenchPanel.loadWithTimeout("history-plans", () => WorkbenchPanel.loadHistoryWritePlans(requestId), (error) => {
+                    if (requestId === state.workbenchRequestId) {
+                        WorkbenchPanel.renderWorkbenchLoadIssue(els.historyWritePlans, error);
+                    }
+                }));
             }
         } else {
             els.doneWorkItems.innerHTML = `<div class="loading">${TEXT.noWorkItems}</div>`;
@@ -9180,7 +9229,7 @@ const WorkbenchPanel = {
                 els.historyWritePlans.innerHTML = `<div class="loading">${TEXT.noWorkItems}</div>`;
             }
         }
-        await Promise.all(loads);
+        const results = await Promise.all(loads);
         Permissions.applyWorkbench();
         if (requestId !== state.workbenchRequestId) {
             return;
@@ -9189,7 +9238,8 @@ const WorkbenchPanel = {
             await WorkbenchPanel.showHistoryDeliveryArchive();
         }
         if (state.activeView === "workbench") {
-            setStatus(TEXT.workbenchReady);
+            const partial = results.some((result) => result?.timedOut || result?.error);
+            setStatus(partial ? TEXT.workbenchPartialReady : TEXT.workbenchReady);
         }
     },
     filters() {
@@ -14622,6 +14672,9 @@ const CodeOptionPicker = {
         { trigger: "educationTypeInput", field: "xllb", title: "\u9009\u62e9\u5b66\u5386\u7c7b\u522b", mode: "name" }
     ],
     init() {
+        if (!els.codeOptionDialog || !els.codeOptionTree || !els.codeOptionSearchInput) {
+            return;
+        }
         CodeOptionPicker.bindings.forEach((binding) => {
             const input = els[binding.trigger];
             if (!input) {
@@ -18024,6 +18077,10 @@ function bindEvents() {
 }
 
 AcceptanceSamples.init();
-CodeOptionPicker.init();
+try {
+    CodeOptionPicker.init();
+} catch (_) {
+    // Person maintenance code picker must not block the main workbench boot.
+}
 bindEvents();
 AuthPanel.boot();

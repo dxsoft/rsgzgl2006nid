@@ -3973,6 +3973,14 @@ public class WorkbenchService {
             if (!hasMenu("SALARY_DONE")) {
                 return new WorkbenchItemsPageResponse(0, safeOffset, safeLimit, List.of());
             }
+            if (canUseFastDonePage(safeOffset, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction)) {
+                return new WorkbenchItemsPageResponse(
+                        countSalaryDoneForAcceptance(),
+                        safeOffset,
+                        safeLimit,
+                        salaryDoneItems(safeOffset, safeLimit, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction)
+                );
+            }
             return new WorkbenchItemsPageResponse(
                     countSalaryDone(keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction),
                     safeOffset,
@@ -8912,6 +8920,9 @@ public class WorkbenchService {
     }
 
     private List<WorkbenchItemResponse> salaryDoneItems(int offset, int limit, String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+        if (canUseFastDonePage(offset, keyword, changeType, source, caseStatus, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction)) {
+            return salaryDoneFastItems(limit);
+        }
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT *
                 FROM (
@@ -8937,38 +8948,176 @@ public class WorkbenchService {
                 .replace("__DONE_ORDER__", salaryDoneOrderBy(closureStatus, nextAction)), doneFilterParams(keyword, changeType, source, trialStatus, reviewStatus, workflowStatus, closureStatus, nextAction, limit, offset));
         List<WorkbenchItemResponse> items = new ArrayList<>();
         for (Map<String, Object> row : rows) {
-            String rowChangeType = text(row.get("change_type"));
-            String itemWorkflowStatus = text(row.get("workflow_status"));
-            String itemBusinessStatus = text(row.get("business_status")).isBlank() ? "DONE" : text(row.get("business_status"));
-            String itemClosureStatus = listItemClosureStatus(itemBusinessStatus, itemWorkflowStatus);
-            items.add(new WorkbenchItemResponse(
-                    text(row.get("id")),
-                    text(row.get("source")),
-                    itemBusinessStatus,
-                    rowChangeType,
-                    text(row.get("person_code")),
-                    text(row.get("person_name")),
-                    text(row.get("org_code")),
-                    number(row.get("event_year")),
-                    number(row.get("event_month")),
-                    rowChangeType,
-                    text(row.get("note")),
-                    text(row.get("trial_status")),
-                    text(row.get("review_status")),
-                    itemWorkflowStatus,
-                    itemClosureStatus,
-                    listItemClosureMessage(itemBusinessStatus, itemWorkflowStatus),
-                    listItemNextActionCode(itemBusinessStatus, itemWorkflowStatus),
-                    listItemNextActionLabel(itemBusinessStatus, itemWorkflowStatus),
-                    text(row.get("review_reason")),
-                    text(row.get("reviewed_by")),
-                    text(row.get("reviewed_at")),
-                    text(row.get("retest_status")),
-                    text(row.get("retest_summary")),
-                    text(row.get("retested_at"))
-            ));
+            items.add(salaryDoneRowToItem(row));
         }
         return items;
+    }
+
+    private boolean canUseFastDonePage(int offset, String keyword, String changeType, String source, String caseStatus, String trialStatus, String reviewStatus, String workflowStatus, String closureStatus, String nextAction) {
+        return offset == 0
+                && text(keyword).isBlank()
+                && text(changeType).isBlank()
+                && text(source).isBlank()
+                && (text(caseStatus).isBlank() || "DONE".equalsIgnoreCase(text(caseStatus)))
+                && text(trialStatus).isBlank()
+                && text(reviewStatus).isBlank()
+                && text(workflowStatus).isBlank()
+                && text(closureStatus).isBlank()
+                && text(nextAction).isBlank();
+    }
+
+    private List<WorkbenchItemResponse> salaryDoneFastItems(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int branchLimit = Math.max(safeLimit, 12);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT *
+                FROM (
+                    SELECT sc.case_no AS id,
+                           'SALARY_CASE' AS source,
+                           sc.status AS business_status,
+                           sc.person_code,
+                           sc.org_code,
+                           sc.person_name,
+                           sc.event_year,
+                           sc.event_month,
+                           sc.business_type AS change_type,
+                           COALESCE(sc.trial_status, '') AS trial_status,
+                           CASE
+                               WHEN sc.trial_status IN ('DIFFERENT','ERROR') THEN COALESCE(NULLIF(sc.review_status, ''), 'PENDING')
+                               ELSE ''
+                           END AS review_status,
+                           CASE
+                               WHEN sc.status = 'CANCELLED' THEN 'CASE_CANCELLED'
+                               WHEN sc.trial_status IN ('DIFFERENT','ERROR') AND COALESCE(NULLIF(sc.review_status, ''), 'PENDING') = 'PENDING' THEN 'REVIEW_PENDING'
+                               ELSE 'CASE_DONE'
+                           END AS workflow_status,
+                           0 AS hj2,
+                           sc.handled_at,
+                           '' AS review_reason,
+                           '' AS reviewed_by,
+                           NULL AS reviewed_at,
+                           '' AS retest_status,
+                           '' AS retest_summary,
+                           NULL AS retested_at,
+                           CONCAT(sc.summary,
+                                  CASE WHEN COALESCE(sc.trial_summary, '') = '' THEN '' ELSE CONCAT('；试算：', sc.trial_summary) END) AS note
+                    FROM salary_business_case sc
+                    WHERE sc.status = 'DONE'
+                      AND __CASE_ORG_ACCESS__
+                    ORDER BY sc.event_year DESC, sc.event_month DESC, sc.handled_at DESC, sc.case_no DESC
+                    LIMIT ?
+                ) cases
+                UNION ALL
+                SELECT *
+                FROM (
+                    SELECT hb.id,
+                           'SALARY_EVENT' AS source,
+                           'DONE' AS business_status,
+                           CONCAT(TRIM(hb.dwbm), '-', TRIM(hb.grbm)) AS person_code,
+                           TRIM(hb.dwbm) AS org_code,
+                           TRIM(COALESCE(p.xm, '')) AS person_name,
+                           CAST(TRIM(hb.jsnf) AS UNSIGNED) AS event_year,
+                           CAST(TRIM(hb.jsyf) AS UNSIGNED) AS event_month,
+                           TRIM(hb.jslb) AS change_type,
+                           '' AS trial_status,
+                           '' AS review_status,
+                           '' AS workflow_status,
+                           hb.hj2,
+                           hb.bbz AS handled_at,
+                           '' AS review_reason,
+                           '' AS reviewed_by,
+                           NULL AS reviewed_at,
+                           '' AS retest_status,
+                           '' AS retest_summary,
+                           NULL AS retested_at,
+                           CONCAT('历史工资已办，合计 ', hb.hj2) AS note
+                    FROM hisbase hb
+                    LEFT JOIN dryjbxx p ON p.dwbm = hb.dwbm AND p.grbm = hb.grbm
+                    WHERE CAST(TRIM(hb.jsnf) AS UNSIGNED) >= YEAR(CURDATE()) - 1
+                      AND TRIM(hb.jslb) NOT IN ('津贴变化', '调标晋升')
+                      AND __HIS_ORG_ACCESS__
+                    ORDER BY CAST(TRIM(hb.jsnf) AS UNSIGNED) DESC,
+                             CAST(TRIM(hb.jsyf) AS UNSIGNED) DESC,
+                             hb.bbz DESC,
+                             hb.id DESC
+                    LIMIT ?
+                ) history
+                UNION ALL
+                SELECT *
+                FROM (
+                    SELECT r.work_item_id AS id,
+                           'DATA_GOVERNANCE' AS source,
+                           'DONE' AS business_status,
+                           r.person_code,
+                           r.org_code,
+                           TRIM(COALESCE(p.xm, '')) AS person_name,
+                           YEAR(COALESCE(r.reviewed_at, r.retested_at, r.created_at)) AS event_year,
+                           MONTH(COALESCE(r.reviewed_at, r.retested_at, r.created_at)) AS event_month,
+                           '数据治理' AS change_type,
+                           '' AS trial_status,
+                           r.review_status,
+                           CASE
+                               WHEN r.review_status = 'IGNORED' THEN 'DATA_GOVERNANCE_IGNORED'
+                               ELSE 'DATA_GOVERNANCE_REVIEWED'
+                           END AS workflow_status,
+                           0 AS hj2,
+                           COALESCE(r.reviewed_at, r.retested_at, r.created_at) AS handled_at,
+                           r.review_reason,
+                           r.reviewed_by,
+                           r.reviewed_at,
+                           r.retest_status,
+                           r.retest_summary,
+                           r.retested_at,
+                           CONCAT(r.issue_type,
+                                  CASE WHEN COALESCE(r.review_reason, '') = '' THEN '' ELSE CONCAT('：', r.review_reason) END) AS note
+                    FROM salary_data_governance_task_review r
+                    LEFT JOIN dryjbxx p ON CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) = r.person_code
+                    WHERE r.review_status IN ('REVIEWED', 'IGNORED')
+                      AND __GOV_ORG_ACCESS__
+                    ORDER BY COALESCE(r.reviewed_at, r.retested_at, r.created_at) DESC, r.id DESC
+                    LIMIT ?
+                ) governance
+                ORDER BY event_year DESC, event_month DESC, handled_at DESC, id DESC
+                LIMIT ?
+                """.replace("__CASE_ORG_ACCESS__", organizationAccessService.orgCodeAccessSql("sc.org_code"))
+                .replace("__HIS_ORG_ACCESS__", organizationAccessService.orgCodeAccessSql("hb.dwbm"))
+                .replace("__GOV_ORG_ACCESS__", organizationAccessService.orgCodeAccessSql("r.org_code")),
+                branchLimit, branchLimit, branchLimit, safeLimit);
+        return rows.stream()
+                .map(this::salaryDoneRowToItem)
+                .toList();
+    }
+
+    private WorkbenchItemResponse salaryDoneRowToItem(Map<String, Object> row) {
+        String rowChangeType = text(row.get("change_type"));
+        String itemWorkflowStatus = text(row.get("workflow_status"));
+        String itemBusinessStatus = text(row.get("business_status")).isBlank() ? "DONE" : text(row.get("business_status"));
+        return new WorkbenchItemResponse(
+                text(row.get("id")),
+                text(row.get("source")),
+                itemBusinessStatus,
+                rowChangeType,
+                text(row.get("person_code")),
+                text(row.get("person_name")),
+                text(row.get("org_code")),
+                number(row.get("event_year")),
+                number(row.get("event_month")),
+                rowChangeType,
+                text(row.get("note")),
+                text(row.get("trial_status")),
+                text(row.get("review_status")),
+                itemWorkflowStatus,
+                listItemClosureStatus(itemBusinessStatus, itemWorkflowStatus),
+                listItemClosureMessage(itemBusinessStatus, itemWorkflowStatus),
+                listItemNextActionCode(itemBusinessStatus, itemWorkflowStatus),
+                listItemNextActionLabel(itemBusinessStatus, itemWorkflowStatus),
+                text(row.get("review_reason")),
+                text(row.get("reviewed_by")),
+                text(row.get("reviewed_at")),
+                text(row.get("retest_status")),
+                text(row.get("retest_summary")),
+                text(row.get("retested_at"))
+        );
     }
 
     private String listItemClosureStatus(String businessStatus, String workflowStatus) {

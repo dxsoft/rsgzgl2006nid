@@ -5462,6 +5462,16 @@ button:disabled {
     background: #fff;
 }
 
+.code-option-input[readonly] {
+    cursor: pointer;
+    background: color-mix(in srgb, var(--panel) 92%, var(--chrome));
+}
+
+.code-option-input[readonly]:hover {
+    border-color: var(--accent);
+    background: #ffffff;
+}
+
 .base-change-form input:focus,
 .base-change-form select:focus,
 .person-base-info-form input:focus,
@@ -5992,6 +6002,110 @@ button:disabled {
     border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
     background: #fff4f1;
     color: #8a2f22;
+}
+
+.code-option-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(20, 29, 35, 0.28);
+}
+
+.code-option-dialog {
+    width: min(680px, 100%);
+    max-height: min(720px, calc(100vh - 36px));
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 18px 44px rgba(20, 35, 44, 0.18);
+}
+
+.code-option-dialog header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.code-option-dialog h2,
+.code-option-dialog p {
+    margin: 0;
+}
+
+.code-option-dialog h2 {
+    font-size: 16px;
+}
+
+.code-option-dialog p {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.code-option-toolbar {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-soft);
+    background: #fbfcfd;
+}
+
+.code-option-toolbar input {
+    width: 100%;
+    min-height: 32px;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 0 9px;
+}
+
+.code-option-tree {
+    min-height: 260px;
+    overflow: auto;
+    padding: 8px;
+    background: #ffffff;
+}
+
+.code-option-tree button,
+.code-option-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-height: 30px;
+    border: 0;
+    border-radius: 4px;
+    padding: 5px 8px 5px calc(8px + var(--tree-indent, 0px));
+    background: transparent;
+    text-align: left;
+}
+
+.code-option-tree button:hover {
+    background: var(--selected);
+}
+
+.code-option-tree strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.code-option-tree span {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.code-option-group {
+    color: var(--accent-strong);
+    font-weight: 700;
 }
 
 @media (max-width: 1080px) {

@@ -9,6 +9,7 @@ import com.dx.rsgzgl.person.dto.PersonBaseChangeResponse;
 import com.dx.rsgzgl.person.dto.PersonBaseInfoRequest;
 import com.dx.rsgzgl.person.dto.PersonBaseInfoResponse;
 import com.dx.rsgzgl.person.dto.PersonBaseStatusResponse;
+import com.dx.rsgzgl.person.dto.PersonCodeOptionNode;
 import com.dx.rsgzgl.person.dto.PersonDetail;
 import com.dx.rsgzgl.person.dto.PersonEducationRequest;
 import com.dx.rsgzgl.person.dto.PersonEducationResponse;
@@ -19,6 +20,7 @@ import com.dx.rsgzgl.person.service.PersonAssessmentService;
 import com.dx.rsgzgl.person.service.PersonBaseChangeService;
 import com.dx.rsgzgl.person.service.PersonBaseInfoService;
 import com.dx.rsgzgl.person.service.PersonBaseStatusService;
+import com.dx.rsgzgl.person.service.PersonCodeOptionService;
 import com.dx.rsgzgl.person.service.PersonEducationService;
 import com.dx.rsgzgl.person.service.PersonPostService;
 import com.dx.rsgzgl.person.service.PersonQueryService;
@@ -41,6 +43,7 @@ public class PersonController {
     private final PersonBaseChangeService personBaseChangeService;
     private final PersonBaseInfoService personBaseInfoService;
     private final PersonBaseStatusService personBaseStatusService;
+    private final PersonCodeOptionService personCodeOptionService;
     private final PersonPostService personPostService;
     private final PersonEducationService personEducationService;
     private final PersonAssessmentService personAssessmentService;
@@ -50,6 +53,7 @@ public class PersonController {
             PersonBaseChangeService personBaseChangeService,
             PersonBaseInfoService personBaseInfoService,
             PersonBaseStatusService personBaseStatusService,
+            PersonCodeOptionService personCodeOptionService,
             PersonPostService personPostService,
             PersonEducationService personEducationService,
             PersonAssessmentService personAssessmentService
@@ -58,6 +62,7 @@ public class PersonController {
         this.personBaseChangeService = personBaseChangeService;
         this.personBaseInfoService = personBaseInfoService;
         this.personBaseStatusService = personBaseStatusService;
+        this.personCodeOptionService = personCodeOptionService;
         this.personPostService = personPostService;
         this.personEducationService = personEducationService;
         this.personAssessmentService = personAssessmentService;
@@ -86,6 +91,11 @@ public class PersonController {
     @GetMapping("/{personCode}/base-status")
     public ApiResponse<PersonBaseStatusResponse> baseStatus(@PathVariable String personCode) {
         return ApiResponse.ok(personBaseStatusService.get(personCode));
+    }
+
+    @GetMapping("/code-options/{fieldName}")
+    public ApiResponse<List<PersonCodeOptionNode>> codeOptions(@PathVariable String fieldName) {
+        return ApiResponse.ok(personCodeOptionService.tree(fieldName));
     }
 
     @PutMapping("/{personCode}/base-info")

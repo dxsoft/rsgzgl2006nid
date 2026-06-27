@@ -188,6 +188,8 @@ const state = {
     historyPlanSelected: new Map(),
     historyPlanCurrentItems: [],
     maintenanceReturn: null,
+    codeOptionCache: new Map(),
+    activeCodeOptionPicker: null,
     currentUsername: "",
     orgs: [],
     selectedOrgCode: "",
@@ -560,7 +562,13 @@ const els = {
     configActiveInput: document.querySelector("#configActiveInput"),
     configActive2006Input: document.querySelector("#configActive2006Input"),
     configSequenceInput: document.querySelector("#configSequenceInput"),
-    configAuditList: document.querySelector("#configAuditList")
+    configAuditList: document.querySelector("#configAuditList"),
+    codeOptionDialog: document.querySelector("#codeOptionDialog"),
+    codeOptionTitle: document.querySelector("#codeOptionTitle"),
+    codeOptionHint: document.querySelector("#codeOptionHint"),
+    codeOptionCloseButton: document.querySelector("#codeOptionCloseButton"),
+    codeOptionSearchInput: document.querySelector("#codeOptionSearchInput"),
+    codeOptionTree: document.querySelector("#codeOptionTree")
 };
 
 const Permissions = {
@@ -14596,6 +14604,144 @@ const SystemPanel = {
     }
 };
 
+const CodeOptionPicker = {
+    bindings: [
+        { trigger: "basePersonCategoryInput", field: "ryfl", title: "\u9009\u62e9\u4eba\u5458\u7c7b\u522b", mode: "name" },
+        { trigger: "baseOrganizationTypeInput", field: "dwsx", title: "\u9009\u62e9\u5355\u4f4d\u6027\u8d28", mode: "code" },
+        { trigger: "basePostCategoryInput", field: "gwfl", title: "\u9009\u62e9\u5c97\u4f4d\u7c7b\u522b", mode: "name" },
+        { trigger: "baseEducationInput", code: "baseEducationCodeInput", field: "xlbm", title: "\u9009\u62e9\u6700\u9ad8\u5b66\u5386", mode: "pair" },
+        { trigger: "baseEducationCodeInput", code: "baseEducationCodeInput", name: "baseEducationInput", field: "xlbm", title: "\u9009\u62e9\u6700\u9ad8\u5b66\u5386", mode: "pair" },
+        { trigger: "baseRankCodeInput", field: "zjbm", title: "\u9009\u62e9\u804c\u7ea7\u7f16\u7801", mode: "code" },
+        { trigger: "baseCurrentPostInput", field: "xrzw", title: "\u9009\u62e9\u73b0\u4efb\u804c\u52a1", mode: "name" },
+        { trigger: "personPostNameInput", code: "personPostCodeInput", field: "zwbm", title: "\u9009\u62e9\u4efb\u804c\u4fe1\u606f", mode: "pair" },
+        { trigger: "personPostCodeInput", code: "personPostCodeInput", name: "personPostNameInput", field: "zwbm", title: "\u9009\u62e9\u4efb\u804c\u4fe1\u606f", mode: "pair" },
+        { trigger: "personPostRankInput", field: "zjbm", title: "\u9009\u62e9\u804c\u7ea7\u7f16\u7801", mode: "code" },
+        { trigger: "personPostCurrentCodeInput", field: "xrzwbm", title: "\u9009\u62e9\u73b0\u4efb\u7f16\u7801", mode: "code" },
+        { trigger: "educationNameInput", code: "educationCodeInput", field: "xlbm", title: "\u9009\u62e9\u5b66\u5386", mode: "pair" },
+        { trigger: "educationCodeInput", code: "educationCodeInput", name: "educationNameInput", field: "xlbm", title: "\u9009\u62e9\u5b66\u5386", mode: "pair" },
+        { trigger: "educationTypeInput", field: "xllb", title: "\u9009\u62e9\u5b66\u5386\u7c7b\u522b", mode: "name" }
+    ],
+    init() {
+        CodeOptionPicker.bindings.forEach((binding) => {
+            const input = els[binding.trigger];
+            if (!input) {
+                return;
+            }
+            input.readOnly = true;
+            input.classList.add("code-option-input");
+            input.title = "\u70b9\u51fb\u4ece\u4ee3\u7801\u6811\u9009\u62e9";
+            input.addEventListener("click", () => CodeOptionPicker.open(binding));
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    CodeOptionPicker.open(binding);
+                }
+            });
+        });
+        els.codeOptionCloseButton?.addEventListener("click", () => CodeOptionPicker.close());
+        els.codeOptionDialog?.addEventListener("click", (event) => {
+            if (event.target === els.codeOptionDialog) {
+                CodeOptionPicker.close();
+            }
+        });
+        els.codeOptionSearchInput?.addEventListener("input", () => CodeOptionPicker.render());
+        els.codeOptionTree?.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-code-option]");
+            if (!button) {
+                return;
+            }
+            CodeOptionPicker.select({
+                code: button.dataset.codeOption || "",
+                rawCode: button.dataset.codeOptionRaw || "",
+                name: button.dataset.codeOptionName || ""
+            });
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !els.codeOptionDialog?.classList.contains("hidden")) {
+                CodeOptionPicker.close();
+            }
+        });
+    },
+    async open(binding) {
+        if (!els.codeOptionDialog) {
+            return;
+        }
+        state.activeCodeOptionPicker = binding;
+        els.codeOptionTitle.textContent = binding.title || "\u9009\u62e9\u53ef\u9009\u9879";
+        els.codeOptionHint.textContent = "\u4ece fldjbxx \u5bf9\u5e94\u7684 dmb \u4ee3\u7801\u6811\u9009\u62e9\uff0c\u7f16\u7801\u53ea\u505a\u5c55\u793a\u3002";
+        els.codeOptionSearchInput.value = "";
+        els.codeOptionTree.innerHTML = `<div class="loading">\u6b63\u5728\u52a0\u8f7d\u53ef\u9009\u9879...</div>`;
+        els.codeOptionDialog.classList.remove("hidden");
+        try {
+            if (!state.codeOptionCache.has(binding.field)) {
+                state.codeOptionCache.set(binding.field, await Api.request(`/api/persons/code-options/${encodeURIComponent(binding.field)}`));
+            }
+            CodeOptionPicker.render();
+        } catch (error) {
+            els.codeOptionTree.innerHTML = `<div class="error">${Format.html(error.message)}</div>`;
+        }
+        els.codeOptionSearchInput.focus();
+    },
+    close() {
+        els.codeOptionDialog?.classList.add("hidden");
+        state.activeCodeOptionPicker = null;
+    },
+    render() {
+        const binding = state.activeCodeOptionPicker;
+        if (!binding || !els.codeOptionTree) {
+            return;
+        }
+        const items = state.codeOptionCache.get(binding.field) || [];
+        const keyword = (els.codeOptionSearchInput?.value || "").trim().toLowerCase();
+        const html = CodeOptionPicker.nodesHtml(items, keyword, 0);
+        els.codeOptionTree.innerHTML = html || `<div class="loading">\u6682\u65e0\u53ef\u9009\u9879</div>`;
+    },
+    nodesHtml(nodes, keyword, depth) {
+        return (nodes || []).map((node) => {
+            const childrenHtml = CodeOptionPicker.nodesHtml(node.children || [], keyword, depth + 1);
+            const text = `${node.code || ""} ${node.rawCode || ""} ${node.name || ""}`.toLowerCase();
+            const visible = !keyword || text.includes(keyword) || childrenHtml;
+            if (!visible) {
+                return "";
+            }
+            const indent = Math.min(depth, 6) * 14;
+            const button = node.selectable
+                ? `<button type="button" data-code-option="${Format.html(node.code || "")}" data-code-option-raw="${Format.html(node.rawCode || "")}" data-code-option-name="${Format.html(node.name || "")}" style="--tree-indent:${indent}px">
+                        <strong>${Format.html(node.name || "-")}</strong>
+                        <span>${Format.html(node.code || node.rawCode || "-")}</span>
+                    </button>`
+                : `<div class="code-option-group" style="--tree-indent:${indent}px">
+                        <strong>${Format.html(node.name || node.rawCode || "-")}</strong>
+                        <span>${Format.html(node.rawCode || "")}</span>
+                    </div>`;
+            return `${button}${childrenHtml ? `<div>${childrenHtml}</div>` : ""}`;
+        }).join("");
+    },
+    select(option) {
+        const binding = state.activeCodeOptionPicker;
+        if (!binding) {
+            return;
+        }
+        const trigger = els[binding.trigger];
+        const codeInput = binding.code ? els[binding.code] : null;
+        const nameInput = binding.name ? els[binding.name] : (binding.mode === "pair" ? trigger : null);
+        if (binding.mode === "code") {
+            trigger.value = option.code || "";
+        } else if (binding.mode === "name") {
+            trigger.value = option.name || "";
+        } else {
+            if (codeInput) {
+                codeInput.value = option.code || "";
+            }
+            if (nameInput) {
+                nameInput.value = option.name || "";
+            }
+        }
+        CodeOptionPicker.close();
+        trigger?.focus();
+    }
+};
+
 const SystemShell = {
     icon(code) {
         if (code === "SALARY_CONFIG") {
@@ -17878,5 +18024,6 @@ function bindEvents() {
 }
 
 AcceptanceSamples.init();
+CodeOptionPicker.init();
 bindEvents();
 AuthPanel.boot();

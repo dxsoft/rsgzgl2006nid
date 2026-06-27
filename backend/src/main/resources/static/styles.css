@@ -5148,8 +5148,9 @@ button:disabled {
     gap: 12px;
     min-height: 52px;
     padding: 11px 14px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f8fafb);
+    border-bottom: 1px solid var(--border-soft);
+    background: #ffffff;
+    box-shadow: 0 1px 0 rgba(20, 35, 44, 0.04);
 }
 
 .pane-title {
@@ -5231,14 +5232,14 @@ button:disabled {
     grid-template-columns: 1fr 72px;
     gap: 8px;
     padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     background: #fbfcfd;
 }
 
 .searchbar input {
     width: 100%;
     min-height: 34px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
     padding: 0 10px;
 }
@@ -5266,7 +5267,8 @@ button:disabled {
 .person-row:hover,
 .person-row.active,
 .history-row:hover,
-.history-row.active {
+.history-row.active,
+.salary-row:hover {
     background: var(--selected);
 }
 
@@ -5318,8 +5320,9 @@ button:disabled {
     justify-content: space-between;
     gap: 8px;
     padding: 10px 12px;
-    border-top: 1px solid var(--border);
-    background: linear-gradient(#ffffff, #f8fafb);
+    border-top: 1px solid var(--border-soft);
+    background: #ffffff;
+    box-shadow: 0 -1px 0 rgba(20, 35, 44, 0.04);
 }
 
 .empty-state {
@@ -5328,8 +5331,9 @@ button:disabled {
     place-content: center;
     text-align: center;
     padding: 24px;
-    border: 1px dashed var(--border);
-    background: #fbfcfd;
+    border: 1px dashed var(--border-soft);
+    border-radius: 6px;
+    background: #ffffff;
     color: var(--muted);
 }
 
@@ -5358,9 +5362,10 @@ button:disabled {
 .person-assessment-band,
 .config-band {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 3px;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
+    overflow: hidden;
 }
 
 .profile-grid {
@@ -5383,6 +5388,8 @@ button:disabled {
 
 .profile-grid dd {
     margin: 4px 0 0;
+    color: var(--text);
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
@@ -5418,7 +5425,7 @@ button:disabled {
 .assessment-form select {
     width: 100%;
     min-height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     background: #fff;
@@ -5445,7 +5452,7 @@ button:disabled {
 }
 
 .base-change-row:hover {
-    background: #f7fbfa;
+    background: var(--selected);
 }
 
 .base-change-main {
@@ -5488,9 +5495,9 @@ button:disabled {
     display: grid;
     gap: 2px;
     padding: 7px 9px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 5px;
-    background: #f8fafc;
+    background: #ffffff;
 }
 
 .base-status-item strong,
@@ -5516,7 +5523,7 @@ button:disabled {
 .base-status-action {
     min-width: 0;
     min-height: 50px;
-    border: 1px solid var(--accent);
+    border: 1px solid var(--selected-strong);
     border-radius: 6px;
     background: color-mix(in srgb, var(--accent) 8%, var(--panel));
     color: var(--accent);

@@ -1546,8 +1546,8 @@ button:disabled {
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 8px;
     padding: 12px;
-    border-bottom: 1px solid var(--border);
-    background: var(--chrome);
+    border-bottom: 1px solid var(--border-soft);
+    background: #fbfcfd;
 }
 
 .history-delivery-metrics span {
@@ -1555,7 +1555,8 @@ button:disabled {
     gap: 3px;
     min-width: 0;
     padding: 9px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #fff;
     color: var(--muted);
 }
@@ -1575,8 +1576,10 @@ button:disabled {
 
 .history-delivery-queue {
     display: grid;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: var(--panel);
+    overflow: hidden;
 }
 
 .history-delivery-row {
@@ -1584,7 +1587,7 @@ button:disabled {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 4px 12px;
     padding: 9px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .history-delivery-row:last-child {
@@ -1619,8 +1622,10 @@ button:disabled {
 .history-delivery-acceptances {
     display: grid;
     gap: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: var(--panel);
+    overflow: hidden;
 }
 
 .history-delivery-acceptances > span {
@@ -1663,8 +1668,9 @@ button:disabled {
     gap: 5px;
     min-width: 0;
     padding: 9px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-left: 4px solid var(--accent);
+    border-radius: 4px;
     background: var(--panel);
 }
 
@@ -1687,7 +1693,7 @@ button:disabled {
     flex: 1 1 130px;
     min-width: 0;
     height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--text);
@@ -1706,7 +1712,7 @@ button:disabled {
 .history-delivery-acceptance-filter select {
     min-width: 0;
     height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #fff;
     color: var(--text);
@@ -1736,7 +1742,7 @@ button:disabled {
     min-height: 54px;
     padding: 8px 10px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-radius: 0;
     background: #fff;
     color: var(--text);
@@ -1770,8 +1776,8 @@ button:disabled {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-    background: var(--chrome);
+    border-bottom: 1px solid var(--border-soft);
+    background: #fbfcfd;
     color: var(--muted);
     font-size: 12px;
 }
@@ -1780,7 +1786,7 @@ button:disabled {
     display: grid;
     gap: 3px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     background: #f8fbfd;
     color: var(--text);
     font-size: 12px;
@@ -1827,9 +1833,9 @@ button:disabled {
     align-items: center;
     min-height: 22px;
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--chrome);
+    background: #ffffff;
     font-weight: 700;
 }
 
@@ -1866,8 +1872,8 @@ button:disabled {
     display: grid;
     gap: 8px;
     padding: 10px;
-    border-top: 1px solid var(--border);
-    background: var(--chrome);
+    border-top: 1px solid var(--border-soft);
+    background: #fbfcfd;
 }
 
 .history-delivery-acceptance-detail > span {
@@ -1879,7 +1885,8 @@ button:disabled {
     grid-template-columns: minmax(180px, 1fr) auto;
     gap: 3px 10px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #fff;
 }
 
@@ -1900,9 +1907,9 @@ button:disabled {
     gap: 2px;
     min-width: 0;
     padding: 6px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--chrome);
+    background: #ffffff;
 }
 
 .history-delivery-acceptance-detail-metrics b {
@@ -1915,7 +1922,8 @@ button:disabled {
     gap: 8px;
     align-items: center;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #fff;
 }
 
@@ -1949,7 +1957,8 @@ button:disabled {
     gap: 6px;
     min-width: 0;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #fff;
 }
 
@@ -1963,7 +1972,7 @@ button:disabled {
     gap: 2px 8px;
     min-width: 0;
     padding-top: 6px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
 }
 
 .history-delivery-detail-grid strong,

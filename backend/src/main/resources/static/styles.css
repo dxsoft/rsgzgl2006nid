@@ -2164,8 +2164,10 @@ button:disabled {
     display: grid;
     gap: 10px;
     padding: 10px;
-    border: 1px solid var(--border);
-    background: #fbfcfd;
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(20, 35, 44, 0.04);
 }
 
 .report-center-head {
@@ -2176,7 +2178,7 @@ button:disabled {
     gap: 8px 12px;
     min-width: 0;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .report-center-titlebar,
@@ -2193,9 +2195,9 @@ button:disabled {
 .report-center-titlebar span {
     min-height: 22px;
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
     color: var(--text);
     font-size: 12px;
     font-weight: 700;
@@ -2214,7 +2216,8 @@ button:disabled {
     display: grid;
     gap: 7px;
     padding: 9px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
     background: #ffffff;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.03);
 }
@@ -2238,7 +2241,7 @@ button:disabled {
 .report-center-params select {
     width: 100%;
     min-height: 30px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 7px;
     background: var(--panel);
@@ -2271,7 +2274,7 @@ button:disabled {
     gap: 7px;
     min-width: 0;
     padding: 9px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 5px;
     background: #ffffff;
     box-shadow: 0 1px 2px rgba(20, 35, 44, 0.03);
@@ -2342,10 +2345,10 @@ button:disabled {
     max-width: 220px;
     min-height: 34px;
     padding: 4px 7px;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
     color: var(--text);
     overflow: hidden;
 }
@@ -2398,7 +2401,7 @@ button:disabled {
     display: grid;
     gap: 2px;
     padding: 6px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     background: #ffffff;
     color: var(--text);
@@ -2420,7 +2423,8 @@ button:disabled {
     display: grid;
     max-height: 260px;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
     background: #ffffff;
 }
 
@@ -2436,7 +2440,7 @@ button:disabled {
 }
 
 .report-audit-row:hover {
-    background: #fbfcfd;
+    background: var(--selected);
 }
 
 .report-audit-row:last-child {
@@ -2488,7 +2492,7 @@ button:disabled {
     display: grid;
     gap: 3px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     border-left: 4px solid var(--accent);
     background: color-mix(in srgb, var(--accent) 7%, var(--panel));
 }
@@ -2514,7 +2518,7 @@ button:disabled {
     flex-wrap: nowrap;
     gap: 6px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
     background: #ffffff;
     overflow-x: auto;
     overflow-y: hidden;
@@ -2523,11 +2527,11 @@ button:disabled {
 .report-batch-filter-actions button {
     flex: 0 0 auto;
     min-height: 26px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     color: var(--accent);
-    background: var(--row);
+    background: #ffffff;
     font-size: 12px;
 }
 
@@ -2553,7 +2557,7 @@ button:disabled {
     display: inline-flex;
     align-items: center;
     min-height: 22px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 7px;
     color: var(--muted);
@@ -2582,6 +2586,10 @@ button:disabled {
 
 .report-batch-audit-list {
     display: grid;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    background: #ffffff;
+    overflow: hidden;
 }
 
 .report-batch-audit-row {
@@ -2591,7 +2599,7 @@ button:disabled {
     align-items: center;
     min-height: 38px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .report-batch-audit-row:last-child {
@@ -2623,7 +2631,7 @@ button:disabled {
 
 .report-batch-actions button {
     min-height: 24px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
     padding: 0 8px;
     color: var(--accent);

@@ -3853,9 +3853,9 @@ button:disabled {
 .history-plan-status span {
     width: fit-content;
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
     font-weight: 700;
     color: var(--accent-strong);
 }
@@ -3876,7 +3876,7 @@ button:disabled {
 }
 
 .work-item:hover {
-    background: #f7fbfa;
+    background: var(--selected);
 }
 
 .work-item.has-next-action {
@@ -3951,9 +3951,9 @@ button:disabled {
 .load-more-button {
     width: 100%;
     border: 0;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
     border-radius: 0;
-    background: linear-gradient(#ffffff, #f8fafb);
+    background: #ffffff;
 }
 
 .work-item-main {
@@ -3992,9 +3992,9 @@ button:disabled {
 .work-item-delivery-warning {
     width: fit-content;
     padding: 2px 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
     color: var(--muted);
     font-size: 12px;
 }
@@ -4053,9 +4053,9 @@ button:disabled {
     gap: 6px;
     min-height: 24px;
     padding: 2px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 4px;
-    background: var(--row);
+    background: #ffffff;
     font-size: 12px;
 }
 
@@ -4110,9 +4110,9 @@ button:disabled {
     display: grid;
     gap: 6px;
     padding: 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
-    background: var(--row);
+    background: #ffffff;
 }
 
 .migration-delivery-detail-audit > span {

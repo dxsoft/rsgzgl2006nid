@@ -1,5 +1,7 @@
 DELIMITER $$
 
+DROP PROCEDURE IF EXISTS add_index_if_missing$$
+
 CREATE PROCEDURE add_index_if_missing(
     IN p_table_name VARCHAR(64),
     IN p_index_name VARCHAR(64),

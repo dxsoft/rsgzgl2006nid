@@ -56,7 +56,9 @@ $checks = @(
     @{ Code = "case-detail-history-status-style"; File = $stylesCss; Pattern = ".case-history-status"; Message = "History status style" },
     @{ Code = "case-detail-change-row-style"; File = $stylesCss; Pattern = ".case-change-row"; Message = "Detail row style" },
     @{ Code = "case-detail-audit-style"; File = $stylesCss; Pattern = ".case-audit-row"; Message = "Audit timeline style" },
-    @{ Code = "case-detail-action-style"; File = $stylesCss; Pattern = ".case-detail-actions"; Message = "Detail action layout style" }
+    @{ Code = "case-detail-action-style"; File = $stylesCss; Pattern = ".case-detail-actions"; Message = "Detail action layout style" },
+    @{ Code = "case-detail-sticky-footer-style"; File = $stylesCss; Pattern = ".case-detail-dialog > .case-detail-actions"; Message = "Detail dialog command footer style" },
+    @{ Code = "case-detail-inline-actions-style"; File = $stylesCss; Pattern = ".case-detail-actions.inline-actions"; Message = "Inline action groups should not inherit sticky footer behavior" }
 )
 
 $results = [System.Collections.Generic.List[object]]::new()

@@ -47,6 +47,8 @@ Add-Check -Rows $rows -Name "required-field-aria-invalid" -Passed ($appJs -match
 Add-Check -Rows $rows -Name "required-field-scroll-focus" -Passed ($appJs -match 'scrollIntoView\(\{ block: "center", inline: "nearest" \}\)' -and $appJs -match 'input\.focus\(\)') -Message "Invalid field should scroll into view and receive focus."
 Add-Check -Rows $rows -Name "base-status-cache-card" -Passed ($appJs -match 'base-status-cache' -and $styles -match '\.base-status-cache') -Message "Base status should show salary todo cache state."
 Add-Check -Rows $rows -Name "base-change-tags" -Passed ($appJs -match 'base-change-tags' -and $styles -match '\.base-change-tags') -Message "Base change ledger should show type/source tags."
+Add-Check -Rows $rows -Name "base-info-readonly-style" -Passed ($styles -match '\.person-base-info-form input\[readonly\]' -and $styles -match '\.person-base-info-form \.code-option-code-input\[readonly\]') -Message "Read-only fields and code fields should remain visually distinct."
+Add-Check -Rows $rows -Name "base-info-save-action-style" -Passed ($styles -match '\.person-base-info-form #saveBaseInfoButton') -Message "Base info save action should be visually anchored in the edit form."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

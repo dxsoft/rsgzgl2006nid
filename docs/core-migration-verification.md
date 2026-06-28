@@ -150,6 +150,12 @@ Run the person maintenance UI and code-option regression suite:
 powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1
 ```
 
+Include the stateful base-change to salary-todo-cache refresh closure check:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1 -IncludeCacheClosure
+```
+
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:
 

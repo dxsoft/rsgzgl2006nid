@@ -3,6 +3,7 @@ param(
     [int]$TimeoutSec = 30,
     [string]$Username = "admin",
     [string]$Password = "admin",
+    [switch]$IncludeCacheClosure,
     [string]$OutputPath = "target/person-maintenance-suite-results.tsv"
 )
 
@@ -56,6 +57,17 @@ $rows.Add((Invoke-Step -Name "person-code-options" -Action {
         -Password $Password `
         -OutputPath "target/person-code-options-results.tsv" | Out-Host
 }))
+
+if ($IncludeCacheClosure) {
+    $rows.Add((Invoke-Step -Name "person-maintenance-cache-closure" -Action {
+        & (Join-Path $scriptDir "verify-person-maintenance-cache-closure.ps1") `
+            -BaseUrl $BaseUrl `
+            -TimeoutSec $TimeoutSec `
+            -Username $Username `
+            -Password $Password `
+            -OutputPath "target/person-maintenance-cache-closure-results.tsv" | Out-Host
+    }))
+}
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

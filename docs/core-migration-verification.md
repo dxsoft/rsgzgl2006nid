@@ -161,7 +161,9 @@ cache becomes `DIRTY`, refreshes the cache, and then verifies both the
 `salary-todo` metric and TODO workbench page can be read after refresh. The
 refresh count, metric count, and TODO page total must match. Visible TODO items
 must also include handling metadata such as work item id, person code, business
-type, and next action.
+type, and next action. The first visible TODO item is also sent to
+`/api/workbench/salary-cases/preview` to verify that the handling entry can open
+the salary-case precheck without creating a case.
 
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:

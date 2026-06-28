@@ -194,6 +194,38 @@ if ($todoItems.Count -gt 0) {
         Detail = "first=$($firstTodo.id) action=$($firstTodo.nextActionCode)"
         Message = ""
     })
+    $originalSource = [string]$firstTodo.source
+    $previewRequest = @{
+        workItemId = $firstTodo.id
+        source = if ($originalSource -and $originalSource -ne "SALARY_EVENT") { "SALARY_EVENT" } else { $originalSource }
+        businessType = $firstTodo.businessType
+        personCode = $firstTodo.personCode
+        personName = $firstTodo.personName
+        orgCode = $firstTodo.orgCode
+        year = [int]$firstTodo.year
+        month = [int]$firstTodo.month
+        title = $firstTodo.title
+        summary = if ($originalSource -and $originalSource -ne "SALARY_EVENT") {
+            "$($firstTodo.summary); source=$originalSource"
+        } else {
+            $firstTodo.summary
+        }
+    }
+    $preview = Invoke-Api -Name "workbench-todo-preview" -Path "/api/workbench/salary-cases/preview" -Method "POST" -Body $previewRequest
+    Add-Result -Rows $rows -Step $preview -Detail "workItem=$($preview.Data.workItemId) trial=$($preview.Data.trialStatus)"
+    Assert-Passed $preview
+    if ([string]$preview.Data.workItemId -ne [string]$firstTodo.id) {
+        throw "Preview work item id does not match TODO item id."
+    }
+    if ([string]$preview.Data.personCode -ne [string]$firstTodo.personCode) {
+        throw "Preview person code does not match TODO item person code."
+    }
+    if ([string]$preview.Data.businessType -ne [string]$firstTodo.businessType) {
+        throw "Preview business type does not match TODO item business type."
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$preview.Data.trialStatus)) {
+        throw "Preview did not return trial status."
+    }
 }
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8

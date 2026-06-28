@@ -41,6 +41,9 @@
 - `scripts/verify-history-write-rehearsal.ps1`
 - `scripts/verify-launch-readiness.ps1`
 - `scripts/verify-online-business-closure.ps1`
+- `backend/scripts/verify-person-maintenance-suite.ps1`
+- `backend/scripts/verify-person-maintenance-ui-contract.ps1`
+- `backend/scripts/verify-person-code-options.ps1`
 - `scripts/verify-report-csv-exports.ps1`
 - `scripts/verify-report-history-queue-closure.ps1`
 - `scripts/verify-report-print-archive-ledger.ps1`

@@ -144,6 +144,12 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-case-report-ui-contract.
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected
 ```
 
+Run the person maintenance UI and code-option regression suite:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1
+```
+
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:
 

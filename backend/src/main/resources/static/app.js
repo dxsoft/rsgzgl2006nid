@@ -1180,6 +1180,21 @@ function baseChangeTypeLabel(value) {
     }[value] || value || "-";
 }
 
+function baseStatusLabel(status) {
+    const value = String(status || "").toUpperCase();
+    if (value === "DIRTY") {
+        return "\u5f85\u529e\u7f13\u5b58\u5f85\u5237\u65b0";
+    }
+    if (value === "ACTIVE" || value === "READY" || value === "CLEAN") {
+        return "\u5f85\u529e\u7f13\u5b58\u5df2\u540c\u6b65";
+    }
+    return status || "-";
+}
+
+function baseStatusTime(status) {
+    return status?.todoCacheDirtyAt || status?.todoCacheRefreshedAt || "-";
+}
+
 const WorkbenchPanel = {
     riskMetricCodes: ["SALARY_REVIEW_PENDING", "SALARY_TRIAL_DIFFERENT", "SALARY_TRIAL_ERROR"],
     closureMetricCodes: ["SALARY_CLOSURE_PENDING", "SALARY_CLOSURE_BLOCKED", "SALARY_CLOSURE_CLOSED"],
@@ -15115,28 +15130,31 @@ const PersonDetail = {
         els.baseStatusSummary.innerHTML = `
             <div class="base-status-item">
                 <strong>${Format.html(status.postCount ?? 0)}</strong>
-                <span>\u4efb\u804c</span>
+                <span>\u4efb\u804c\u8bb0\u5f55</span>
             </div>
             <div class="base-status-item">
                 <strong>${Format.html(status.educationCount ?? 0)}</strong>
-                <span>\u5b66\u5386</span>
+                <span>\u5b66\u5386\u8bb0\u5f55</span>
             </div>
             <div class="base-status-item">
                 <strong>${Format.html(status.assessmentCount ?? 0)}</strong>
-                <span>\u8003\u6838</span>
+                <span>\u8003\u6838\u8bb0\u5f55</span>
             </div>
-            <div class="base-status-item wide ${dirty ? "dirty" : ""}">
-                <strong>${dirty ? "\u5f85\u5237\u65b0" : Format.html(status.todoCacheStatus || "-")}</strong>
-                <span>${Format.html(status.todoCacheDirtyAt || status.todoCacheRefreshedAt || "-")}</span>
+            <div class="base-status-item base-status-cache ${dirty ? "dirty" : ""}">
+                <strong>${Format.html(baseStatusLabel(status.todoCacheStatus))}</strong>
+                <span>${Format.html(baseStatusTime(status))}</span>
             </div>
-            <div class="base-status-item wide">
+            <div class="base-status-item base-status-latest">
                 <strong>${Format.html(baseChangeTypeLabel(status.latestChangeType || "") || "-")}</strong>
                 <span>${Format.html(status.latestChangeSummary || "-")}</span>
             </div>
             ${canRefreshTodoCache ? `
-                <button type="button" class="base-status-action" data-refresh-base-status-cache>
-                    ${TEXT.refreshTodoCacheAction}
-                </button>
+                <div class="base-status-refresh">
+                    <button type="button" class="base-status-action" data-refresh-base-status-cache>
+                        ${TEXT.refreshTodoCacheAction}
+                    </button>
+                    <span>\u57fa\u7840\u8d44\u6599\u53d8\u66f4\u540e\u9700\u5237\u65b0\uff0c\u5de5\u4f5c\u53f0\u5f85\u529e\u624d\u4f1a\u91cd\u65b0\u63a8\u5bfc\u3002</span>
+                </div>
             ` : ""}
         `;
     },
@@ -15186,16 +15204,20 @@ const PersonDetail = {
             const period = item.changeYear
                 ? `${item.changeYear}${item.changeMonth ? `-${String(item.changeMonth).padStart(2, "0")}` : ""}`
                 : "-";
+            const sourceText = item.sourceId ? `${item.sourceTable || item.dataType || "-"}#${item.sourceId}` : "\u624b\u5de5\u767b\u8bb0";
             return `
                 <div class="base-change-row">
                     <span class="base-change-main">
-                        <strong>${Format.html(baseChangeTypeLabel(item.dataType))}</strong>
+                        <strong>${Format.html(item.summary || "-")}</strong>
                         <span>${Format.html(period)}</span>
                     </span>
-                    <span class="base-change-sub">
-                        ${Format.html(item.summary || "-")} | ${Format.html(item.createdBy || "-")} ${Format.html(item.createdAt || "")}
+                    <span class="base-change-tags">
+                        <em>${Format.html(baseChangeTypeLabel(item.dataType))}</em>
+                        <em>${Format.html(sourceText)}</em>
                     </span>
-                    ${item.sourceId ? `<span class="base-change-sub">${Format.html(item.sourceTable || item.dataType || "-")}#${Format.html(item.sourceId)}</span>` : ""}
+                    <span class="base-change-sub">
+                        ${Format.html(item.createdBy || "-")} ${Format.html(item.createdAt || "")}
+                    </span>
                 </div>
             `;
         }).join("");

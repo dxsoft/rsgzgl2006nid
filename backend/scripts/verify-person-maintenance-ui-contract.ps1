@@ -57,6 +57,9 @@ Add-Check -Rows $rows -Name "base-info-save-action-style" -Passed ($styles -matc
 Add-Check -Rows $rows -Name "base-info-editor-default-hidden" -Passed ($indexHtml -match 'id="personBaseInfoForm"\s+class="person-base-info-form hidden"') -Message "Base info editor should be hidden by default for clearer read-only viewing."
 Add-Check -Rows $rows -Name "base-info-toggle-action" -Passed ($indexHtml -match 'id="toggleBaseInfoEditButton"' -and $appJs -match 'toggleBaseInfoEditor' -and $appJs -match 'setBaseInfoEditorVisible') -Message "Base info editor should open only from the explicit edit action."
 Add-Check -Rows $rows -Name "base-info-toggle-action-style" -Passed ($styles -match '\.section-heading-action' -and $styles -match '\.section-heading-action\[aria-expanded="true"\]') -Message "Base info edit toggle should have a clear desktop command style."
+Add-Check -Rows $rows -Name "post-editor-default-hidden" -Passed ($indexHtml -match 'id="personPostForm"\s+class="person-post-form hidden"' -and $appJs -match 'newPostEditor' -and $appJs -match 'setPersonPostEditorVisible') -Message "Post editor should stay hidden until add/edit."
+Add-Check -Rows $rows -Name "education-editor-default-hidden" -Passed ($indexHtml -match 'id="educationForm"\s+class="education-form hidden"' -and $appJs -match 'newEducationEditor' -and $appJs -match 'setEducationEditorVisible') -Message "Education editor should stay hidden until add/edit."
+Add-Check -Rows $rows -Name "assessment-editor-default-hidden" -Passed ($indexHtml -match 'id="assessmentForm"\s+class="assessment-form hidden"' -and $appJs -match 'newAssessmentEditor' -and $appJs -match 'setAssessmentEditorVisible') -Message "Assessment editor should stay hidden until add/edit."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

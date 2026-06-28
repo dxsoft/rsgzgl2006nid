@@ -193,6 +193,9 @@ const state = {
     historyPlanCurrentItems: [],
     maintenanceReturn: null,
     baseInfoEditVisible: false,
+    personPostEditVisible: false,
+    educationEditVisible: false,
+    assessmentEditVisible: false,
     codeOptionCache: new Map(),
     activeCodeOptionPicker: null,
     currentUsername: "",
@@ -15158,6 +15161,30 @@ const PersonDetail = {
     toggleBaseInfoEditor() {
         PersonDetail.setBaseInfoEditorVisible(!state.baseInfoEditVisible, true);
     },
+    setPersonPostEditorVisible(visible, focusFirst = false) {
+        state.personPostEditVisible = Boolean(visible);
+        els.personPostForm.classList.toggle("hidden", !state.personPostEditVisible);
+        els.newPersonPostButton?.setAttribute("aria-expanded", String(state.personPostEditVisible));
+        if (state.personPostEditVisible && focusFirst) {
+            els.personPostCodeInput?.focus();
+        }
+    },
+    setEducationEditorVisible(visible, focusFirst = false) {
+        state.educationEditVisible = Boolean(visible);
+        els.educationForm.classList.toggle("hidden", !state.educationEditVisible);
+        els.newEducationButton?.setAttribute("aria-expanded", String(state.educationEditVisible));
+        if (state.educationEditVisible && focusFirst) {
+            els.educationCodeInput?.focus();
+        }
+    },
+    setAssessmentEditorVisible(visible, focusFirst = false) {
+        state.assessmentEditVisible = Boolean(visible);
+        els.assessmentForm.classList.toggle("hidden", !state.assessmentEditVisible);
+        els.newAssessmentButton?.setAttribute("aria-expanded", String(state.assessmentEditVisible));
+        if (state.assessmentEditVisible && focusFirst) {
+            els.assessmentYearInput?.focus();
+        }
+    },
     renderBaseStatus(status) {
         if (!status) {
             els.baseStatusSummary.innerHTML = `<div class="loading compact">${TEXT.loadingBaseStatus}</div>`;
@@ -15308,6 +15335,11 @@ const PersonDetail = {
         els.personPostPayrollFlagInput.value = "";
         els.personPostSummaryInput.value = "";
         document.querySelectorAll(".person-post-row").forEach((button) => button.classList.remove("active"));
+        PersonDetail.setPersonPostEditorVisible(false);
+    },
+    newPostEditor() {
+        PersonDetail.clearPostEditor();
+        PersonDetail.setPersonPostEditorVisible(true, true);
     },
     editPost(button) {
         const post = state.personPosts?.find((item) => String(item.id) === String(button.dataset.postId));
@@ -15326,6 +15358,7 @@ const PersonDetail = {
         els.personPostPayrollFlagInput.value = post.payrollFlag || "";
         els.personPostSummaryInput.value = "";
         document.querySelectorAll(".person-post-row").forEach((row) => row.classList.toggle("active", row === button));
+        PersonDetail.setPersonPostEditorVisible(true, true);
     },
     renderEducations(records) {
         const items = records || [];
@@ -15365,6 +15398,11 @@ const PersonDetail = {
         els.educationNoteInput.value = "";
         els.educationSummaryInput.value = "";
         document.querySelectorAll(".education-row").forEach((button) => button.classList.remove("active"));
+        PersonDetail.setEducationEditorVisible(false);
+    },
+    newEducationEditor() {
+        PersonDetail.clearEducationEditor();
+        PersonDetail.setEducationEditorVisible(true, true);
     },
     editEducation(button) {
         const education = state.educations?.find((item) => String(item.id) === String(button.dataset.educationId));
@@ -15382,6 +15420,7 @@ const PersonDetail = {
         els.educationNoteInput.value = education.note || "";
         els.educationSummaryInput.value = "";
         document.querySelectorAll(".education-row").forEach((row) => row.classList.toggle("active", row === button));
+        PersonDetail.setEducationEditorVisible(true, true);
     },
     renderAssessments(records) {
         const items = records || [];
@@ -15413,6 +15452,11 @@ const PersonDetail = {
         els.assessmentResultInput.value = "\u5408\u683c";
         els.assessmentSummaryInput.value = "";
         document.querySelectorAll(".assessment-row").forEach((button) => button.classList.remove("active"));
+        PersonDetail.setAssessmentEditorVisible(false);
+    },
+    newAssessmentEditor() {
+        PersonDetail.clearAssessmentEditor();
+        PersonDetail.setAssessmentEditorVisible(true, true);
     },
     editAssessment(button) {
         const assessment = state.assessments?.find((item) => String(item.id) === String(button.dataset.assessmentId));
@@ -15424,6 +15468,7 @@ const PersonDetail = {
         els.assessmentResultInput.value = assessment.result || "\u5408\u683c";
         els.assessmentSummaryInput.value = "";
         document.querySelectorAll(".assessment-row").forEach((row) => row.classList.toggle("active", row === button));
+        PersonDetail.setAssessmentEditorVisible(true, true);
     },
     renderHistory(records) {
         state.salaryHistoryRecords = records || [];
@@ -16923,13 +16968,13 @@ function bindEvents() {
     });
     els.baseChangeForm.addEventListener("submit", (event) => PersonDetail.saveBaseChange(event));
     els.personPostForm.addEventListener("submit", (event) => PersonDetail.savePost(event));
-    els.newPersonPostButton.addEventListener("click", () => PersonDetail.clearPostEditor());
+    els.newPersonPostButton.addEventListener("click", () => PersonDetail.newPostEditor());
     els.cancelPersonPostEditButton.addEventListener("click", () => PersonDetail.clearPostEditor());
     els.educationForm.addEventListener("submit", (event) => PersonDetail.saveEducation(event));
-    els.newEducationButton.addEventListener("click", () => PersonDetail.clearEducationEditor());
+    els.newEducationButton.addEventListener("click", () => PersonDetail.newEducationEditor());
     els.cancelEducationEditButton.addEventListener("click", () => PersonDetail.clearEducationEditor());
     els.assessmentForm.addEventListener("submit", (event) => PersonDetail.saveAssessment(event));
-    els.newAssessmentButton.addEventListener("click", () => PersonDetail.clearAssessmentEditor());
+    els.newAssessmentButton.addEventListener("click", () => PersonDetail.newAssessmentEditor());
     els.cancelAssessmentEditButton.addEventListener("click", () => PersonDetail.clearAssessmentEditor());
     els.prevPageButton.addEventListener("click", () => PeoplePanel.previousPage());
     els.nextPageButton.addEventListener("click", () => PeoplePanel.nextPage());

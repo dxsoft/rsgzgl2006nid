@@ -34,6 +34,7 @@
 - `scripts/stop-backend-dev.ps1`
 - `scripts/verify-auto-regression-samples.ps1`
 - `scripts/verify-business-acceptance-samples.ps1`
+- `scripts/verify-case-detail-ui-contract.ps1`
 - `scripts/verify-case-report-ui-contract.ps1`
 - `scripts/verify-core-migration.ps1`
 - `scripts/verify-generated-timeline-level-contract.ps1`

@@ -78,6 +78,7 @@ The script runs and summarizes:
 - `scripts\verify-report-print-pages.ps1 -FailOnUnexpected`
 - `scripts\verify-report-csv-exports.ps1 -FailOnUnexpected`
 - `scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected`
+- `scripts\verify-case-detail-ui-contract.ps1 -FailOnUnexpected`
 - `scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected`
 
 The core script records `PASS`, `FAIL`, and `SKIP` for every step, then fails
@@ -141,8 +142,14 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-archive-led
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-pages.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-csv-exports.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\verify-case-detail-ui-contract.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected
 ```
+
+The case detail UI contract check is static and read-only. It verifies that the
+handling detail page still exposes the trial, snapshot, report print, history
+write plan, comparison, retest, audit, rollback, and closure next-action entry
+points expected by the migrated salary workflow.
 
 The report/history queue closure check is read-only for normal runs. When a
 history write plan exists, it also samples one salary case to verify the single

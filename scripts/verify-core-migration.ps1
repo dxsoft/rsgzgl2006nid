@@ -191,6 +191,9 @@ if (-not $SkipSamples) {
     Invoke-Step "Case report UI contract gate" {
         & (Join-Path $PSScriptRoot "verify-case-report-ui-contract.ps1") @sampleArgs
     }
+    Invoke-Step "Case detail UI contract gate" {
+        & (Join-Path $PSScriptRoot "verify-case-detail-ui-contract.ps1") @sampleArgs
+    }
     $queueArgs = $sampleArgs.Clone()
     $queueArgs.MaxSummaryMilliseconds = $MaxSummaryMilliseconds
     Invoke-Step "Report/history queue closure gate" {

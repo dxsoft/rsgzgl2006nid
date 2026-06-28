@@ -4,6 +4,7 @@ param(
     [string]$Username = "admin",
     [string]$Password = "admin",
     [string]$PersonCode = "",
+    [switch]$IncludeCaseCreate,
     [string]$OutputPath = "target/person-maintenance-cache-closure-results.tsv"
 )
 
@@ -241,6 +242,54 @@ if ($todoItems.Count -gt 0) {
         Detail = "summary=$($preview.Data.trialSummary) amounts=$hasPreviewAmounts changes=$($previewChanges.Count)"
         Message = ""
     })
+
+    if ($IncludeCaseCreate) {
+        $caseRequest = $previewRequest.Clone()
+        $trialStatus = [string]$preview.Data.trialStatus
+        if ($trialStatus -eq "ERROR") {
+            $caseRequest.force = $true
+            $caseRequest.forceReason = "verification force create from person maintenance cache closure $runId"
+        }
+        if ($trialStatus -eq "DIFFERENT") {
+            $caseRequest.differenceReason = "verification difference create from person maintenance cache closure $runId"
+        }
+
+        $case = Invoke-Api -Name "workbench-todo-create-case" -Path "/api/workbench/salary-cases" -Method "POST" -Body $caseRequest
+        Add-Result -Rows $rows -Step $case -Detail "id=$($case.Data.id) trial=$($case.Data.trialStatus)"
+        Assert-Passed $case
+        $caseNo = [string]$case.Data.id
+        if ([string]::IsNullOrWhiteSpace($caseNo)) {
+            throw "Salary case creation did not return an id."
+        }
+
+        $caseDetail = Invoke-Api -Name "workbench-todo-case-detail" -Path "/api/workbench/salary-cases/$([uri]::EscapeDataString($caseNo))"
+        Add-Result -Rows $rows -Step $caseDetail -Detail "case=$($caseDetail.Data.caseNo) status=$($caseDetail.Data.status)"
+        Assert-Passed $caseDetail
+        if ([string]$caseDetail.Data.caseNo -ne $caseNo) {
+            throw "Salary case detail caseNo does not match created id."
+        }
+        if ([string]$caseDetail.Data.workItemId -ne [string]$firstTodo.id) {
+            throw "Salary case detail work item id does not match TODO item id."
+        }
+        if ([string]$caseDetail.Data.personCode -ne [string]$firstTodo.personCode) {
+            throw "Salary case detail person code does not match TODO item person code."
+        }
+        if ([string]$caseDetail.Data.businessType -ne [string]$firstTodo.businessType) {
+            throw "Salary case detail business type does not match TODO item business type."
+        }
+        if ([string]$caseDetail.Data.status -ne "DONE") {
+            throw "Salary case detail status should be DONE."
+        }
+        if ([string]::IsNullOrWhiteSpace([string]$caseDetail.Data.trialStatus)) {
+            throw "Salary case detail did not return trial status."
+        }
+        if ($trialStatus -eq "ERROR" -and [string]::IsNullOrWhiteSpace([string]$caseDetail.Data.forceReason)) {
+            throw "Salary case detail did not keep force reason for ERROR trial."
+        }
+        if ($trialStatus -eq "DIFFERENT" -and [string]::IsNullOrWhiteSpace([string]$caseDetail.Data.differenceReason)) {
+            throw "Salary case detail did not keep difference reason for DIFFERENT trial."
+        }
+    }
 }
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8

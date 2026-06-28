@@ -4,6 +4,7 @@ param(
     [string]$Username = "admin",
     [string]$Password = "admin",
     [switch]$IncludeCacheClosure,
+    [switch]$IncludeCaseCreate,
     [string]$OutputPath = "target/person-maintenance-suite-results.tsv"
 )
 
@@ -44,6 +45,10 @@ function Invoke-Step {
 
 $rows = New-Object System.Collections.Generic.List[object]
 
+if ($IncludeCaseCreate) {
+    $IncludeCacheClosure = $true
+}
+
 $rows.Add((Invoke-Step -Name "person-maintenance-ui-contract" -Action {
     & (Join-Path $scriptDir "verify-person-maintenance-ui-contract.ps1") `
         -OutputPath "target/person-maintenance-ui-contract.tsv" | Out-Host
@@ -60,12 +65,17 @@ $rows.Add((Invoke-Step -Name "person-code-options" -Action {
 
 if ($IncludeCacheClosure) {
     $rows.Add((Invoke-Step -Name "person-maintenance-cache-closure" -Action {
-        & (Join-Path $scriptDir "verify-person-maintenance-cache-closure.ps1") `
-            -BaseUrl $BaseUrl `
-            -TimeoutSec $TimeoutSec `
-            -Username $Username `
-            -Password $Password `
-            -OutputPath "target/person-maintenance-cache-closure-results.tsv" | Out-Host
+        $cacheClosureArgs = @{
+            BaseUrl = $BaseUrl
+            TimeoutSec = $TimeoutSec
+            Username = $Username
+            Password = $Password
+            OutputPath = "target/person-maintenance-cache-closure-results.tsv"
+        }
+        if ($IncludeCaseCreate) {
+            $cacheClosureArgs.IncludeCaseCreate = $true
+        }
+        & (Join-Path $scriptDir "verify-person-maintenance-cache-closure.ps1") @cacheClosureArgs | Out-Host
     }))
 }
 

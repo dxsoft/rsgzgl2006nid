@@ -156,6 +156,13 @@ Include the stateful base-change to salary-todo-cache refresh closure check:
 powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1 -IncludeCacheClosure
 ```
 
+Include case creation and detail open verification explicitly when the test
+environment allows new handled salary cases:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1 -IncludeCaseCreate
+```
+
 This option registers a `VERIFY-*` base-change row, checks that the salary todo
 cache becomes `DIRTY`, refreshes the cache, and then verifies both the
 `salary-todo` metric and TODO workbench page can be read after refresh. The
@@ -166,6 +173,12 @@ type, and next action. The first visible TODO item is also sent to
 the salary-case precheck without creating a case. The precheck must return a
 trial status and trial summary; amount fields and trial changes are recorded
 when available because error prechecks may only return an explanatory summary.
+`-IncludeCaseCreate` implies `-IncludeCacheClosure` and continues from that
+precheck to create a handled salary case, adding a force reason for `ERROR`
+prechecks or a difference reason for `DIFFERENT` prechecks as required by the
+business API. It then opens `/api/workbench/salary-cases/{caseNo}` and verifies
+the detail still points to the original TODO item, person, business type, and
+stored trial handling reason.
 
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:

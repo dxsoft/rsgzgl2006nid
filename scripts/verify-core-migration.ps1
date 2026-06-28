@@ -185,6 +185,9 @@ if (-not $SkipSamples) {
     Invoke-Step "Report entry matrix gate" {
         & (Join-Path $PSScriptRoot "verify-report-entry-matrix.ps1") @sampleArgs
     }
+    Invoke-Step "Permission/menu contract gate" {
+        & (Join-Path $PSScriptRoot "verify-permission-menu-contract.ps1") @sampleArgs
+    }
     Invoke-Step "Report print page gate" {
         & (Join-Path $PSScriptRoot "verify-report-print-pages.ps1") @sampleArgs
     }

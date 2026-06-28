@@ -5244,6 +5244,26 @@ button:disabled {
     max-width: 760px;
 }
 
+.section-heading-action {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--selected-strong);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent) 7%, #ffffff);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.section-heading-action:hover,
+.section-heading-action[aria-expanded="true"] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, #ffffff);
+    color: var(--accent-strong);
+}
+
 .org-tree {
     padding: 9px 9px 18px;
 }

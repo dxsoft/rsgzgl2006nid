@@ -1,5 +1,6 @@
 param(
     [string]$AppJsPath = "backend/src/main/resources/static/app.js",
+    [string]$IndexPath = "backend/src/main/resources/static/index.html",
     [string]$StylesPath = "backend/src/main/resources/static/styles.css",
     [string]$OutputPath = "target/person-maintenance-ui-contract.tsv"
 )
@@ -32,8 +33,12 @@ if (-not (Test-Path $AppJsPath)) {
 if (-not (Test-Path $StylesPath)) {
     throw "Missing styles.css: $StylesPath"
 }
+if (-not (Test-Path $IndexPath)) {
+    throw "Missing index.html: $IndexPath"
+}
 
 $appJs = Get-Content -Path $AppJsPath -Raw
+$indexHtml = Get-Content -Path $IndexPath -Raw
 $styles = Get-Content -Path $StylesPath -Raw
 $rows = New-Object System.Collections.Generic.List[object]
 
@@ -49,6 +54,9 @@ Add-Check -Rows $rows -Name "base-status-cache-card" -Passed ($appJs -match 'bas
 Add-Check -Rows $rows -Name "base-change-tags" -Passed ($appJs -match 'base-change-tags' -and $styles -match '\.base-change-tags') -Message "Base change ledger should show type/source tags."
 Add-Check -Rows $rows -Name "base-info-readonly-style" -Passed ($styles -match '\.person-base-info-form input\[readonly\]' -and $styles -match '\.person-base-info-form \.code-option-code-input\[readonly\]') -Message "Read-only fields and code fields should remain visually distinct."
 Add-Check -Rows $rows -Name "base-info-save-action-style" -Passed ($styles -match '\.person-base-info-form #saveBaseInfoButton') -Message "Base info save action should be visually anchored in the edit form."
+Add-Check -Rows $rows -Name "base-info-editor-default-hidden" -Passed ($indexHtml -match 'id="personBaseInfoForm"\s+class="person-base-info-form hidden"') -Message "Base info editor should be hidden by default for clearer read-only viewing."
+Add-Check -Rows $rows -Name "base-info-toggle-action" -Passed ($indexHtml -match 'id="toggleBaseInfoEditButton"' -and $appJs -match 'toggleBaseInfoEditor' -and $appJs -match 'setBaseInfoEditorVisible') -Message "Base info editor should open only from the explicit edit action."
+Add-Check -Rows $rows -Name "base-info-toggle-action-style" -Passed ($styles -match '\.section-heading-action' -and $styles -match '\.section-heading-action\[aria-expanded="true"\]') -Message "Base info edit toggle should have a clear desktop command style."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

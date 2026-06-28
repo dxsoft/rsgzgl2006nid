@@ -192,6 +192,7 @@ const state = {
     historyPlanSelected: new Map(),
     historyPlanCurrentItems: [],
     maintenanceReturn: null,
+    baseInfoEditVisible: false,
     codeOptionCache: new Map(),
     activeCodeOptionPicker: null,
     currentUsername: "",
@@ -478,6 +479,7 @@ const els = {
     personMeta: document.querySelector("#personMeta"),
     profileGrid: document.querySelector("#profileGrid"),
     baseStatusSummary: document.querySelector("#baseStatusSummary"),
+    toggleBaseInfoEditButton: document.querySelector("#toggleBaseInfoEditButton"),
     personBaseInfoForm: document.querySelector("#personBaseInfoForm"),
     basePersonCategoryInput: document.querySelector("#basePersonCategoryInput"),
     baseOrganizationTypeInput: document.querySelector("#baseOrganizationTypeInput"),
@@ -15142,6 +15144,20 @@ const PersonDetail = {
         els.basePostStartInput.value = info?.postStartDate || "";
         els.baseInfoSummaryInput.value = "";
     },
+    setBaseInfoEditorVisible(visible, focusFirst = false) {
+        state.baseInfoEditVisible = Boolean(visible);
+        els.personBaseInfoForm.classList.toggle("hidden", !state.baseInfoEditVisible);
+        if (els.toggleBaseInfoEditButton) {
+            els.toggleBaseInfoEditButton.textContent = state.baseInfoEditVisible ? "\u6536\u8d77" : "\u4fee\u6539";
+            els.toggleBaseInfoEditButton.setAttribute("aria-expanded", String(state.baseInfoEditVisible));
+        }
+        if (state.baseInfoEditVisible && focusFirst) {
+            els.basePersonCategoryInput?.focus();
+        }
+    },
+    toggleBaseInfoEditor() {
+        PersonDetail.setBaseInfoEditorVisible(!state.baseInfoEditVisible, true);
+    },
     renderBaseStatus(status) {
         if (!status) {
             els.baseStatusSummary.innerHTML = `<div class="loading compact">${TEXT.loadingBaseStatus}</div>`;
@@ -15682,6 +15698,7 @@ const PersonDetail = {
         els.salaryDetails.innerHTML = `<div class="loading">${TEXT.chooseSalary}</div>`;
         els.salaryTitle.textContent = TEXT.salaryDetail;
         els.salaryTotal.textContent = "-";
+        PersonDetail.setBaseInfoEditorVisible(false);
         PeoplePanel.render({ records: state.people, total: els.peopleTotal.textContent, page: state.page, size: state.size });
 
         els.baseChangeList.innerHTML = `<div class="loading">${TEXT.loadingBaseChanges}</div>`;
@@ -15741,6 +15758,7 @@ const PersonDetail = {
                 body: JSON.stringify(payload)
             });
             PersonDetail.renderBaseInfo(saved);
+            PersonDetail.setBaseInfoEditorVisible(false);
             PersonDetail.renderProfile(await Api.request(`/api/persons/${encodeURIComponent(state.selectedPersonCode)}`));
             await Promise.all([PersonDetail.loadBaseChanges(), PersonDetail.loadBaseStatus()]);
             if (Permissions.has("SALARY_TODO") && state.workbench?.metrics) {
@@ -16895,6 +16913,7 @@ function bindEvents() {
         event.preventDefault();
         await PeoplePanel.search();
     });
+    els.toggleBaseInfoEditButton?.addEventListener("click", () => PersonDetail.toggleBaseInfoEditor());
     els.personBaseInfoForm.addEventListener("submit", (event) => PersonDetail.saveBaseInfo(event));
     els.baseStatusSummary.addEventListener("click", async (event) => {
         const button = event.target.closest("[data-refresh-base-status-cache]");

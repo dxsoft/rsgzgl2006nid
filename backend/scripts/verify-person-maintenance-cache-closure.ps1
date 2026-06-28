@@ -226,6 +226,21 @@ if ($todoItems.Count -gt 0) {
     if ([string]::IsNullOrWhiteSpace([string]$preview.Data.trialStatus)) {
         throw "Preview did not return trial status."
     }
+    if ([string]::IsNullOrWhiteSpace([string]$preview.Data.trialSummary)) {
+        throw "Preview did not return trial summary."
+    }
+    $previewChanges = @($preview.Data.trialChanges)
+    $hasPreviewAmounts = $null -ne $preview.Data.trialBaselineTotal `
+        -or $null -ne $preview.Data.trialCalculatedTotal `
+        -or $null -ne $preview.Data.trialExpectedTotal `
+        -or $null -ne $preview.Data.trialDifference
+    $Rows.Add([pscustomobject]@{
+        Name = "workbench-todo-preview-detail"
+        Status = "PASS"
+        Milliseconds = 0
+        Detail = "summary=$($preview.Data.trialSummary) amounts=$hasPreviewAmounts changes=$($previewChanges.Count)"
+        Message = ""
+    })
 }
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8

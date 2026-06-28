@@ -163,7 +163,9 @@ refresh count, metric count, and TODO page total must match. Visible TODO items
 must also include handling metadata such as work item id, person code, business
 type, and next action. The first visible TODO item is also sent to
 `/api/workbench/salary-cases/preview` to verify that the handling entry can open
-the salary-case precheck without creating a case.
+the salary-case precheck without creating a case. The precheck must return a
+trial status and trial summary; amount fields and trial changes are recorded
+when available because error prechecks may only return an explanatory summary.
 
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:

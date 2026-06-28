@@ -6,6 +6,7 @@ temp/
 ~$*
 
 # Spring Boot backend build/runtime artifacts
+target/
 backend/target/
 backend/BOOT-INF/
 backend/*.log

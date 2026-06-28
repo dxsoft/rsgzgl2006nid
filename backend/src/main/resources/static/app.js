@@ -14657,7 +14657,6 @@ const SystemPanel = {
 const CodeOptionPicker = {
     bindings: [
         { trigger: "basePersonCategoryInput", field: "ryfl", title: "\u9009\u62e9\u4eba\u5458\u7c7b\u522b", mode: "name" },
-        { trigger: "baseOrganizationTypeInput", field: "dwsx", title: "\u9009\u62e9\u5355\u4f4d\u6027\u8d28", mode: "code" },
         { trigger: "basePostCategoryInput", field: "gwfl", title: "\u9009\u62e9\u5c97\u4f4d\u7c7b\u522b", mode: "name" },
         { trigger: "baseEducationInput", code: "baseEducationCodeInput", field: "xlbm", title: "\u9009\u62e9\u6700\u9ad8\u5b66\u5386", mode: "pair" },
         { trigger: "baseEducationCodeInput", code: "baseEducationCodeInput", name: "baseEducationInput", field: "xlbm", title: "\u9009\u62e9\u6700\u9ad8\u5b66\u5386", mode: "pair" },
@@ -14668,8 +14667,7 @@ const CodeOptionPicker = {
         { trigger: "personPostRankInput", field: "zjbm", title: "\u9009\u62e9\u804c\u7ea7\u7f16\u7801", mode: "code" },
         { trigger: "personPostCurrentCodeInput", field: "xrzwbm", title: "\u9009\u62e9\u73b0\u4efb\u7f16\u7801", mode: "code" },
         { trigger: "educationNameInput", code: "educationCodeInput", field: "xlbm", title: "\u9009\u62e9\u5b66\u5386", mode: "pair" },
-        { trigger: "educationCodeInput", code: "educationCodeInput", name: "educationNameInput", field: "xlbm", title: "\u9009\u62e9\u5b66\u5386", mode: "pair" },
-        { trigger: "educationTypeInput", field: "xllb", title: "\u9009\u62e9\u5b66\u5386\u7c7b\u522b", mode: "name" }
+        { trigger: "educationCodeInput", code: "educationCodeInput", name: "educationNameInput", field: "xlbm", title: "\u9009\u62e9\u5b66\u5386", mode: "pair" }
     ],
     init() {
         if (!els.codeOptionDialog || !els.codeOptionTree || !els.codeOptionSearchInput) {

@@ -7,14 +7,25 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PersonCodeOptionService {
 
     private static final int MAX_FIELD_NAME_LENGTH = 16;
+    private static final Map<String, List<String>> FIELD_ALIASES = Map.of(
+            "xlbm", List.of("ZGXL"),
+            "educationCode", List.of("ZGXL"),
+            "zwbm", List.of("XRZW"),
+            "xrzwbm", List.of("XRZW"),
+            "postCode", List.of("XRZW"),
+            "zjbm", List.of("ZWJB"),
+            "rankCode", List.of("ZWJB")
+    );
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -27,15 +38,30 @@ public class PersonCodeOptionService {
         if (!StringUtils.hasText(safeFieldName)) {
             return List.of();
         }
-        String category = optionCategory(safeFieldName);
-        if (!StringUtils.hasText(category)) {
-            return List.of();
+        for (String candidate : fieldCandidates(safeFieldName)) {
+            String category = optionCategory(candidate);
+            if (!StringUtils.hasText(category)) {
+                continue;
+            }
+            List<OptionRow> rows = optionRows(category);
+            if (!rows.isEmpty()) {
+                return buildTree(category, rows);
+            }
         }
-        List<OptionRow> rows = optionRows(category);
-        if (rows.isEmpty()) {
-            return List.of();
+        return List.of();
+    }
+
+    private List<String> fieldCandidates(String fieldName) {
+        Set<String> candidates = new LinkedHashSet<>();
+        candidates.add(fieldName);
+        List<String> aliases = FIELD_ALIASES.get(fieldName);
+        if (aliases == null) {
+            aliases = FIELD_ALIASES.get(fieldName.toLowerCase());
         }
-        return buildTree(category, rows);
+        if (aliases != null) {
+            candidates.addAll(aliases);
+        }
+        return List.copyOf(candidates);
     }
 
     private String optionCategory(String fieldName) {

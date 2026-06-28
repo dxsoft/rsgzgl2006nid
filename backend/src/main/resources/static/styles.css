@@ -5463,13 +5463,39 @@ button:disabled {
 }
 
 .code-option-input[readonly] {
+    position: relative;
     cursor: pointer;
-    background: color-mix(in srgb, var(--panel) 92%, var(--chrome));
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--border-soft));
+    background: color-mix(in srgb, var(--accent) 5%, #ffffff);
 }
 
 .code-option-input[readonly]:hover {
     border-color: var(--accent);
     background: #ffffff;
+}
+
+.code-option-input[readonly]:focus {
+    background: #ffffff;
+}
+
+.code-option-name-input[readonly] {
+    padding-right: 28px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+        linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position:
+        calc(100% - 15px) 50%,
+        calc(100% - 10px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.code-option-code-input[readonly] {
+    color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent) 9%, #ffffff);
+    font-family: Consolas, "Courier New", monospace;
+    font-weight: 700;
+    letter-spacing: 0;
 }
 
 .base-change-form input:focus,
@@ -6110,6 +6136,27 @@ button:disabled {
 .code-option-group {
     color: var(--accent-strong);
     font-weight: 700;
+}
+
+.code-option-empty {
+    min-height: 180px;
+    display: grid;
+    place-content: center;
+    gap: 5px;
+    padding: 18px;
+    border: 1px dashed var(--border-soft);
+    border-radius: 6px;
+    background: #fbfcfd;
+    text-align: center;
+}
+
+.code-option-empty strong {
+    color: var(--text);
+}
+
+.code-option-empty span {
+    color: var(--muted);
+    font-size: 12px;
 }
 
 @media (max-width: 1080px) {

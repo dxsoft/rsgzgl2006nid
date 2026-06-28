@@ -14680,6 +14680,11 @@ const CodeOptionPicker = {
             }
             input.readOnly = true;
             input.classList.add("code-option-input");
+            if (binding.mode === "code" || binding.trigger.toLowerCase().includes("code")) {
+                input.classList.add("code-option-code-input");
+            } else {
+                input.classList.add("code-option-name-input");
+            }
             input.title = "\u70b9\u51fb\u4ece\u4ee3\u7801\u6811\u9009\u62e9";
             input.addEventListener("click", () => CodeOptionPicker.open(binding));
             input.addEventListener("keydown", (event) => {
@@ -14745,7 +14750,10 @@ const CodeOptionPicker = {
         const items = state.codeOptionCache.get(binding.field) || [];
         const keyword = (els.codeOptionSearchInput?.value || "").trim().toLowerCase();
         const html = CodeOptionPicker.nodesHtml(items, keyword, 0);
-        els.codeOptionTree.innerHTML = html || `<div class="loading">\u6682\u65e0\u53ef\u9009\u9879</div>`;
+        els.codeOptionTree.innerHTML = html || `<div class="code-option-empty">
+            <strong>\u6682\u65e0\u53ef\u9009\u9879</strong>
+            <span>${keyword ? "\u8bf7\u66f4\u6362\u5173\u952e\u5b57\u91cd\u8bd5" : "\u8be5\u5b57\u6bb5\u672a\u914d\u7f6e fldjbxx/dmb \u53ef\u9009\u6811"}</span>
+        </div>`;
     },
     nodesHtml(nodes, keyword, depth) {
         return (nodes || []).map((node) => {

@@ -434,12 +434,13 @@ button:disabled {
 
 .workbench-view {
     display: grid;
-    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto auto minmax(0, auto) minmax(320px, 1fr);
     gap: 9px;
     padding: 10px;
     min-height: 0;
     height: 100%;
     background: #f3f5f7;
+    overflow: hidden;
 }
 
 .workbench-view.hidden {
@@ -884,6 +885,11 @@ button:disabled {
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
+}
+
+.workbench-filter-summary:empty,
+#migrationToolResult:empty {
+    display: none;
 }
 
 .workbench-filter-summary > span:first-child {
@@ -2776,6 +2782,10 @@ button:disabled {
     grid-template-columns: repeat(6, minmax(128px, 1fr));
     gap: 7px;
     min-height: 0;
+    max-height: min(28vh, 260px);
+    overflow: auto;
+    align-content: start;
+    padding-right: 2px;
 }
 
 .closure-queue-strip {
@@ -2962,6 +2972,7 @@ button:disabled {
     grid-template-rows: minmax(220px, 1fr) minmax(180px, auto);
     gap: 9px;
     min-height: 0;
+    overflow: hidden;
 }
 
 .workbench-panel {

@@ -5511,7 +5511,9 @@ button:disabled {
 }
 
 .field-invalid,
-.field-invalid:focus {
+.field-invalid:focus,
+[aria-invalid="true"],
+[aria-invalid="true"]:focus {
     border-color: var(--danger) !important;
     outline: 2px solid color-mix(in srgb, var(--danger) 28%, transparent) !important;
     outline-offset: 1px;

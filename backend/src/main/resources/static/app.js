@@ -1199,15 +1199,22 @@ function focusRequiredField(input) {
     if (!input) {
         return;
     }
+    const clear = () => clearRequiredField(input);
+    clearRequiredField(input);
     input.classList.add("field-invalid");
+    input.setAttribute("aria-invalid", "true");
+    input.addEventListener("input", clear, { once: true });
+    input.addEventListener("change", clear, { once: true });
+    input.scrollIntoView({ block: "center", inline: "nearest" });
     input.focus();
-    const clear = () => {
-        input.classList.remove("field-invalid");
-        input.removeEventListener("input", clear);
-        input.removeEventListener("change", clear);
-    };
-    input.addEventListener("input", clear);
-    input.addEventListener("change", clear);
+}
+
+function clearRequiredField(input) {
+    if (!input) {
+        return;
+    }
+    input.classList.remove("field-invalid");
+    input.removeAttribute("aria-invalid");
 }
 
 const WorkbenchPanel = {

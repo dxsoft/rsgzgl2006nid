@@ -39,6 +39,7 @@
 - `scripts/verify-core-migration.ps1`
 - `scripts/verify-generated-timeline-level-contract.ps1`
 - `scripts/verify-generated-timeline-samples.ps1`
+- `scripts/verify-history-write-batch-safety-contract.ps1`
 - `scripts/verify-history-write-rehearsal.ps1`
 - `scripts/verify-launch-readiness.ps1`
 - `scripts/verify-online-business-closure.ps1`

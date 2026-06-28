@@ -79,6 +79,7 @@ The script runs and summarizes:
 - `scripts\verify-report-csv-exports.ps1 -FailOnUnexpected`
 - `scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected`
 - `scripts\verify-case-detail-ui-contract.ps1 -FailOnUnexpected`
+- `scripts\verify-history-write-batch-safety-contract.ps1 -FailOnUnexpected`
 - `scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected`
 
 The core script records `PASS`, `FAIL`, and `SKIP` for every step, then fails
@@ -143,6 +144,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-pages.ps1 -
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-csv-exports.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-case-detail-ui-contract.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\verify-history-write-batch-safety-contract.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected
 ```
 
@@ -150,6 +152,12 @@ The case detail UI contract check is static and read-only. It verifies that the
 handling detail page still exposes the trial, snapshot, report print, history
 write plan, comparison, retest, audit, rollback, and closure next-action entry
 points expected by the migrated salary workflow.
+
+The history-write batch safety contract check does not consume a valid token and
+does not execute history writes. It verifies that batch and selected previews
+issue safety tokens, that missing-token execution is rejected, and that the
+front-end confirmation gate plus back-end token validation/audit anchors are
+present.
 
 The report/history queue closure check is read-only for normal runs. When a
 history write plan exists, it also samples one salary case to verify the single

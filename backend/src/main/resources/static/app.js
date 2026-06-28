@@ -1195,6 +1195,21 @@ function baseStatusTime(status) {
     return status?.todoCacheDirtyAt || status?.todoCacheRefreshedAt || "-";
 }
 
+function focusRequiredField(input) {
+    if (!input) {
+        return;
+    }
+    input.classList.add("field-invalid");
+    input.focus();
+    const clear = () => {
+        input.classList.remove("field-invalid");
+        input.removeEventListener("input", clear);
+        input.removeEventListener("change", clear);
+    };
+    input.addEventListener("input", clear);
+    input.addEventListener("change", clear);
+}
+
 const WorkbenchPanel = {
     riskMetricCodes: ["SALARY_REVIEW_PENDING", "SALARY_TRIAL_DIFFERENT", "SALARY_TRIAL_ERROR"],
     closureMetricCodes: ["SALARY_CLOSURE_PENDING", "SALARY_CLOSURE_BLOCKED", "SALARY_CLOSURE_CLOSED"],
@@ -15741,7 +15756,7 @@ const PersonDetail = {
         const summary = els.baseChangeSummaryInput.value.trim();
         if (!summary) {
             setStatus(TEXT.baseChangeSummaryRequired);
-            els.baseChangeSummaryInput.focus();
+            focusRequiredField(els.baseChangeSummaryInput);
             return;
         }
         const dataType = els.baseChangeTypeInput.value;
@@ -15790,6 +15805,7 @@ const PersonDetail = {
         const startDate = els.personPostStartInput.value.trim();
         if (!postCode || !startDate) {
             setStatus(TEXT.personPostRequired);
+            focusRequiredField(postCode ? els.personPostStartInput : els.personPostCodeInput);
             return;
         }
         const payload = {
@@ -15838,6 +15854,7 @@ const PersonDetail = {
         const graduationDate = els.educationGraduationInput.value.trim();
         if (!educationCode || !graduationDate) {
             setStatus(TEXT.educationRequired);
+            focusRequiredField(educationCode ? els.educationGraduationInput : els.educationCodeInput);
             return;
         }
         const payload = {
@@ -15885,6 +15902,7 @@ const PersonDetail = {
         const result = els.assessmentResultInput.value.trim();
         if (!year || !result) {
             setStatus(TEXT.assessmentRequired);
+            focusRequiredField(year ? els.assessmentResultInput : els.assessmentYearInput);
             return;
         }
         const payload = {

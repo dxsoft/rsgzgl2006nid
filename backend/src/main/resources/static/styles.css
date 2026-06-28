@@ -5510,6 +5510,14 @@ button:disabled {
     border-color: var(--accent);
 }
 
+.field-invalid,
+.field-invalid:focus {
+    border-color: var(--danger) !important;
+    outline: 2px solid color-mix(in srgb, var(--danger) 28%, transparent) !important;
+    outline-offset: 1px;
+    background: color-mix(in srgb, var(--danger) 4%, #ffffff) !important;
+}
+
 .base-change-row {
     position: relative;
     display: grid;

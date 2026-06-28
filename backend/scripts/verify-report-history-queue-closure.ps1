@@ -75,6 +75,20 @@ function Find-PrintableCaseNo() {
     return ""
 }
 
+function Find-HistoryWritePlanCaseNo() {
+    try {
+        $plansResponse = Invoke-Api "/api/workbench/history-write-plans?limit=1"
+        foreach ($plan in @($plansResponse.data)) {
+            $caseNo = "" + $plan.caseNo
+            if ($caseNo.StartsWith("GZ-")) {
+                return $caseNo
+            }
+        }
+    } catch {
+    }
+    return ""
+}
+
 function Invoke-SelectedValidate([string[]]$CaseNos) {
     $body = [System.Text.StringBuilder]::new()
     foreach ($caseNo in $CaseNos) {
@@ -164,6 +178,50 @@ if ([string]::IsNullOrWhiteSpace($printableCaseNo)) {
         }
     } catch {
         Add-Result $results "selected-approval-sample-validate" "REQUEST_ERROR" $_.Exception.Message
+    }
+}
+
+$historyPlanCaseNo = Find-HistoryWritePlanCaseNo
+if ([string]::IsNullOrWhiteSpace($historyPlanCaseNo)) {
+    Add-Result $results "single-history-plan-detail" "SKIP" "No history write plan found."
+    Add-Result $results "single-history-comparison-detail" "SKIP" "No history write plan found."
+    Add-Result $results "single-history-audit-detail" "SKIP" "No history write plan found."
+} else {
+    $encodedHistoryCaseNo = [uri]::EscapeDataString($historyPlanCaseNo)
+    try {
+        $planDetail = Invoke-Api "/api/workbench/salary-cases/$encodedHistoryCaseNo/history-write-plan"
+        if ($planDetail.data.caseNo -eq $historyPlanCaseNo `
+                -and -not [string]::IsNullOrWhiteSpace("" + $planDetail.data.planNo) `
+                -and -not [string]::IsNullOrWhiteSpace("" + $planDetail.data.planStatus) `
+                -and -not [string]::IsNullOrWhiteSpace("" + $planDetail.data.nextActionCode)) {
+            Add-Result $results "single-history-plan-detail" "OK" ("case=" + $historyPlanCaseNo + "; status=" + $planDetail.data.planStatus + "; next=" + $planDetail.data.nextActionCode)
+        } else {
+            Add-Result $results "single-history-plan-detail" "FAIL" ("Incomplete plan detail for " + $historyPlanCaseNo)
+        }
+    } catch {
+        Add-Result $results "single-history-plan-detail" "REQUEST_ERROR" $_.Exception.Message
+    }
+
+    try {
+        $comparison = Invoke-Api "/api/workbench/salary-cases/$encodedHistoryCaseNo/history-write-comparison"
+        $comparisonFields = @($comparison.data.fields)
+        if ($comparison.data.caseNo -eq $historyPlanCaseNo `
+                -and -not [string]::IsNullOrWhiteSpace("" + $comparison.data.planNo) `
+                -and $comparisonFields.Count -gt 0) {
+            Add-Result $results "single-history-comparison-detail" "OK" ("case=" + $historyPlanCaseNo + "; fields=" + $comparisonFields.Count + "; status=" + $comparison.data.comparisonStatus)
+        } else {
+            Add-Result $results "single-history-comparison-detail" "FAIL" ("Incomplete comparison detail for " + $historyPlanCaseNo)
+        }
+    } catch {
+        Add-Result $results "single-history-comparison-detail" "REQUEST_ERROR" $_.Exception.Message
+    }
+
+    try {
+        $audits = Invoke-Api "/api/workbench/salary-cases/$encodedHistoryCaseNo/history-write-audits"
+        $auditRows = @($audits.data)
+        Add-Result $results "single-history-audit-detail" "OK" ("case=" + $historyPlanCaseNo + "; audits=" + $auditRows.Count)
+    } catch {
+        Add-Result $results "single-history-audit-detail" "REQUEST_ERROR" $_.Exception.Message
     }
 }
 

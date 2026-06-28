@@ -144,6 +144,11 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-case-report-ui-contract.
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected
 ```
 
+The report/history queue closure check is read-only for normal runs. When a
+history write plan exists, it also samples one salary case to verify the single
+case history-write plan, comparison detail, and audit-detail endpoints used by
+the handling detail page.
+
 Run the person maintenance UI and code-option regression suite:
 
 ```powershell

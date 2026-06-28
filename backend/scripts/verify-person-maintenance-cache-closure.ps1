@@ -175,6 +175,26 @@ if ($todoTotal -ne $refreshCount) {
 if ($todoTotal -gt 0 -and $todoItems.Count -lt 1) {
     throw "Workbench TODO page reported total $todoTotal but returned no visible items."
 }
+if ($todoItems.Count -gt 0) {
+    $missingAction = @($todoItems | Where-Object {
+        [string]::IsNullOrWhiteSpace([string]$_.id) `
+            -or [string]::IsNullOrWhiteSpace([string]$_.personCode) `
+            -or [string]::IsNullOrWhiteSpace([string]$_.businessType) `
+            -or [string]::IsNullOrWhiteSpace([string]$_.nextActionCode) `
+            -or [string]::IsNullOrWhiteSpace([string]$_.nextActionLabel)
+    })
+    if ($missingAction.Count -gt 0) {
+        throw "Workbench TODO page returned item(s) without handling action metadata."
+    }
+    $firstTodo = $todoItems[0]
+    $Rows.Add([pscustomobject]@{
+        Name = "workbench-todo-action-metadata"
+        Status = "PASS"
+        Milliseconds = 0
+        Detail = "first=$($firstTodo.id) action=$($firstTodo.nextActionCode)"
+        Message = ""
+    })
+}
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

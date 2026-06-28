@@ -158,7 +158,8 @@ powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenan
 
 This option registers a `VERIFY-*` base-change row, checks that the salary todo
 cache becomes `DIRTY`, refreshes the cache, and then verifies both the
-`salary-todo` metric and TODO workbench page can be read after refresh.
+`salary-todo` metric and TODO workbench page can be read after refresh. The
+refresh count, metric count, and TODO page total must match.
 
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:

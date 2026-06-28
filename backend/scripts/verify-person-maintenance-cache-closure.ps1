@@ -134,6 +134,10 @@ if ([string]$dirty.Data.latestChangeSummary -ne $summary) {
 $refresh = Invoke-Api -Name "refresh-todo-cache" -Path "/api/workbench/salary-todo-cache/refresh" -Method "POST"
 Add-Result -Rows $rows -Step $refresh -Detail "metric=$($refresh.Data.count)"
 Assert-Passed $refresh
+$refreshCount = if ($null -ne $refresh.Data.count) { [long]$refresh.Data.count } else { -1 }
+if ($refreshCount -lt 0) {
+    throw "Refresh response did not return a non-negative count."
+}
 
 $after = Invoke-Api -Name "base-status-after-refresh" -Path "/api/persons/$([uri]::EscapeDataString($PersonCode))/base-status"
 Add-Result -Rows $rows -Step $after -Detail "status=$($after.Data.todoCacheStatus) refreshed=$($after.Data.todoCacheRefreshedAt)"
@@ -148,17 +152,28 @@ Assert-Passed $metric
 if ($null -eq $metric.Data.count) {
     throw "Salary todo metric did not return a count."
 }
+$metricCount = [long]$metric.Data.count
+if ($metricCount -ne $refreshCount) {
+    throw "Salary todo metric count $metricCount does not match refresh count $refreshCount."
+}
 
 $todoPagePath = "/api/workbench/items?status=TODO&offset=0&limit=12&keyword=&changeType=&source=&caseStatus=&trialStatus=&reviewStatus=&workflowStatus=&closureStatus=&nextAction="
 $todoPage = Invoke-Api -Name "workbench-todo-after-refresh" -Path $todoPagePath
+Assert-Passed $todoPage
+if ($null -eq $todoPage.Data) {
+    throw "Workbench todo page returned no data."
+}
 $todoItems = @($todoPage.Data.items)
 if ($todoItems.Count -lt 1) {
     $todoItems = @($todoPage.Data.records)
 }
-Add-Result -Rows $rows -Step $todoPage -Detail "items=$($todoItems.Count)"
-Assert-Passed $todoPage
-if ($null -eq $todoPage.Data) {
-    throw "Workbench todo page returned no data."
+$todoTotal = if ($null -ne $todoPage.Data.total) { [long]$todoPage.Data.total } else { [long]$todoItems.Count }
+Add-Result -Rows $rows -Step $todoPage -Detail "total=$todoTotal items=$($todoItems.Count)"
+if ($todoTotal -ne $refreshCount) {
+    throw "Workbench TODO total $todoTotal does not match refresh count $refreshCount."
+}
+if ($todoTotal -gt 0 -and $todoItems.Count -lt 1) {
+    throw "Workbench TODO page reported total $todoTotal but returned no visible items."
 }
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8

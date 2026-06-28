@@ -156,6 +156,10 @@ Include the stateful base-change to salary-todo-cache refresh closure check:
 powershell -ExecutionPolicy Bypass -File backend\scripts\verify-person-maintenance-suite.ps1 -IncludeCacheClosure
 ```
 
+This option registers a `VERIFY-*` base-change row, checks that the salary todo
+cache becomes `DIRTY`, refreshes the cache, and then verifies both the
+`salary-todo` metric and TODO workbench page can be read after refresh.
+
 `verify-auto-regression-samples.ps1` is the sample package gate. It can
 optionally rebuild the dynamic sample sets first:
 

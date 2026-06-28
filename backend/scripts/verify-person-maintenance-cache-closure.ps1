@@ -109,7 +109,7 @@ Add-Result -Rows $rows -Step $before -Detail "status=$($before.Data.todoCacheSta
 Assert-Passed $before
 
 $runId = "VERIFY-" + (Get-Date -Format "yyyyMMddHHmmss")
-$summary = "人员维护待办刷新闭环验收 $runId"
+$summary = "person maintenance todo cache closure $runId"
 $change = Invoke-Api -Name "create-base-change" -Path "/api/persons/$([uri]::EscapeDataString($PersonCode))/base-changes" -Method "POST" -Body @{
     dataType = "dryjbxx"
     sourceTable = "person_base_change_log"
@@ -140,6 +140,25 @@ Add-Result -Rows $rows -Step $after -Detail "status=$($after.Data.todoCacheStatu
 Assert-Passed $after
 if ("DIRTY" -eq [string]$after.Data.todoCacheStatus) {
     throw "Expected todo cache status to be refreshed, still DIRTY."
+}
+
+$metric = Invoke-Api -Name "salary-todo-metric-after-refresh" -Path "/api/workbench/metrics/salary-todo"
+Add-Result -Rows $rows -Step $metric -Detail "count=$($metric.Data.count)"
+Assert-Passed $metric
+if ($null -eq $metric.Data.count) {
+    throw "Salary todo metric did not return a count."
+}
+
+$todoPagePath = "/api/workbench/items?status=TODO&offset=0&limit=12&keyword=&changeType=&source=&caseStatus=&trialStatus=&reviewStatus=&workflowStatus=&closureStatus=&nextAction="
+$todoPage = Invoke-Api -Name "workbench-todo-after-refresh" -Path $todoPagePath
+$todoItems = @($todoPage.Data.items)
+if ($todoItems.Count -lt 1) {
+    $todoItems = @($todoPage.Data.records)
+}
+Add-Result -Rows $rows -Step $todoPage -Detail "items=$($todoItems.Count)"
+Assert-Passed $todoPage
+if ($null -eq $todoPage.Data) {
+    throw "Workbench todo page returned no data."
 }
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8

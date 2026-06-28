@@ -75,6 +75,7 @@ The script runs and summarizes:
 - `scripts\verify-generated-timeline-level-contract.ps1 -FailOnUnexpected`
 - `scripts\verify-report-print-archive-samples.ps1 -FailOnUnexpected`
 - `scripts\verify-report-print-archive-ledger.ps1 -FailOnUnexpected`
+- `scripts\verify-report-entry-matrix.ps1 -FailOnUnexpected`
 - `scripts\verify-report-print-pages.ps1 -FailOnUnexpected`
 - `scripts\verify-report-csv-exports.ps1 -FailOnUnexpected`
 - `scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected`
@@ -140,6 +141,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-generated-timeline-sampl
 powershell -ExecutionPolicy Bypass -File scripts\verify-generated-timeline-level-contract.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-archive-samples.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-archive-ledger.ps1 -FailOnUnexpected
+powershell -ExecutionPolicy Bypass -File scripts\verify-report-entry-matrix.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-print-pages.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-csv-exports.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-case-report-ui-contract.ps1 -FailOnUnexpected
@@ -147,6 +149,11 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-case-detail-ui-contract.
 powershell -ExecutionPolicy Bypass -File scripts\verify-history-write-batch-safety-contract.ps1 -FailOnUnexpected
 powershell -ExecutionPolicy Bypass -File scripts\verify-report-history-queue-closure.ps1 -FailOnUnexpected
 ```
+
+The report entry matrix check verifies that the migrated report catalog rows,
+case-detail report buttons, batch print buttons, archive endpoints, print
+endpoints, and CSV endpoints are all present before the heavier page and export
+checks run.
 
 The case detail UI contract check is static and read-only. It verifies that the
 handling detail page still exposes the trial, snapshot, report print, history

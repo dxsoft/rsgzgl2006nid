@@ -48,6 +48,7 @@
 - `backend/scripts/verify-person-code-options.ps1`
 - `backend/scripts/verify-person-maintenance-cache-closure.ps1`
 - `scripts/verify-report-csv-exports.ps1`
+- `scripts/verify-report-entry-matrix.ps1`
 - `scripts/verify-report-history-queue-closure.ps1`
 - `scripts/verify-report-print-archive-ledger.ps1`
 - `scripts/verify-report-print-archive-samples.ps1`

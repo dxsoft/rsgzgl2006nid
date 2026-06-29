@@ -893,11 +893,60 @@ button:disabled {
 }
 
 .workbench-action-group.migration-actions {
+    position: relative;
+    min-width: 118px;
     background: #fbfcfd;
 }
 
-.workbench-action-group.migration-actions > span {
+.workbench-action-group.migration-actions summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 9px;
+    border: 1px solid color-mix(in srgb, var(--warn) 24%, var(--border-soft));
+    border-radius: 4px;
     color: var(--warn);
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    list-style: none;
+}
+
+.workbench-action-group.migration-actions summary::-webkit-details-marker {
+    display: none;
+}
+
+.workbench-action-group.migration-actions summary::after {
+    content: "";
+    width: 0;
+    height: 0;
+    margin-left: 7px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+}
+
+.workbench-action-group.migration-actions[open] summary::after {
+    border-top: 0;
+    border-bottom: 5px solid currentColor;
+}
+
+.workbench-action-group.migration-actions summary:hover {
+    border-color: var(--warn);
+    background: #fffaf0;
+    color: var(--warn);
+}
+
+.migration-action-panel {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.workbench-action-group.migration-actions:not([open]) .migration-action-panel {
+    display: none;
 }
 
 .filter-strip input,

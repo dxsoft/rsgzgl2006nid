@@ -43,8 +43,8 @@ Add-Check -Rows $rows -Name "workbench-empty-summary-hidden" -Passed ($styles -m
 Add-Check -Rows $rows -Name "workbench-metrics-scroll-boundary" -Passed ($styles -match '\.workbench-metrics\s*\{[\s\S]*?max-height:\s*min\(28vh,\s*260px\);[\s\S]*?overflow:\s*auto;') -Message "Metric cards should scroll inside their own band when content grows."
 Add-Check -Rows $rows -Name "workbench-main-grid-overflow-guard" -Passed ($styles -match '\.workbench-grid\s*\{[\s\S]*?overflow:\s*hidden;') -Message "Todo/done/history panels should keep their inner scrolling bounded."
 Add-Check -Rows $rows -Name "workbench-business-action-group" -Passed ($indexHtml -match 'class="workbench-action-group business-actions"' -and $indexHtml -match '&#24037;&#36164;&#19994;&#21153;') -Message "Daily salary actions should be grouped as the main business area."
-Add-Check -Rows $rows -Name "workbench-migration-action-group" -Passed ($indexHtml -match 'class="workbench-action-group migration-actions"' -and $indexHtml -match '&#36801;&#31227;&#26680;&#39564;') -Message "Migration verification actions should be separated from the daily salary business area."
-Add-Check -Rows $rows -Name "workbench-action-group-style" -Passed ($styles -match '\.workbench-action-group' -and $styles -match '\.workbench-action-group\.migration-actions') -Message "Workbench action groups should have distinct desktop styling."
+Add-Check -Rows $rows -Name "workbench-migration-action-group" -Passed ($indexHtml -match '<details class="workbench-action-group migration-actions">' -and $indexHtml -match '<summary>&#36801;&#31227;&#26680;&#39564;</summary>') -Message "Migration verification actions should be separated behind a collapsible admin-style entry."
+Add-Check -Rows $rows -Name "workbench-action-group-style" -Passed ($styles -match '\.workbench-action-group' -and $styles -match '\.workbench-action-group\.migration-actions' -and $styles -match '\.migration-action-panel') -Message "Workbench action groups should have distinct desktop styling."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

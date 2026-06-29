@@ -3227,6 +3227,13 @@ const WorkbenchPanel = {
         }
         const year = String(Number(els.batchYearInput.value || new Date().getFullYear()));
         const limit = String(Number(els.batchLimitInput.value || 100));
+        if (els.migrationToolResult) {
+            els.migrationToolResult.innerHTML = `
+                <strong>\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165</strong>
+                <div class="loading compact">\u6b63\u5728\u52a0\u8f7d ${Format.html(state.selectedOrgCode)} ${Format.html(year)} \u5e74\u5ea6\u8003\u6838\u4eba\u5458\u540d\u5355...</div>
+            `;
+            els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
         setStatus("\u6b63\u5728\u52a0\u8f7d\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165...");
         try {
             const rows = await Api.request(`/api/persons/assessments/batch-candidates?${new URLSearchParams({
@@ -3237,6 +3244,13 @@ const WorkbenchPanel = {
             WorkbenchPanel.renderAssessmentBatch(rows || [], year);
             setStatus(`\u5df2\u52a0\u8f7d ${rows?.length || 0} \u4eba\u5e74\u5ea6\u8003\u6838\u5019\u9009`);
         } catch (error) {
+            if (els.migrationToolResult) {
+                els.migrationToolResult.innerHTML = `
+                    <strong>\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165</strong>
+                    <div class="loading compact">\u52a0\u8f7d\u5931\u8d25\uff1a${Format.html(error.message || "-")}</div>
+                `;
+                els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
             setStatus(error.message);
         }
     },
@@ -3268,7 +3282,7 @@ const WorkbenchPanel = {
                             </select>
                             <em>${row.id ? "\u5df2\u6709\u8bb0\u5f55" : "\u5c06\u65b0\u589e"}</em>
                         </label>
-                    `).join("") : `<div class="loading compact">\u672a\u627e\u5230\u672c\u5355\u4f4d\u4eba\u5458</div>`}
+                    `).join("") : `<div class="loading compact">\u672a\u627e\u5230\u672c\u5355\u4f4d\u4eba\u5458\uff0c\u8bf7\u68c0\u67e5\u4e1a\u52a1\u671f\u95f4\u4e2d\u7684\u5355\u4f4d\u9009\u62e9\u548c\u4eba\u6570\u4e0a\u9650\u3002</div>`}
                 </div>
             </form>
         `;

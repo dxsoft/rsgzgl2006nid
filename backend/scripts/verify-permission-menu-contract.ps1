@@ -79,6 +79,7 @@ $requiredMenuCodes = @(
     "SALARY_REPORT",
     "SALARY_HISTORY_WRITE",
     "SALARY_HISTORY_ROLLBACK",
+    "MIGRATION",
     "SALARY_GOVERNANCE",
     "SALARY_ACCEPTANCE",
     "SALARY_DELIVERY_ARCHIVE",
@@ -107,9 +108,9 @@ try {
 try {
     $userMenus = Invoke-Api "/api/system/menus"
     $json = $userMenus.data | ConvertTo-Json -Depth 8 -Compress
-    $missing = @("WORKBENCH", "SALARY", "SYSTEM") | Where-Object { -not $json.Contains($_) }
+    $missing = @("WORKBENCH", "SALARY", "MIGRATION", "SYSTEM") | Where-Object { -not $json.Contains($_) }
     if ($missing.Count -eq 0) {
-        Add-Result $results "current-user-menu-tree" "OK" "Workbench, salary, and system roots are visible."
+        Add-Result $results "current-user-menu-tree" "OK" "Workbench, salary, migration, and system roots are visible."
     } else {
         Add-Result $results "current-user-menu-tree" "FAIL" ("Missing " + ($missing -join ","))
     }
@@ -161,6 +162,7 @@ $adminServiceText = Get-Content -Raw -Path $adminService
 $workbenchServiceText = Get-Content -Raw -Path $workbenchService
 $systemControllerText = Get-Content -Raw -Path $systemController
 
+$menuGroupCodes = @("MIGRATION")
 foreach ($code in $requiredMenuCodes) {
     $frontEndPatterns = @(
         "Permissions.has(`"$code`")",
@@ -171,11 +173,15 @@ foreach ($code in $requiredMenuCodes) {
     if ($code -eq "SYSTEM_MENU") {
         $frontEndPatterns += "SystemPanel.loadMenus()"
     }
-    $matched = @($frontEndPatterns | Where-Object { $app.Contains($_) })
-    if ($matched.Count -gt 0) {
-        Add-Result $results ("frontend-permission-" + $code) "OK" ("Front-end permission/menu route for " + $code)
+    if ($menuGroupCodes -contains $code) {
+        Add-Result $results ("frontend-permission-" + $code) "OK" ("Menu group " + $code + " does not require a direct front-end route.")
     } else {
-        Add-Result $results ("frontend-permission-" + $code) "FAIL" ("Missing front-end permission/menu route for " + $code)
+        $matched = @($frontEndPatterns | Where-Object { $app.Contains($_) })
+        if ($matched.Count -gt 0) {
+            Add-Result $results ("frontend-permission-" + $code) "OK" ("Front-end permission/menu route for " + $code)
+        } else {
+            Add-Result $results ("frontend-permission-" + $code) "FAIL" ("Missing front-end permission/menu route for " + $code)
+        }
     }
     Test-Contains $results ("default-menu-" + $code) $menuServiceText "`"$code`"" "Default menu includes $code"
 }

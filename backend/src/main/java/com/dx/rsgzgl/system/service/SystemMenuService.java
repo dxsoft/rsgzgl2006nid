@@ -88,10 +88,12 @@ public class SystemMenuService {
                         menu("SALARY_EXPORT", "\u5de5\u8d44\u5bfc\u51fa", "export", "salary", 60),
                         menu("SALARY_REPORT", "\u62a5\u8868\u6253\u5370", "print", "workbench", 70),
                         menu("SALARY_HISTORY_WRITE", "\u5386\u53f2\u5199\u5165", "write", "workbench", 80),
-                        menu("SALARY_HISTORY_ROLLBACK", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90),
-                        menu("SALARY_GOVERNANCE", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 110),
-                        menu("SALARY_ACCEPTANCE", "\u8fc1\u79fb\u9a8c\u6536", "acceptance", "workbench", 120),
-                        menu("SALARY_DELIVERY_ARCHIVE", "\u4ea4\u4ed8\u5f52\u6863", "archive", "workbench", 130)
+                        menu("SALARY_HISTORY_ROLLBACK", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90)
+                )),
+                group("MIGRATION", "\u8fc1\u79fb\u6838\u9a8c", "migration", 25, List.of(
+                        menu("SALARY_GOVERNANCE", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 10),
+                        menu("SALARY_ACCEPTANCE", "\u8fc1\u79fb\u9a8c\u6536", "acceptance", "workbench", 20),
+                        menu("SALARY_DELIVERY_ARCHIVE", "\u4ea4\u4ed8\u5f52\u6863", "archive", "workbench", 30)
                 )),
                 group("APPLICATION", "\u7533\u529e\u4e1a\u52a1", "application", 30, List.of(
                         menu("APPLICATION_TODO", "\u7533\u529e\u5f85\u529e", "todo", "workbench", 10),

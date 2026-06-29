@@ -160,14 +160,15 @@ public class SystemBootstrapService {
                 new MenuSeed("WORKBENCH", null, "\u5de5\u4f5c\u53f0", "desktop", "workbench", 10),
                 new MenuSeed("SALARY", null, "\u5de5\u8d44\u4e1a\u52a1", "salary", "", 20),
                 new MenuSeed("SALARY_PERSON", "SALARY", "\u4eba\u5458\u5de5\u8d44", "people", "salary", 10),
-                new MenuSeed("SALARY_TODO", "SALARY", "\u5f85\u529e\u5de5\u8d44\u53d8\u52a8", "todo", "workbench", 20),
-                new MenuSeed("SALARY_DONE", "SALARY", "\u5df2\u529e\u5de5\u8d44\u53d8\u52a8", "done", "workbench", 30),
-                new MenuSeed("SALARY_TRIAL", "SALARY", "\u5de5\u8d44\u8bd5\u7b97", "trial", "salary", 40),
-                new MenuSeed("SALARY_RECONCILE", "SALARY", "\u5de5\u8d44\u5bf9\u8d26", "reconcile", "salary", 50),
-                new MenuSeed("SALARY_EXPORT", "SALARY", "\u5de5\u8d44\u5bfc\u51fa", "export", "salary", 60),
-                new MenuSeed("SALARY_REPORT", "SALARY", "\u62a5\u8868\u6253\u5370", "print", "workbench", 70),
-                new MenuSeed("SALARY_HISTORY_WRITE", "SALARY", "\u5386\u53f2\u5199\u5165", "write", "workbench", 80),
-                new MenuSeed("SALARY_HISTORY_ROLLBACK", "SALARY", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90),
+                new MenuSeed("SALARY_ASSESSMENT_BATCH", "SALARY", "\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165", "assessment", "workbench", 20),
+                new MenuSeed("SALARY_TODO", "SALARY", "\u5f85\u529e\u5de5\u8d44\u53d8\u52a8", "todo", "workbench", 30),
+                new MenuSeed("SALARY_DONE", "SALARY", "\u5df2\u529e\u5de5\u8d44\u53d8\u52a8", "done", "workbench", 40),
+                new MenuSeed("SALARY_TRIAL", "SALARY", "\u5de5\u8d44\u8bd5\u7b97", "trial", "salary", 50),
+                new MenuSeed("SALARY_RECONCILE", "SALARY", "\u5de5\u8d44\u5bf9\u8d26", "reconcile", "salary", 60),
+                new MenuSeed("SALARY_EXPORT", "SALARY", "\u5de5\u8d44\u5bfc\u51fa", "export", "salary", 70),
+                new MenuSeed("SALARY_REPORT", "SALARY", "\u62a5\u8868\u6253\u5370", "print", "workbench", 80),
+                new MenuSeed("SALARY_HISTORY_WRITE", "SALARY", "\u5386\u53f2\u5199\u5165", "write", "workbench", 90),
+                new MenuSeed("SALARY_HISTORY_ROLLBACK", "SALARY", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 100),
                 new MenuSeed("MIGRATION", null, "\u8fc1\u79fb\u6838\u9a8c", "migration", "", 25),
                 new MenuSeed("SALARY_GOVERNANCE", "MIGRATION", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 10),
                 new MenuSeed("SALARY_ACCEPTANCE", "MIGRATION", "\u8fc1\u79fb\u9a8c\u6536", "acceptance", "workbench", 20),
@@ -235,19 +236,19 @@ public class SystemBootstrapService {
     private List<RoleSeed> roleSeeds() {
         return List.of(
                 new RoleSeed("SALARY_OPERATOR", "\u5de5\u8d44\u7ecf\u529e", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE"
                 )),
                 new RoleSeed("SALARY_REVIEWER", "\u5de5\u8d44\u5ba1\u6838", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_RECONCILE", "SALARY_EXPORT", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_RECONCILE", "SALARY_EXPORT", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
                 )),
                 new RoleSeed("SALARY_WRITER", "\u5386\u53f2\u5199\u5165\u6267\u884c", List.of(
                         "WORKBENCH", "SALARY_PERSON", "SALARY_DONE", "SALARY_HISTORY_WRITE", "SALARY_HISTORY_ROLLBACK", "SALARY_EXPORT", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
                 )),
                 new RoleSeed("DATA_STEWARD", "\u6570\u636e\u6cbb\u7406\u5458", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
                 )),
                 new RoleSeed("RULE_STEWARD", "\u89c4\u5219\u6807\u51c6\u7ef4\u62a4", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_CONFIG", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_CONFIG", "SALARY_REPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
                 )),
                 new RoleSeed("SALARY_VIEWER", "\u5de5\u8d44\u67e5\u8be2", List.of(
                         "WORKBENCH", "SALARY_PERSON", "SALARY_DONE", "SALARY_REPORT"

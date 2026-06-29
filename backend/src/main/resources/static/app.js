@@ -627,7 +627,7 @@ const Permissions = {
         Permissions.show(els.todoWorkItems?.closest(".workbench-panel"), canTodo);
         Permissions.show(els.doneWorkItems?.closest(".workbench-panel"), canDone);
         Permissions.show(els.historyWritePlans?.closest(".workbench-panel"), Permissions.has("SALARY_DONE"));
-        Permissions.show(els.batchAssessmentButton, Permissions.has("SALARY_PERSON"));
+        Permissions.show(els.batchAssessmentButton, Permissions.has("SALARY_PERSON") || Permissions.has("SALARY_ASSESSMENT_BATCH"));
         Permissions.show(els.refreshTodoCacheButton, Permissions.has("SALARY_TODO"));
         Permissions.show(els.exportTodoButton, canExport && canTodo);
         Permissions.show(els.exportDoneButton, canExport && canDone);
@@ -3223,7 +3223,8 @@ const WorkbenchPanel = {
         els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
     },
     async openAssessmentBatch() {
-        if (!Permissions.guard("SALARY_PERSON")) {
+        if (!Permissions.has("SALARY_PERSON") && !Permissions.has("SALARY_ASSESSMENT_BATCH")) {
+            setStatus(TEXT.menuPlaceholder);
             return;
         }
         if (!(await OrgPanel.ensureSelectedForBatch())) {
@@ -9423,6 +9424,9 @@ const WorkbenchPanel = {
         if (state.activeView === "workbench") {
             const partial = results.some((result) => result?.timedOut || result?.error);
             setStatus(partial ? TEXT.workbenchPartialReady : TEXT.workbenchReady);
+            if (state.activeMenuCode === "SALARY_ASSESSMENT_BATCH") {
+                await WorkbenchPanel.openAssessmentBatch();
+            }
         }
     },
     filters() {
@@ -14986,6 +14990,9 @@ const CodeOptionPicker = {
 
 const SystemShell = {
     icon(code) {
+        if (code === "SALARY_ASSESSMENT_BATCH") {
+            return "\u8003";
+        }
         if (code === "SALARY_CONFIG") {
             return "\u7cfb";
         }

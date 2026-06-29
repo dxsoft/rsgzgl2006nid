@@ -81,14 +81,15 @@ public class SystemMenuService {
                 menu("WORKBENCH", "\u5de5\u4f5c\u53f0", "desktop", "workbench", 10),
                 group("SALARY", "\u5de5\u8d44\u4e1a\u52a1", "salary", 20, List.of(
                         menu("SALARY_PERSON", "\u4eba\u5458\u5de5\u8d44", "people", "salary", 10),
-                        menu("SALARY_TODO", "\u5f85\u529e\u5de5\u8d44\u53d8\u52a8", "todo", "workbench", 20),
-                        menu("SALARY_DONE", "\u5df2\u529e\u5de5\u8d44\u53d8\u52a8", "done", "workbench", 30),
-                        menu("SALARY_TRIAL", "\u5de5\u8d44\u8bd5\u7b97", "trial", "salary", 40),
-                        menu("SALARY_RECONCILE", "\u5de5\u8d44\u5bf9\u8d26", "reconcile", "salary", 50),
-                        menu("SALARY_EXPORT", "\u5de5\u8d44\u5bfc\u51fa", "export", "salary", 60),
-                        menu("SALARY_REPORT", "\u62a5\u8868\u6253\u5370", "print", "workbench", 70),
-                        menu("SALARY_HISTORY_WRITE", "\u5386\u53f2\u5199\u5165", "write", "workbench", 80),
-                        menu("SALARY_HISTORY_ROLLBACK", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 90)
+                        menu("SALARY_ASSESSMENT_BATCH", "\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165", "assessment", "workbench", 20),
+                        menu("SALARY_TODO", "\u5f85\u529e\u5de5\u8d44\u53d8\u52a8", "todo", "workbench", 30),
+                        menu("SALARY_DONE", "\u5df2\u529e\u5de5\u8d44\u53d8\u52a8", "done", "workbench", 40),
+                        menu("SALARY_TRIAL", "\u5de5\u8d44\u8bd5\u7b97", "trial", "salary", 50),
+                        menu("SALARY_RECONCILE", "\u5de5\u8d44\u5bf9\u8d26", "reconcile", "salary", 60),
+                        menu("SALARY_EXPORT", "\u5de5\u8d44\u5bfc\u51fa", "export", "salary", 70),
+                        menu("SALARY_REPORT", "\u62a5\u8868\u6253\u5370", "print", "workbench", 80),
+                        menu("SALARY_HISTORY_WRITE", "\u5386\u53f2\u5199\u5165", "write", "workbench", 90),
+                        menu("SALARY_HISTORY_ROLLBACK", "\u5386\u53f2\u5199\u5165\u64a4\u9500", "rollback", "workbench", 100)
                 )),
                 group("MIGRATION", "\u8fc1\u79fb\u6838\u9a8c", "migration", 25, List.of(
                         menu("SALARY_GOVERNANCE", "\u6570\u636e\u6cbb\u7406", "governance", "workbench", 10),

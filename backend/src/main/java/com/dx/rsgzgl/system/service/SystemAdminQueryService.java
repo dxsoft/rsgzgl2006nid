@@ -74,19 +74,19 @@ public class SystemAdminQueryService {
     public List<RoleTemplateResponse> roleTemplates() {
         return List.of(
                 new RoleTemplateResponse("SALARY_OPERATOR", "\u5de5\u8d44\u7ecf\u529e", "\u529e\u7406\u5de5\u8d44\u5f85\u529e\u3001\u8bd5\u7b97\u548c\u5bf9\u8d26\uff0c\u4e0d\u542b\u5bfc\u51fa\u548c\u7cfb\u7edf\u7ba1\u7406\u3002", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_TRIAL", "SALARY_RECONCILE", "MIGRATION", "SALARY_GOVERNANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_TRIAL", "SALARY_RECONCILE", "MIGRATION", "SALARY_GOVERNANCE"
                 )),
                 new RoleTemplateResponse("SALARY_REVIEWER", "\u5de5\u8d44\u5ba1\u6838", "\u67e5\u770b\u5f85\u529e\u3001\u5df2\u529e\u3001\u5bf9\u8d26\u548c\u5bfc\u51fa\u7ed3\u679c\u3002", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_RECONCILE", "SALARY_EXPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_RECONCILE", "SALARY_EXPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
                 )),
                 new RoleTemplateResponse("SALARY_WRITER", "\u5386\u53f2\u5199\u5165\u6267\u884c", "\u6267\u884c\u5de5\u8d44\u529e\u7406\u5199\u5165\u3001\u590d\u6d4b\u3001\u64a4\u9500\u548c\u5ba1\u8ba1\u5bfc\u51fa\u3002", List.of(
                         "WORKBENCH", "SALARY_PERSON", "SALARY_DONE", "SALARY_HISTORY_WRITE", "SALARY_HISTORY_ROLLBACK", "SALARY_EXPORT", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "SALARY_DELIVERY_ARCHIVE"
                 )),
                 new RoleTemplateResponse("DATA_STEWARD", "\u6570\u636e\u6cbb\u7406\u5458", "\u5904\u7406\u57fa\u7840\u4fe1\u606f\u3001\u4efb\u804c\u3001\u5b66\u5386\u3001\u8003\u6838\u548c\u5386\u53f2\u94fe\u5f02\u5e38\u3002", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
                 )),
                 new RoleTemplateResponse("RULE_STEWARD", "\u89c4\u5219\u6807\u51c6\u7ef4\u62a4", "\u7ef4\u62a4\u5de5\u8d44\u9879\u914d\u7f6e\u3001\u89c4\u5219\u56de\u5f52\u548c\u6807\u51c6\u8868\u62bd\u67e5\u3002", List.of(
-                        "WORKBENCH", "SALARY_PERSON", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_CONFIG", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
+                        "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TRIAL", "SALARY_RECONCILE", "SALARY_CONFIG", "MIGRATION", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE"
                 )),
                 new RoleTemplateResponse("SALARY_VIEWER", "\u5de5\u8d44\u67e5\u8be2", "\u4ec5\u67e5\u770b\u4eba\u5458\u5de5\u8d44\u548c\u5df2\u529e\u4e1a\u52a1\u3002", List.of(
                         "WORKBENCH", "SALARY_PERSON", "SALARY_DONE"

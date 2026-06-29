@@ -90,7 +90,7 @@ class SystemPermissionRegressionTests {
         createUserRole(WORKBENCH_USER, WORKBENCH_ROLE, "WORKBENCH");
         createUserRole(TODO_USER, TODO_ROLE, "WORKBENCH", "SALARY_TODO");
         createUserRole(DONE_USER, DONE_ROLE, "WORKBENCH", "SALARY_DONE");
-        createUserRole(SCOPED_WORKBENCH_USER, SCOPED_WORKBENCH_ROLE, "WORKBENCH", "SALARY_PERSON", "SALARY_TODO", "SALARY_DONE", "SALARY_HISTORY_WRITE", "SALARY_HISTORY_ROLLBACK", "SALARY_EXPORT", "SALARY_TRIAL", "SALARY_CONFIG", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "APPLICATION_TODO", "APPLICATION_DONE");
+        createUserRole(SCOPED_WORKBENCH_USER, SCOPED_WORKBENCH_ROLE, "WORKBENCH", "SALARY_PERSON", "SALARY_ASSESSMENT_BATCH", "SALARY_TODO", "SALARY_DONE", "SALARY_HISTORY_WRITE", "SALARY_HISTORY_ROLLBACK", "SALARY_EXPORT", "SALARY_TRIAL", "SALARY_CONFIG", "SALARY_GOVERNANCE", "SALARY_ACCEPTANCE", "APPLICATION_TODO", "APPLICATION_DONE");
         createUserRole(ORG_USER, ORG_ROLE, "SALARY_PERSON");
         createUserRole(TRIAL_USER, TRIAL_ROLE, "SALARY_TRIAL");
         createUserRole(RECONCILE_USER, RECONCILE_ROLE, "SALARY_RECONCILE");
@@ -3711,6 +3711,7 @@ class SystemPermissionRegressionTests {
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, ADMIN_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("SALARY_OPERATOR")))
+                .andExpect(content().string(containsString("SALARY_ASSESSMENT_BATCH")))
                 .andExpect(content().string(containsString("SALARY_HISTORY_WRITE")))
                 .andExpect(content().string(containsString("SALARY_HISTORY_ROLLBACK")));
 

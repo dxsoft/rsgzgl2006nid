@@ -460,6 +460,7 @@ const els = {
     batchReconcileButton: document.querySelector("#batchReconcileButton"),
     normalGradeBatchButton: document.querySelector("#normalGradeBatchButton"),
     generateNormalGradeTodoButton: document.querySelector("#generateNormalGradeTodoButton"),
+    generateSalaryGradeTodoButton: document.querySelector("#generateSalaryGradeTodoButton"),
     batchAssessmentButton: document.querySelector("#batchAssessmentButton"),
     generateEntrySalaryTodoButton: document.querySelector("#generateEntrySalaryTodoButton"),
     generatePostChangeTodoButton: document.querySelector("#generatePostChangeTodoButton"),
@@ -600,6 +601,7 @@ const Permissions = {
         const canExport = Permissions.has("SALARY_EXPORT");
         Permissions.show(els.normalGradeBatchButton, canTrial);
         Permissions.show(els.generateNormalGradeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
+        Permissions.show(els.generateSalaryGradeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
         Permissions.show(els.generateEntrySalaryTodoButton, canTrial && Permissions.has("SALARY_TODO"));
         Permissions.show(els.generatePostChangeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
         Permissions.show(els.generateAllowanceChangeTodoButton, canTrial && Permissions.has("SALARY_TODO"));
@@ -16365,6 +16367,41 @@ const PersonDetail = {
             els.generateNormalGradeTodoButton.disabled = false;
         }
     },
+    async generateSalaryGradeTodo() {
+        if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
+            return;
+        }
+        if (!(await OrgPanel.ensureSelectedForBatch())) {
+            return;
+        }
+        const params = new URLSearchParams({
+            orgCode: state.selectedOrgCode,
+            year: Number(els.batchYearInput.value || 2024),
+            month: Number(els.batchMonthInput.value || 7),
+            limit: Number(els.batchLimitInput.value || 100)
+        });
+        els.generateSalaryGradeTodoButton.disabled = true;
+        setStatus("\u6b63\u5728\u751f\u6210\u6b63\u5e38\u85aa\u7ea7\u5f85\u529e...");
+        try {
+            const result = await Api.request(`/api/workbench/salary-grade-applications/generate?${params.toString()}`, {
+                method: "POST"
+            });
+            WorkbenchPanel.renderMigrationToolResult("\u6b63\u5e38\u85aa\u7ea7\u5f85\u529e", [
+                `\u5355\u4f4d ${result.orgCode || state.selectedOrgCode}`,
+                `${result.year}-${String(result.month || 1).padStart(2, "0")}`,
+                `\u68c0\u67e5 ${result.checkedCount ?? 0}`,
+                `\u7b26\u5408\u85aa\u7ea7 ${result.salaryGradeCount ?? 0}`,
+                `\u751f\u6210 ${result.generatedCount ?? 0}`
+            ]);
+            state.workbenchTodoLoaded = 0;
+            await WorkbenchPanel.loadPage("TODO", true);
+            setStatus("\u6b63\u5e38\u85aa\u7ea7\u5f85\u529e\u5df2\u751f\u6210");
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            els.generateSalaryGradeTodoButton.disabled = false;
+        }
+    },
     async generateEntrySalaryTodo() {
         if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
             return;
@@ -18359,6 +18396,7 @@ function bindEvents() {
     els.batchReconcileButton.addEventListener("click", () => PersonDetail.reconcileBatch());
     els.normalGradeBatchButton.addEventListener("click", () => PersonDetail.normalGradeBatch());
     els.generateNormalGradeTodoButton.addEventListener("click", () => PersonDetail.generateNormalGradeTodo());
+    els.generateSalaryGradeTodoButton?.addEventListener("click", () => PersonDetail.generateSalaryGradeTodo());
     els.batchAssessmentButton?.addEventListener("click", () => WorkbenchPanel.openAssessmentBatch());
     els.generateEntrySalaryTodoButton.addEventListener("click", () => PersonDetail.generateEntrySalaryTodo());
     els.generatePostChangeTodoButton.addEventListener("click", () => PersonDetail.generatePostChangeTodo());

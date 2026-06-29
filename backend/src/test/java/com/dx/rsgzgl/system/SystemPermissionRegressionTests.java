@@ -3982,6 +3982,18 @@ class SystemPermissionRegressionTests {
                 .andExpect(content().string(containsString("\"generatedCount\":")))
                 .andExpect(content().string(containsString("\"eligibleCount\":")));
 
+        mockMvc.perform(post("/api/workbench/salary-grade-applications/preview?orgCode=001&year=2024&month=1&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"salaryGradeCount\":")))
+                .andExpect(content().string(containsString("\"eligibleCount\":")));
+
+        mockMvc.perform(post("/api/workbench/salary-grade-applications/generate?orgCode=001&year=2024&month=1&limit=3")
+                        .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"generatedCount\":")))
+                .andExpect(content().string(containsString("\"salaryGradeCount\":")));
+
         mockMvc.perform(post("/api/workbench/entry-salary-applications/preview?orgCode=001&year=2024&month=1&limit=3&changeType=%E6%96%B0%E8%BF%9B%E5%B7%A5%E8%B5%84")
                         .sessionAttr(AuthSessionService.SESSION_USERNAME, SCOPED_WORKBENCH_USER))
                 .andExpect(status().isOk())

@@ -1356,43 +1356,40 @@ public class WorkbenchService {
         }
         NormalGradeBatchTrialResult trial = normalGradeBatchTrialService.trial(new NormalGradeBatchTrialCommand(orgCode, year, month, limit, changeType));
         List<NormalGradeBatchTrialItem> eligibleItems = normalGradeEligibleItems(trial);
-        int generated = 0;
-        for (NormalGradeBatchTrialItem item : eligibleItems) {
-            String workItemId = "normal-grade-" + trial.orgCode() + "-" + trial.year() + "-" + String.format("%02d", trial.month()) + "-" + item.personCode();
-            String itemChangeType = normalGradeApplicationChangeType(item);
-            jdbcTemplate.update("""
-                    INSERT INTO salary_todo_candidate_cache(work_item_id, source, source_id, person_code, org_code,
-                                                            person_no, person_name, event_year, event_month, change_type, note)
-                    VALUES (?, 'SALARY_EVENT', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE
-                        source = VALUES(source),
-                        source_id = VALUES(source_id),
-                        person_code = VALUES(person_code),
-                        org_code = VALUES(org_code),
-                        person_no = VALUES(person_no),
-                        person_name = VALUES(person_name),
-                        event_year = VALUES(event_year),
-                        event_month = VALUES(event_month),
-                        change_type = VALUES(change_type),
-                        note = VALUES(note),
-                        generated_at = CURRENT_TIMESTAMP
-                    """,
-                    workItemId,
-                    "NORMAL_GRADE",
-                    item.personCode(),
-                    item.orgCode(),
-                    personNo(item.personCode()),
-                    item.personName(),
-                    trial.year(),
-                    trial.month(),
-                    itemChangeType,
-                    left(normalGradeApplicationNote(item), 1000));
-            generated++;
-        }
+        int generated = generateNormalRuleApplications(trial, eligibleItems, "normal-grade", "NORMAL_GRADE");
         Map<String, Object> result = normalGradeApplicationSummary(trial, eligibleItems);
         result.put("generatedCount", generated);
         result.put("items", eligibleItems.stream().limit(100).map(this::normalGradeApplicationItem).toList());
         systemAuditService.record("workbench", "normal-grade-applications-generate", "ORG", trial.orgCode(),
+                trial.year() + "-" + trial.month() + " generated=" + generated);
+        return result;
+    }
+
+    public Map<String, Object> salaryGradeApplicationPreview(String orgCode, int year, int month, int limit) {
+        if (!hasMenu("SALARY_TODO") || !hasMenu("SALARY_TRIAL")) {
+            throw new IllegalArgumentException("Salary todo and trial permissions are required.");
+        }
+        NormalGradeBatchTrialResult trial = normalGradeBatchTrialService.trial(new NormalGradeBatchTrialCommand(orgCode, year, month, limit, ""));
+        List<NormalGradeBatchTrialItem> eligibleItems = salaryGradeEligibleItems(trial);
+        Map<String, Object> result = normalGradeApplicationSummary(trial, eligibleItems);
+        result.put("salaryGradeCount", eligibleItems.size());
+        result.put("items", eligibleItems.stream().limit(100).map(this::normalGradeApplicationItem).toList());
+        return result;
+    }
+
+    public Map<String, Object> generateSalaryGradeApplications(String orgCode, int year, int month, int limit) {
+        ensureSalaryTodoCacheTable();
+        if (!hasMenu("SALARY_TODO") || !hasMenu("SALARY_TRIAL")) {
+            throw new IllegalArgumentException("Salary todo and trial permissions are required.");
+        }
+        NormalGradeBatchTrialResult trial = normalGradeBatchTrialService.trial(new NormalGradeBatchTrialCommand(orgCode, year, month, limit, ""));
+        List<NormalGradeBatchTrialItem> eligibleItems = salaryGradeEligibleItems(trial);
+        int generated = generateNormalRuleApplications(trial, eligibleItems, "salary-grade", "NORMAL_SALARY_GRADE");
+        Map<String, Object> result = normalGradeApplicationSummary(trial, eligibleItems);
+        result.put("salaryGradeCount", eligibleItems.size());
+        result.put("generatedCount", generated);
+        result.put("items", eligibleItems.stream().limit(100).map(this::normalGradeApplicationItem).toList());
+        systemAuditService.record("workbench", "salary-grade-applications-generate", "ORG", trial.orgCode(),
                 trial.year() + "-" + trial.month() + " generated=" + generated);
         return result;
     }
@@ -10413,6 +10410,51 @@ public class WorkbenchService {
                 .filter(item -> !"NOT_ELIGIBLE".equalsIgnoreCase(text(item.ruleType())))
                 .filter(item -> !text(item.ruleType()).isBlank())
                 .toList();
+    }
+
+    private List<NormalGradeBatchTrialItem> salaryGradeEligibleItems(NormalGradeBatchTrialResult trial) {
+        return trial.items().stream()
+                .filter(item -> "SALARY_GRADE_INCREMENT".equalsIgnoreCase(text(item.ruleType())))
+                .toList();
+    }
+
+    private int generateNormalRuleApplications(NormalGradeBatchTrialResult trial, List<NormalGradeBatchTrialItem> eligibleItems,
+                                               String workItemPrefix, String sourceId) {
+        int generated = 0;
+        for (NormalGradeBatchTrialItem item : eligibleItems) {
+            String workItemId = workItemPrefix + "-" + trial.orgCode() + "-" + trial.year() + "-"
+                    + String.format("%02d", trial.month()) + "-" + item.personCode();
+            String itemChangeType = normalGradeApplicationChangeType(item);
+            jdbcTemplate.update("""
+                    INSERT INTO salary_todo_candidate_cache(work_item_id, source, source_id, person_code, org_code,
+                                                            person_no, person_name, event_year, event_month, change_type, note)
+                    VALUES (?, 'SALARY_EVENT', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                        source = VALUES(source),
+                        source_id = VALUES(source_id),
+                        person_code = VALUES(person_code),
+                        org_code = VALUES(org_code),
+                        person_no = VALUES(person_no),
+                        person_name = VALUES(person_name),
+                        event_year = VALUES(event_year),
+                        event_month = VALUES(event_month),
+                        change_type = VALUES(change_type),
+                        note = VALUES(note),
+                        generated_at = CURRENT_TIMESTAMP
+                    """,
+                    workItemId,
+                    sourceId,
+                    item.personCode(),
+                    item.orgCode(),
+                    personNo(item.personCode()),
+                    item.personName(),
+                    trial.year(),
+                    trial.month(),
+                    itemChangeType,
+                    left(normalGradeApplicationNote(item), 1000));
+            generated++;
+        }
+        return generated;
     }
 
     private Map<String, Object> normalGradeApplicationSummary(NormalGradeBatchTrialResult trial, List<NormalGradeBatchTrialItem> eligibleItems) {

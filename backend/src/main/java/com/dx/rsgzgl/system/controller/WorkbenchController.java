@@ -214,6 +214,26 @@ public class WorkbenchController {
         return ApiResponse.ok(workbenchService.generateNormalGradeApplications(orgCode, year, month, limit, changeType));
     }
 
+    @PostMapping("/salary-grade-applications/preview")
+    public ApiResponse<Map<String, Object>> salaryGradeApplicationPreview(
+            @RequestParam String orgCode,
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam(defaultValue = "100") int limit
+    ) {
+        return ApiResponse.ok(workbenchService.salaryGradeApplicationPreview(orgCode, year, month, limit));
+    }
+
+    @PostMapping("/salary-grade-applications/generate")
+    public ApiResponse<Map<String, Object>> generateSalaryGradeApplications(
+            @RequestParam String orgCode,
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam(defaultValue = "100") int limit
+    ) {
+        return ApiResponse.ok(workbenchService.generateSalaryGradeApplications(orgCode, year, month, limit));
+    }
+
     @PostMapping("/entry-salary-applications/preview")
     public ApiResponse<Map<String, Object>> entrySalaryApplicationPreview(
             @RequestParam String orgCode,

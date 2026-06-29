@@ -125,13 +125,39 @@ button:disabled {
 }
 
 .login-view {
+    position: relative;
     min-height: 100vh;
     display: grid;
     place-items: center;
     padding: 18px;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(244, 246, 248, 0.96)),
+        linear-gradient(135deg, rgba(27, 107, 95, 0.16), rgba(74, 99, 118, 0.08) 42%, rgba(244, 246, 248, 0.96)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(237, 241, 244, 0.96)),
         var(--bg);
+    overflow: hidden;
+}
+
+.login-view::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.34) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.login-view::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--accent), #517386, var(--accent-strong));
+    pointer-events: none;
 }
 
 .login-view.hidden {
@@ -139,6 +165,8 @@ button:disabled {
 }
 
 .login-panel {
+    position: relative;
+    z-index: 1;
     width: min(380px, 100%);
     display: grid;
     gap: 14px;

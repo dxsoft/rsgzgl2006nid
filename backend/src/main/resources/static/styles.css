@@ -883,6 +883,7 @@ button:disabled {
 
 .workbench-action-strip {
     align-items: stretch;
+    justify-content: flex-start;
 }
 
 .workbench-action-group {

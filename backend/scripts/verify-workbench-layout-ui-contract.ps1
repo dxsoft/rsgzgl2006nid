@@ -48,6 +48,7 @@ Add-Check -Rows $rows -Name "workbench-migration-action-group" -Passed ($indexHt
 Add-Check -Rows $rows -Name "workbench-action-group-style" -Passed ($styles -match '\.workbench-action-group' -and $styles -match '\.workbench-action-group\.migration-actions' -and $styles -match '\.migration-action-panel') -Message "Workbench action groups should have distinct desktop styling."
 Add-Check -Rows $rows -Name "workbench-result-scroll-boundary" -Passed ($styles -match '#migrationToolResult\s*\{[\s\S]*?display:\s*block;[\s\S]*?max-height:\s*min\(42vh,\s*420px\);[\s\S]*?overflow:\s*auto;[\s\S]*?contain:\s*layout paint;') -Message "Large migration/result panes should scroll and paint inside their own band instead of pushing into the work panels."
 Add-Check -Rows $rows -Name "workbench-horizontal-toolbar-boundary" -Passed ($styles -match 'scrollbar-gutter:\s*stable;' -and $styles -match '\.workspace-tabs\s*\{[\s\S]*?overflow-x:\s*auto;[\s\S]*?overflow-y:\s*hidden;') -Message "Wide filter, action, and tab rows should use bounded horizontal scrolling."
+Add-Check -Rows $rows -Name "workbench-action-strip-clickable-origin" -Passed ($styles -match '\.workbench-action-strip\s*\{[\s\S]*?justify-content:\s*flex-start;') -Message "Workbench action buttons should start inside their scroll container so visible buttons remain clickable."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

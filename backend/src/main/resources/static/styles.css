@@ -1037,14 +1037,18 @@ button:disabled {
 }
 
 #migrationToolResult {
+    display: block;
     min-height: 34px;
     max-height: min(42vh, 420px);
+    min-width: 0;
     border: 1px solid var(--border-soft);
     border-radius: 6px;
     background: #ffffff;
     color: var(--text);
     overflow: auto;
-    align-content: start;
+    box-sizing: border-box;
+    contain: layout paint;
+    scrollbar-gutter: stable;
 }
 
 #migrationToolResult:empty {
@@ -2310,6 +2314,7 @@ button:disabled {
 .report-center {
     display: grid;
     gap: 10px;
+    min-width: 0;
     padding: 10px;
     border: 1px solid var(--border-soft);
     border-radius: 6px;
@@ -2362,6 +2367,7 @@ button:disabled {
 .report-center-query {
     display: grid;
     gap: 7px;
+    min-width: 0;
     padding: 9px;
     border: 1px solid var(--border-soft);
     border-radius: 5px;
@@ -2407,12 +2413,14 @@ button:disabled {
 .report-center-results {
     display: grid;
     gap: 7px;
+    min-width: 0;
 }
 
 .report-center-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 7px;
+    min-width: 0;
 }
 
 .report-action-group {
@@ -2466,6 +2474,7 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 8px;
+    min-width: 0;
     color: var(--muted);
     font-size: 12px;
 }

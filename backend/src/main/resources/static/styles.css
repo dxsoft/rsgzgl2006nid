@@ -827,7 +827,7 @@ button:disabled {
 }
 
 .period-group {
-    grid-template-columns: 72px 72px 72px 116px;
+    grid-template-columns: 180px 72px 72px 72px 116px;
 }
 
 .period-group > span {
@@ -835,6 +835,10 @@ button:disabled {
 }
 
 .period-group input {
+    width: 100%;
+}
+
+.period-group select {
     width: 100%;
 }
 

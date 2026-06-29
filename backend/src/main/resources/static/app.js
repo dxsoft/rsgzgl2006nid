@@ -448,6 +448,7 @@ const els = {
     todoCount: document.querySelector("#todoCount"),
     doneCount: document.querySelector("#doneCount"),
     refreshButton: document.querySelector("#refreshButton"),
+    batchOrgSelect: document.querySelector("#batchOrgSelect"),
     batchYearInput: document.querySelector("#batchYearInput"),
     batchMonthInput: document.querySelector("#batchMonthInput"),
     batchLimitInput: document.querySelector("#batchLimitInput"),
@@ -14995,6 +14996,41 @@ const OrgPanel = {
     count(nodes) {
         return nodes.reduce((total, node) => total + 1 + OrgPanel.count(node.children || []), 0);
     },
+    flatten(nodes, depth = 0) {
+        return nodes.flatMap((node) => [
+            { code: node.orgCode, name: node.orgName, depth },
+            ...OrgPanel.flatten(node.children || [], depth + 1)
+        ]);
+    },
+    renderWorkbenchSelect() {
+        if (!els.batchOrgSelect) {
+            return;
+        }
+        const options = OrgPanel.flatten(state.orgs || []).map((org) => {
+            const prefix = "\u3000".repeat(Math.min(org.depth || 0, 4));
+            const label = `${prefix}${org.code} ${org.name || ""}`.trimEnd();
+            return `<option value="${Format.html(org.code)}" ${state.selectedOrgCode === org.code ? "selected" : ""}>${Format.html(label)}</option>`;
+        }).join("");
+        els.batchOrgSelect.innerHTML = `<option value="">\u9009\u62e9\u5355\u4f4d</option>${options}`;
+        els.batchOrgSelect.value = state.selectedOrgCode || "";
+    },
+    async ensureLoadedForWorkbench() {
+        if (!state.orgs.length) {
+            setStatus("\u6b63\u5728\u8bfb\u53d6\u5355\u4f4d\u5217\u8868...");
+            await OrgPanel.load();
+        } else {
+            OrgPanel.renderWorkbenchSelect();
+        }
+    },
+    async ensureSelectedForBatch() {
+        await OrgPanel.ensureLoadedForWorkbench();
+        if (!state.selectedOrgCode) {
+            els.batchOrgSelect?.focus();
+            setStatus("\u8bf7\u5148\u5728\u4e1a\u52a1\u671f\u95f4\u4e2d\u9009\u62e9\u5355\u4f4d\u3002");
+            return false;
+        }
+        return true;
+    },
     render(nodes, depth = 0) {
         if (!nodes.length) {
             return depth === 0 ? `<div class="loading">${TEXT.noOrgs}</div>` : "";
@@ -15014,11 +15050,13 @@ const OrgPanel = {
         state.orgs = await Api.request("/api/org/tree");
         els.orgCount.textContent = OrgPanel.count(state.orgs);
         els.orgTree.innerHTML = OrgPanel.render(state.orgs);
+        OrgPanel.renderWorkbenchSelect();
     },
     async select(orgCode) {
         state.selectedOrgCode = orgCode;
         state.page = 1;
         els.orgTree.innerHTML = OrgPanel.render(state.orgs);
+        OrgPanel.renderWorkbenchSelect();
         await Promise.all([
             PeoplePanel.load(),
             SalaryPeriods.loadLatest(orgCode)
@@ -16145,8 +16183,7 @@ const PersonDetail = {
         if (!Permissions.guard("SALARY_TRIAL")) {
             return;
         }
-        if (!state.selectedOrgCode) {
-            setStatus(TEXT.chooseOrgForBatch);
+        if (!(await OrgPanel.ensureSelectedForBatch())) {
             return;
         }
         const changeType = batchChangeType();
@@ -16180,8 +16217,7 @@ const PersonDetail = {
         if (!Permissions.guard("SALARY_TRIAL") || !Permissions.guard("SALARY_TODO")) {
             return;
         }
-        if (!state.selectedOrgCode) {
-            setStatus(TEXT.chooseOrgForBatch);
+        if (!(await OrgPanel.ensureSelectedForBatch())) {
             return;
         }
         const params = new URLSearchParams({
@@ -18185,6 +18221,19 @@ function bindEvents() {
     els.exportDoneButton.addEventListener("click", () => WorkbenchPanel.exportItems("DONE"));
     els.loadMoreTodoButton.addEventListener("click", () => WorkbenchPanel.loadMore("TODO"));
     els.loadMoreDoneButton.addEventListener("click", () => WorkbenchPanel.loadMore("DONE"));
+    els.batchOrgSelect?.addEventListener("change", async () => {
+        const orgCode = els.batchOrgSelect.value || "";
+        state.selectedOrgCode = orgCode;
+        if (!orgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d\u518d\u529e\u7406\u5de5\u8d44\u4e1a\u52a1\u3002");
+            return;
+        }
+        if (!state.orgs.length) {
+            await OrgPanel.ensureLoadedForWorkbench();
+        }
+        els.orgTree.innerHTML = OrgPanel.render(state.orgs);
+        await SalaryPeriods.loadLatest(orgCode);
+    });
     els.batchReconcileButton.addEventListener("click", () => PersonDetail.reconcileBatch());
     els.normalGradeBatchButton.addEventListener("click", () => PersonDetail.normalGradeBatch());
     els.generateNormalGradeTodoButton.addEventListener("click", () => PersonDetail.generateNormalGradeTodo());

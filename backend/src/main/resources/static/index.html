@@ -60,16 +60,8 @@
         <main class="desktop-main">
             <section id="workbenchView" class="workbench-view" aria-label="&#24037;&#20316;&#21488;">
                 <section class="command-ribbon" aria-label="&#24037;&#36164;&#19994;&#21153;&#24555;&#25463;&#25805;&#20316;">
-                    <div class="ribbon-group period-group">
-                        <span>&#26399;&#38388;</span>
-                        <input id="batchYearInput" type="number" min="2006" max="2099" value="2024" aria-label="&#23545;&#36134;&#24180;&#24230;">
-                        <input id="batchMonthInput" type="number" min="1" max="12" value="7" aria-label="&#23545;&#36134;&#26376;&#20221;">
-                        <input id="batchLimitInput" type="number" min="1" max="500" value="100" aria-label="&#23545;&#36134;&#20154;&#25968;">
-                        <input id="batchChangeTypeInput" type="text" placeholder="&#21464;&#21160;&#31867;&#22411;" aria-label="&#21464;&#21160;&#31867;&#22411;">
-                    </div>
                     <div class="ribbon-group">
                         <span>&#24453;&#21150;&#29983;&#25104;</span>
-                        <button id="generateNormalGradeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#27491;&#24120;&#26187;&#26723;&#24453;&#21150;">&#26187;&#26723;</button>
                         <button id="generateEntrySalaryTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#26032;&#36827;&#35265;&#20064;&#36716;&#27491;&#24453;&#21150;">&#26032;&#36827;</button>
                         <button id="generatePostChangeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#32844;&#21153;&#32844;&#32423;&#21464;&#21160;&#24453;&#21150;">&#32844;&#21153;</button>
                         <button id="generateAllowanceChangeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#27941;&#34917;&#36148;&#21464;&#21270;&#24453;&#21150;">&#27941;&#36148;</button>
@@ -79,7 +71,6 @@
                     <div class="ribbon-group">
                         <span>&#25209;&#37327;&#26680;&#39564;</span>
                         <button id="batchReconcileButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23545;&#36134;</button>
-                        <button id="normalGradeBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#26187;&#26723;</button>
                         <button id="generatedTimelineBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#29983;&#25104;&#22522;&#30784;&#20449;&#24687;&#24212;&#21457;&#32447;">&#24212;&#21457;&#32447;</button>
                         <button id="exportBatchReconcileButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#23545;&#36134;">&#23548;&#20986;&#23545;&#36134;</button>
                         <button id="exportNormalGradeButton" type="button" title="&#23548;&#20986;&#24403;&#21069;&#21333;&#20301;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#23548;&#20986;&#26187;&#26723;</button>
@@ -175,8 +166,17 @@
                             <button id="workbenchApplyFilterButton" type="submit">&#31579;&#36873;</button>
                         </div>
                         <div class="workbench-action-strip">
+                            <div class="ribbon-group period-group workbench-period-group">
+                                <span>&#19994;&#21153;&#26399;&#38388;</span>
+                                <input id="batchYearInput" type="number" min="2006" max="2099" value="2024" aria-label="&#23545;&#36134;&#24180;&#24230;">
+                                <input id="batchMonthInput" type="number" min="1" max="12" value="7" aria-label="&#23545;&#36134;&#26376;&#20221;">
+                                <input id="batchLimitInput" type="number" min="1" max="500" value="100" aria-label="&#23545;&#36134;&#20154;&#25968;">
+                                <input id="batchChangeTypeInput" type="text" placeholder="&#21464;&#21160;&#31867;&#22411;" aria-label="&#21464;&#21160;&#31867;&#22411;">
+                            </div>
                             <div class="workbench-action-group business-actions">
                                 <span>&#24037;&#36164;&#19994;&#21153;</span>
+                                <button id="normalGradeBatchButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#25209;&#37327;&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;">&#27491;&#24120;&#26187;&#26723;&#35797;&#31639;</button>
+                                <button id="generateNormalGradeTodoButton" type="button" title="&#25353;&#24403;&#21069;&#21333;&#20301;&#29983;&#25104;&#27491;&#24120;&#26187;&#26723;&#24453;&#21150;">&#29983;&#25104;&#26187;&#26723;&#24453;&#21150;</button>
                                 <button id="refreshTodoCacheButton" type="button">&#21047;&#26032;&#24453;&#21150;&#32531;&#23384;</button>
                                 <button id="workbenchRefreshButton" type="button">&#21047;&#26032;</button>
                                 <button id="exportTodoButton" type="button">&#23548;&#20986;&#24453;&#21150;</button>

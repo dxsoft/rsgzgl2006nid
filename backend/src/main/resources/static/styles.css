@@ -838,6 +838,21 @@ button:disabled {
     width: 100%;
 }
 
+.workbench-period-group {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 4px 6px;
+    background: #ffffff;
+}
+
+.workbench-period-group > span {
+    color: var(--accent-strong);
+}
+
+.workbench-period-group input {
+    min-height: 28px;
+}
+
 .sample-group {
     grid-template-columns: 178px auto;
 }

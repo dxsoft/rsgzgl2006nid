@@ -37,14 +37,16 @@ $indexHtml = Get-Content -Path $IndexPath -Raw
 $styles = Get-Content -Path $StylesPath -Raw
 $rows = New-Object System.Collections.Generic.List[object]
 
-Add-Check -Rows $rows -Name "workbench-seven-row-shell" -Passed ($styles -match 'grid-template-rows:\s*auto auto auto auto auto minmax\(0,\s*auto\) minmax\(320px,\s*1fr\);') -Message "Workbench shell should reserve rows for ribbon, header, summaries, tabs, metrics and main panels."
-Add-Check -Rows $rows -Name "workbench-shell-overflow-guard" -Passed ($styles -match '\.workbench-view\s*\{[\s\S]*?overflow:\s*hidden;') -Message "Workbench shell should keep children from visually overlapping outside the grid."
+Add-Check -Rows $rows -Name "workbench-seven-row-shell" -Passed ($styles -match 'grid-template-rows:\s*auto auto auto auto auto minmax\(96px,\s*max-content\) minmax\(320px,\s*auto\);') -Message "Workbench shell should reserve rows for ribbon, header, summaries, tabs, metrics and main panels without compressing them into overlap."
+Add-Check -Rows $rows -Name "workbench-shell-overflow-guard" -Passed ($styles -match '\.workbench-view\s*\{[\s\S]*?overflow:\s*auto;[\s\S]*?overscroll-behavior:\s*contain;') -Message "Workbench shell should scroll internally when header, filters, metrics or result panels grow."
 Add-Check -Rows $rows -Name "workbench-empty-summary-hidden" -Passed ($styles -match '\.workbench-filter-summary:empty,\s*#migrationToolResult:empty') -Message "Empty summary/result bands should not consume vertical space."
 Add-Check -Rows $rows -Name "workbench-metrics-scroll-boundary" -Passed ($styles -match '\.workbench-metrics\s*\{[\s\S]*?max-height:\s*min\(28vh,\s*260px\);[\s\S]*?overflow:\s*auto;') -Message "Metric cards should scroll inside their own band when content grows."
 Add-Check -Rows $rows -Name "workbench-main-grid-overflow-guard" -Passed ($styles -match '\.workbench-grid\s*\{[\s\S]*?overflow:\s*hidden;') -Message "Todo/done/history panels should keep their inner scrolling bounded."
 Add-Check -Rows $rows -Name "workbench-business-action-group" -Passed ($indexHtml -match 'class="workbench-action-group business-actions"' -and $indexHtml -match '&#24037;&#36164;&#19994;&#21153;') -Message "Daily salary actions should be grouped as the main business area."
 Add-Check -Rows $rows -Name "workbench-migration-action-group" -Passed ($indexHtml -match '<details class="workbench-action-group migration-actions">' -and $indexHtml -match '<summary>&#36801;&#31227;&#26680;&#39564;</summary>') -Message "Migration verification actions should be separated behind a collapsible admin-style entry."
 Add-Check -Rows $rows -Name "workbench-action-group-style" -Passed ($styles -match '\.workbench-action-group' -and $styles -match '\.workbench-action-group\.migration-actions' -and $styles -match '\.migration-action-panel') -Message "Workbench action groups should have distinct desktop styling."
+Add-Check -Rows $rows -Name "workbench-result-scroll-boundary" -Passed ($styles -match '#migrationToolResult\s*\{[\s\S]*?max-height:\s*min\(42vh,\s*420px\);[\s\S]*?overflow:\s*auto;') -Message "Large migration/result panes should scroll in their own band instead of pushing into the work panels."
+Add-Check -Rows $rows -Name "workbench-horizontal-toolbar-boundary" -Passed ($styles -match 'scrollbar-gutter:\s*stable;' -and $styles -match '\.workspace-tabs\s*\{[\s\S]*?overflow-x:\s*auto;[\s\S]*?overflow-y:\s*hidden;') -Message "Wide filter, action, and tab rows should use bounded horizontal scrolling."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

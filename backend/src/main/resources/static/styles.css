@@ -462,13 +462,15 @@ button:disabled {
 
 .workbench-view {
     display: grid;
-    grid-template-rows: auto auto auto auto auto minmax(0, auto) minmax(320px, 1fr);
+    grid-template-rows: auto auto auto auto auto minmax(96px, max-content) minmax(320px, auto);
+    align-content: start;
     gap: 9px;
     padding: 10px;
     min-height: 0;
     height: 100%;
     background: #f3f5f7;
-    overflow: hidden;
+    overflow: auto;
+    overscroll-behavior: contain;
 }
 
 .workbench-view.hidden {
@@ -498,7 +500,7 @@ button:disabled {
 .workbench-header {
     display: grid;
     grid-template-columns: minmax(190px, 260px) minmax(0, 1fr);
-    align-items: center;
+    align-items: start;
     gap: 10px;
     padding: 9px 10px;
     border: 1px solid var(--border-soft);
@@ -861,6 +863,7 @@ button:disabled {
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 1px;
+    scrollbar-gutter: stable;
 }
 
 .workbench-action-strip {
@@ -1000,6 +1003,7 @@ button:disabled {
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
+    min-width: 0;
 }
 
 .workbench-filter-summary:empty,
@@ -1034,10 +1038,13 @@ button:disabled {
 
 #migrationToolResult {
     min-height: 34px;
+    max-height: min(42vh, 420px);
     border: 1px solid var(--border-soft);
     border-radius: 6px;
     background: #ffffff;
     color: var(--text);
+    overflow: auto;
+    align-content: start;
 }
 
 #migrationToolResult:empty {
@@ -2806,9 +2813,12 @@ button:disabled {
     align-items: center;
     gap: 0;
     min-height: 34px;
+    min-width: 0;
     border: 1px solid var(--border-soft);
     background: var(--chrome);
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-gutter: stable;
 }
 
 .workspace-tabs button {
@@ -2901,6 +2911,7 @@ button:disabled {
     overflow: auto;
     align-content: start;
     padding-right: 2px;
+    scrollbar-gutter: stable;
 }
 
 .closure-queue-strip {

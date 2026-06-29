@@ -863,6 +863,43 @@ button:disabled {
     padding-bottom: 1px;
 }
 
+.workbench-action-strip {
+    align-items: stretch;
+}
+
+.workbench-action-group {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 34px;
+    padding: 4px 6px;
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    background: #ffffff;
+}
+
+.workbench-action-group > span {
+    flex: 0 0 auto;
+    min-height: 22px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 6px;
+    border-right: 1px solid var(--border-soft);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.workbench-action-group.migration-actions {
+    background: #fbfcfd;
+}
+
+.workbench-action-group.migration-actions > span {
+    color: var(--warn);
+}
+
 .filter-strip input,
 .filter-strip select,
 .workbench-tools input,
@@ -885,7 +922,8 @@ button:disabled {
 }
 
 .filter-strip button,
-.workbench-action-strip button {
+.workbench-action-strip button,
+.workbench-action-group button {
     flex: 0 0 auto;
     min-height: 28px;
     border-radius: 4px;

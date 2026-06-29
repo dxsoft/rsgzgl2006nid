@@ -2,6 +2,9 @@ package com.dx.rsgzgl.person.controller;
 
 import com.dx.rsgzgl.common.api.ApiResponse;
 import com.dx.rsgzgl.common.api.PageResponse;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchCandidate;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchRequest;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchResponse;
 import com.dx.rsgzgl.person.dto.PersonAssessmentRequest;
 import com.dx.rsgzgl.person.dto.PersonAssessmentResponse;
 import com.dx.rsgzgl.person.dto.PersonBaseChangeRequest;
@@ -167,6 +170,22 @@ public class PersonController {
     @GetMapping("/{personCode}/assessments")
     public ApiResponse<List<PersonAssessmentResponse>> assessments(@PathVariable String personCode) {
         return ApiResponse.ok(personAssessmentService.list(personCode));
+    }
+
+    @GetMapping("/assessments/batch-candidates")
+    public ApiResponse<List<PersonAssessmentBatchCandidate>> assessmentBatchCandidates(
+            @RequestParam String orgCode,
+            @RequestParam String year,
+            @RequestParam(required = false) Integer limit
+    ) {
+        return ApiResponse.ok(personAssessmentService.batchCandidates(orgCode, year, limit));
+    }
+
+    @PostMapping("/assessments/batch")
+    public ApiResponse<PersonAssessmentBatchResponse> saveAssessmentBatch(
+            @RequestBody PersonAssessmentBatchRequest request
+    ) {
+        return ApiResponse.ok(personAssessmentService.saveBatch(request));
     }
 
     @PostMapping("/{personCode}/assessments")

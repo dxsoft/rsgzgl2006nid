@@ -1,17 +1,25 @@
 package com.dx.rsgzgl.person.service;
 
 import com.dx.rsgzgl.common.exception.BusinessException;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchCandidate;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchItem;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchRequest;
+import com.dx.rsgzgl.person.dto.PersonAssessmentBatchResponse;
 import com.dx.rsgzgl.person.dto.PersonAssessmentRequest;
 import com.dx.rsgzgl.person.dto.PersonAssessmentResponse;
 import com.dx.rsgzgl.person.dto.PersonBaseChangeRequest;
 import com.dx.rsgzgl.person.dto.PersonDetail;
+import com.dx.rsgzgl.system.service.OrganizationAccessService;
 import com.dx.rsgzgl.system.service.SystemAuditService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonAssessmentService {
@@ -20,17 +28,20 @@ public class PersonAssessmentService {
     private final PersonQueryService personQueryService;
     private final PersonBaseChangeService personBaseChangeService;
     private final SystemAuditService systemAuditService;
+    private final OrganizationAccessService organizationAccessService;
 
     public PersonAssessmentService(
             JdbcTemplate jdbcTemplate,
             PersonQueryService personQueryService,
             PersonBaseChangeService personBaseChangeService,
-            SystemAuditService systemAuditService
+            SystemAuditService systemAuditService,
+            OrganizationAccessService organizationAccessService
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.personQueryService = personQueryService;
         this.personBaseChangeService = personBaseChangeService;
         this.systemAuditService = systemAuditService;
+        this.organizationAccessService = organizationAccessService;
     }
 
     public List<PersonAssessmentResponse> list(String personCode) {
@@ -51,6 +62,87 @@ public class PersonAssessmentService {
                 rs.getString("assessment_year"),
                 rs.getString("assessment_result")
         ), person.orgCode(), personNo(person.personCode(), person.orgCode()));
+    }
+
+    public List<PersonAssessmentBatchCandidate> batchCandidates(String orgCode, String year, Integer limit) {
+        String safeOrgCode = requireText(orgCode, "orgCode");
+        NormalizedAssessment assessment = normalize(new PersonAssessmentRequest(year, "合格", ""));
+        organizationAccessService.requireOrgAccess(safeOrgCode);
+        int safeLimit = Math.min(Math.max(limit == null ? 500 : limit, 1), 1000);
+        return jdbcTemplate.query("""
+                SELECT existing.id,
+                       CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) AS person_code,
+                       TRIM(p.xm) AS person_name,
+                       TRIM(p.dwbm) AS org_code,
+                       TRIM(existing.khjg) AS assessment_result
+                FROM dryjbxx p
+                LEFT JOIN dndkh existing
+                       ON existing.dwbm = p.dwbm
+                      AND existing.grbm = p.grbm
+                      AND existing.khnd = ?
+                WHERE p.dwbm LIKE CONCAT(?, '%')
+                  AND %s
+                ORDER BY p.dwbm, p.grbm
+                LIMIT ?
+                """.formatted(organizationAccessService.orgCodeAccessSql("p.dwbm")),
+                (rs, rowNum) -> new PersonAssessmentBatchCandidate(
+                        rs.getObject("id") == null ? null : rs.getLong("id"),
+                        rs.getString("person_code"),
+                        rs.getString("person_name"),
+                        rs.getString("org_code"),
+                        assessment.year(),
+                        rs.getString("assessment_result")
+                ), assessment.year(), safeOrgCode, safeLimit);
+    }
+
+    @Transactional
+    public PersonAssessmentBatchResponse saveBatch(PersonAssessmentBatchRequest request) {
+        if (request == null) {
+            throw new BusinessException("INVALID_PERSON_ASSESSMENT_BATCH", "request body is required.");
+        }
+        String safeOrgCode = requireText(request.orgCode(), "orgCode");
+        NormalizedAssessment defaultAssessment = normalize(new PersonAssessmentRequest(request.year(), request.defaultResult(), request.summary()));
+        List<PersonAssessmentBatchCandidate> candidates = batchCandidates(safeOrgCode, defaultAssessment.year(), request.limit());
+        Map<String, PersonAssessmentBatchCandidate> candidateByPerson = candidates.stream()
+                .collect(Collectors.toMap(PersonAssessmentBatchCandidate::personCode, Function.identity(), (left, right) -> left));
+        List<PersonAssessmentBatchItem> requestedItems = request.items() == null || request.items().isEmpty()
+                ? candidates.stream()
+                .map(candidate -> new PersonAssessmentBatchItem(candidate.personCode(), defaultAssessment.result()))
+                .toList()
+                : request.items();
+        List<PersonAssessmentResponse> saved = new ArrayList<>();
+        int created = 0;
+        int updated = 0;
+        for (PersonAssessmentBatchItem item : requestedItems) {
+            String personCode = requireText(item.personCode(), "personCode");
+            PersonAssessmentBatchCandidate candidate = candidateByPerson.get(personCode);
+            if (candidate == null) {
+                throw new BusinessException("INVALID_PERSON_ASSESSMENT_BATCH", "person is not in selected organization: " + personCode);
+            }
+            String result = trim(item.result()).isBlank() ? defaultAssessment.result() : item.result();
+            PersonAssessmentResponse response = save(personCode, new PersonAssessmentRequest(
+                    defaultAssessment.year(),
+                    result,
+                    trim(request.summary()).isBlank() ? "年度考核批量录入" : request.summary()
+            ));
+            saved.add(response);
+            if (candidate.id() == null) {
+                created++;
+            } else {
+                updated++;
+            }
+        }
+        systemAuditService.record("person", "person-assessment-batch-save", "ORG", safeOrgCode,
+                defaultAssessment.year() + " checked=" + candidates.size() + " saved=" + saved.size());
+        return new PersonAssessmentBatchResponse(
+                safeOrgCode,
+                defaultAssessment.year(),
+                candidates.size(),
+                saved.size(),
+                created,
+                updated,
+                saved
+        );
     }
 
     @Transactional

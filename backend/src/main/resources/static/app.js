@@ -458,6 +458,7 @@ const els = {
     batchReconcileButton: document.querySelector("#batchReconcileButton"),
     normalGradeBatchButton: document.querySelector("#normalGradeBatchButton"),
     generateNormalGradeTodoButton: document.querySelector("#generateNormalGradeTodoButton"),
+    batchAssessmentButton: document.querySelector("#batchAssessmentButton"),
     generateEntrySalaryTodoButton: document.querySelector("#generateEntrySalaryTodoButton"),
     generatePostChangeTodoButton: document.querySelector("#generatePostChangeTodoButton"),
     generateAllowanceChangeTodoButton: document.querySelector("#generateAllowanceChangeTodoButton"),
@@ -622,6 +623,7 @@ const Permissions = {
         Permissions.show(els.todoWorkItems?.closest(".workbench-panel"), canTodo);
         Permissions.show(els.doneWorkItems?.closest(".workbench-panel"), canDone);
         Permissions.show(els.historyWritePlans?.closest(".workbench-panel"), Permissions.has("SALARY_DONE"));
+        Permissions.show(els.batchAssessmentButton, Permissions.has("SALARY_PERSON"));
         Permissions.show(els.refreshTodoCacheButton, Permissions.has("SALARY_TODO"));
         Permissions.show(els.exportTodoButton, canExport && canTodo);
         Permissions.show(els.exportDoneButton, canExport && canDone);
@@ -3215,6 +3217,103 @@ const WorkbenchPanel = {
             </div>
         `;
         els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    async openAssessmentBatch() {
+        if (!Permissions.guard("SALARY_PERSON")) {
+            return;
+        }
+        if (!(await OrgPanel.ensureSelectedForBatch())) {
+            return;
+        }
+        const year = String(Number(els.batchYearInput.value || new Date().getFullYear()));
+        const limit = String(Number(els.batchLimitInput.value || 100));
+        setStatus("\u6b63\u5728\u52a0\u8f7d\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165...");
+        try {
+            const rows = await Api.request(`/api/persons/assessments/batch-candidates?${new URLSearchParams({
+                orgCode: state.selectedOrgCode,
+                year,
+                limit
+            }).toString()}`);
+            WorkbenchPanel.renderAssessmentBatch(rows || [], year);
+            setStatus(`\u5df2\u52a0\u8f7d ${rows?.length || 0} \u4eba\u5e74\u5ea6\u8003\u6838\u5019\u9009`);
+        } catch (error) {
+            setStatus(error.message);
+        }
+    },
+    renderAssessmentBatch(rows, year) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        const options = ["优秀", "称职", "合格", "未定等次", "不合格"];
+        const optionHtml = (selected = "") => options
+                .map((value) => `<option value="${Format.html(value)}" ${selected === value ? "selected" : ""}>${Format.html(value)}</option>`)
+                .join("");
+        els.migrationToolResult.innerHTML = `
+            <strong>\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165</strong>
+            <form class="assessment-batch-panel" data-assessment-batch-form>
+                <div class="assessment-batch-toolbar">
+                    <label>\u5e74\u5ea6 <input name="year" value="${Format.html(year || "")}" maxlength="4" required></label>
+                    <label>\u9ed8\u8ba4\u7ed3\u679c <select name="defaultResult">${optionHtml("合格")}</select></label>
+                    <label>\u8bf4\u660e <input name="summary" value="\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165"></label>
+                    <button type="submit">\u4fdd\u5b58\u672c\u9875\u8003\u6838</button>
+                </div>
+                <div class="assessment-batch-list">
+                    ${rows.length ? rows.map((row) => `
+                        <label class="assessment-batch-row">
+                            <input type="checkbox" checked data-assessment-person-enabled>
+                            <span><b>${Format.html(row.personName || "-")}</b><small>${Format.html(row.personCode || "")}</small></span>
+                            <select data-assessment-person-result data-person-code="${Format.html(row.personCode || "")}">
+                                <option value="">\u6309\u9ed8\u8ba4</option>
+                                ${optionHtml(row.result || "")}
+                            </select>
+                            <em>${row.id ? "\u5df2\u6709\u8bb0\u5f55" : "\u5c06\u65b0\u589e"}</em>
+                        </label>
+                    `).join("") : `<div class="loading compact">\u672a\u627e\u5230\u672c\u5355\u4f4d\u4eba\u5458</div>`}
+                </div>
+            </form>
+        `;
+        els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    async saveAssessmentBatch(form) {
+        if (!state.selectedOrgCode) {
+            setStatus("\u8bf7\u5148\u9009\u62e9\u5355\u4f4d\u3002");
+            return;
+        }
+        const data = new FormData(form);
+        const defaultResult = String(data.get("defaultResult") || "合格");
+        const items = Array.from(form.querySelectorAll("[data-assessment-person-result]"))
+                .filter((select) => select.closest(".assessment-batch-row")?.querySelector("[data-assessment-person-enabled]")?.checked)
+                .map((select) => ({
+                    personCode: select.dataset.personCode || "",
+                    result: select.value || defaultResult
+                }))
+                .filter((item) => item.personCode);
+        if (!items.length) {
+            setStatus("\u8bf7\u81f3\u5c11\u9009\u62e9\u4e00\u540d\u4eba\u5458\u3002");
+            return;
+        }
+        const submit = form.querySelector("button[type='submit']");
+        submit.disabled = true;
+        setStatus("\u6b63\u5728\u6279\u91cf\u4fdd\u5b58\u5e74\u5ea6\u8003\u6838...");
+        try {
+            const result = await Api.request("/api/persons/assessments/batch", {
+                method: "POST",
+                body: JSON.stringify({
+                    orgCode: state.selectedOrgCode,
+                    year: String(data.get("year") || els.batchYearInput.value || ""),
+                    defaultResult,
+                    summary: String(data.get("summary") || ""),
+                    limit: Number(els.batchLimitInput.value || 100),
+                    items
+                })
+            });
+            setStatus(`\u5e74\u5ea6\u8003\u6838\u5df2\u4fdd\u5b58 ${result.savedCount || 0} \u4eba\uff0c\u65b0\u589e ${result.createdCount || 0}\uff0c\u66f4\u65b0 ${result.updatedCount || 0}`);
+            await WorkbenchPanel.openAssessmentBatch();
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            submit.disabled = false;
+        }
     },
     reportCenterSavedPrefs() {
         try {
@@ -17695,6 +17794,12 @@ function bindEvents() {
             await WorkbenchPanel.filterMigrationQualityArchiveLedger(qualityArchiveFilterForm);
             return;
         }
+        const assessmentBatchForm = event.target.closest("form[data-assessment-batch-form]");
+        if (assessmentBatchForm) {
+            event.preventDefault();
+            await WorkbenchPanel.saveAssessmentBatch(assessmentBatchForm);
+            return;
+        }
         const filterRegressionForm = event.target.closest("form[data-regression-sample-filter-form]");
         if (filterRegressionForm) {
             event.preventDefault();
@@ -18237,6 +18342,7 @@ function bindEvents() {
     els.batchReconcileButton.addEventListener("click", () => PersonDetail.reconcileBatch());
     els.normalGradeBatchButton.addEventListener("click", () => PersonDetail.normalGradeBatch());
     els.generateNormalGradeTodoButton.addEventListener("click", () => PersonDetail.generateNormalGradeTodo());
+    els.batchAssessmentButton?.addEventListener("click", () => WorkbenchPanel.openAssessmentBatch());
     els.generateEntrySalaryTodoButton.addEventListener("click", () => PersonDetail.generateEntrySalaryTodo());
     els.generatePostChangeTodoButton.addEventListener("click", () => PersonDetail.generatePostChangeTodo());
     els.generateAllowanceChangeTodoButton.addEventListener("click", () => PersonDetail.generateAllowanceChangeTodo());

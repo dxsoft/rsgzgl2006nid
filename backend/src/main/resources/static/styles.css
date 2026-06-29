@@ -2552,6 +2552,80 @@ button:disabled {
     line-height: 1.45;
 }
 
+.assessment-batch-panel {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+    min-width: 0;
+}
+
+.assessment-batch-toolbar {
+    display: grid;
+    grid-template-columns: 90px 140px minmax(180px, 1fr) auto;
+    gap: 7px;
+    align-items: end;
+    min-width: 0;
+}
+
+.assessment-batch-toolbar label {
+    display: grid;
+    gap: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.assessment-batch-toolbar input,
+.assessment-batch-toolbar select,
+.assessment-batch-toolbar button,
+.assessment-batch-row select {
+    min-height: 30px;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 0 8px;
+    background: var(--panel);
+}
+
+.assessment-batch-list {
+    display: grid;
+    gap: 5px;
+    max-height: min(36vh, 360px);
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.assessment-batch-row {
+    display: grid;
+    grid-template-columns: 24px minmax(180px, 1fr) 130px 78px;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    background: #fbfcfd;
+}
+
+.assessment-batch-row span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.assessment-batch-row b,
+.assessment-batch-row small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.assessment-batch-row small,
+.assessment-batch-row em {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: normal;
+}
+
 .report-center-catalog-list {
     display: flex;
     flex-wrap: wrap;

@@ -235,6 +235,8 @@ const HISTORY_PLAN_QUEUE_STORAGE_KEY = "rsgzgl.historyPlanQueue.v1";
 const HISTORY_PLAN_QUEUE_STATE_KEY = "history-plan-queue";
 const DESKTOP_DENSITY_STORAGE_KEY = "rsgzgl.desktopDensity.v1";
 const REPORT_CENTER_PREF_STORAGE_KEY = "rsgzgl.reportCenterPrefs.v1";
+const ASSESSMENT_BATCH_CANDIDATES_ENDPOINT = "/api/persons/assessments/batch-candidates";
+const ASSESSMENT_BATCH_SAVE_ENDPOINT = "/api/persons/assessments/batch";
 let historyPlanQueuePersistTimer = null;
 
 function historyPlanQueuePayload() {
@@ -3236,7 +3238,7 @@ const WorkbenchPanel = {
         }
         setStatus("\u6b63\u5728\u52a0\u8f7d\u5e74\u5ea6\u8003\u6838\u6279\u91cf\u5f55\u5165...");
         try {
-            const rows = await Api.request(`/api/persons/assessments/batch-candidates?${new URLSearchParams({
+            const rows = await Api.request(`${ASSESSMENT_BATCH_CANDIDATES_ENDPOINT}?${new URLSearchParams({
                 orgCode: state.selectedOrgCode,
                 year,
                 limit
@@ -3310,7 +3312,7 @@ const WorkbenchPanel = {
         submit.disabled = true;
         setStatus("\u6b63\u5728\u6279\u91cf\u4fdd\u5b58\u5e74\u5ea6\u8003\u6838...");
         try {
-            const result = await Api.request("/api/persons/assessments/batch", {
+            const result = await Api.request(ASSESSMENT_BATCH_SAVE_ENDPOINT, {
                 method: "POST",
                 body: JSON.stringify({
                     orgCode: state.selectedOrgCode,

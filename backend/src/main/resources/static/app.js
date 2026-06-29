@@ -3307,8 +3307,9 @@ const WorkbenchPanel = {
                     items
                 })
             });
-            setStatus(`\u5e74\u5ea6\u8003\u6838\u5df2\u4fdd\u5b58 ${result.savedCount || 0} \u4eba\uff0c\u65b0\u589e ${result.createdCount || 0}\uff0c\u66f4\u65b0 ${result.updatedCount || 0}`);
+            const savedMessage = `\u5e74\u5ea6\u8003\u6838\u5df2\u4fdd\u5b58 ${result.savedCount || 0} \u4eba\uff0c\u65b0\u589e ${result.createdCount || 0}\uff0c\u66f4\u65b0 ${result.updatedCount || 0}\uff0c\u5de5\u8d44\u5f85\u529e\u7f13\u5b58\u9700\u5237\u65b0`;
             await WorkbenchPanel.openAssessmentBatch();
+            setStatus(savedMessage);
         } catch (error) {
             setStatus(error.message);
         } finally {

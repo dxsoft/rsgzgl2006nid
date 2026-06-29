@@ -3187,11 +3187,33 @@ const WorkbenchPanel = {
         setStatus("\u6b63\u5728\u8bfb\u53d6\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b...");
         try {
             const flows = await Api.request("/api/workbench/salary-business-flows");
-            WorkbenchPanel.renderMigrationToolResult("\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b", (flows || []).map((flow) => `${flow.code || "-"}:${(flow.steps || []).length}`));
+            WorkbenchPanel.renderSalaryBusinessFlows(flows || []);
             setStatus("\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b\u5df2\u8bfb\u53d6");
         } catch (error) {
             setStatus(error.message);
         }
+    },
+    renderSalaryBusinessFlows(flows) {
+        if (!els.migrationToolResult) {
+            return;
+        }
+        els.migrationToolResult.innerHTML = `
+            <strong>\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b</strong>
+            <div class="salary-flow-grid">
+                ${flows.length ? flows.map((flow) => `
+                    <section class="salary-flow-card">
+                        <header>
+                            <b>${Format.html(flow.title || flow.code || "-")}</b>
+                            <span>${Format.html(flow.status || "READY")} | ${Format.html(flow.formCode || "-")} | ${Format.html((flow.steps || []).length)} \u6b65</span>
+                        </header>
+                        <ol>
+                            ${(flow.steps || []).map((step) => `<li>${Format.html(step || "-")}</li>`).join("")}
+                        </ol>
+                    </section>
+                `).join("") : `<div class="loading compact">\u6682\u65e0\u5de5\u8d44\u4e1a\u52a1\u6d41\u7a0b</div>`}
+            </div>
+        `;
+        els.migrationToolResult.scrollIntoView({ behavior: "smooth", block: "start" });
     },
     reportCenterSavedPrefs() {
         try {

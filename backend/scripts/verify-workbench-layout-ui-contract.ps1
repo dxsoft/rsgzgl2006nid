@@ -1,6 +1,7 @@
 param(
     [string]$IndexPath = "backend/src/main/resources/static/index.html",
     [string]$StylesPath = "backend/src/main/resources/static/styles.css",
+    [string]$AppJsPath = "backend/src/main/resources/static/app.js",
     [string]$OutputPath = "target/workbench-layout-ui-contract.tsv"
 )
 
@@ -32,9 +33,13 @@ if (-not (Test-Path $StylesPath)) {
 if (-not (Test-Path $IndexPath)) {
     throw "Missing index.html: $IndexPath"
 }
+if (-not (Test-Path $AppJsPath)) {
+    throw "Missing app.js: $AppJsPath"
+}
 
 $indexHtml = Get-Content -Path $IndexPath -Raw
 $styles = Get-Content -Path $StylesPath -Raw
+$appJs = Get-Content -Path $AppJsPath -Raw
 $rows = New-Object System.Collections.Generic.List[object]
 
 Add-Check -Rows $rows -Name "workbench-seven-row-shell" -Passed ($styles -match 'grid-template-rows:\s*auto auto auto auto auto minmax\(96px,\s*max-content\) minmax\(320px,\s*auto\);') -Message "Workbench shell should reserve rows for ribbon, header, summaries, tabs, metrics and main panels without compressing them into overlap."
@@ -49,6 +54,7 @@ Add-Check -Rows $rows -Name "workbench-action-group-style" -Passed ($styles -mat
 Add-Check -Rows $rows -Name "workbench-result-scroll-boundary" -Passed ($styles -match '#migrationToolResult\s*\{[\s\S]*?display:\s*block;[\s\S]*?max-height:\s*min\(42vh,\s*420px\);[\s\S]*?overflow:\s*auto;[\s\S]*?contain:\s*layout paint;') -Message "Large migration/result panes should scroll and paint inside their own band instead of pushing into the work panels."
 Add-Check -Rows $rows -Name "workbench-horizontal-toolbar-boundary" -Passed ($styles -match 'scrollbar-gutter:\s*stable;' -and $styles -match '\.workspace-tabs\s*\{[\s\S]*?overflow-x:\s*auto;[\s\S]*?overflow-y:\s*hidden;') -Message "Wide filter, action, and tab rows should use bounded horizontal scrolling."
 Add-Check -Rows $rows -Name "workbench-action-strip-clickable-origin" -Passed ($styles -match '\.workbench-action-strip\s*\{[\s\S]*?justify-content:\s*flex-start;') -Message "Workbench action buttons should start inside their scroll container so visible buttons remain clickable."
+Add-Check -Rows $rows -Name "salary-business-flow-readable-cards" -Passed ($appJs -match 'renderSalaryBusinessFlows\(flows' -and $appJs -match 'salary-flow-card' -and $appJs -notmatch 'flow\.code \|\| "-"}:\$\{\(flow\.steps') -Message "Salary business flows should render readable cards with steps, not code:length summaries."
 
 $rows | Export-Csv -Path $OutputPath -Delimiter "`t" -NoTypeInformation -Encoding UTF8
 $rows | Format-Table -AutoSize

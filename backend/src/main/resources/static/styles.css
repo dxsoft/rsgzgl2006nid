@@ -2505,6 +2505,49 @@ button:disabled {
     color: var(--accent-strong);
 }
 
+.salary-flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+    min-width: 0;
+}
+
+.salary-flow-card {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    background: #fbfcfd;
+}
+
+.salary-flow-card header {
+    display: grid;
+    gap: 3px;
+}
+
+.salary-flow-card b {
+    color: var(--accent-strong);
+    font-size: 13px;
+}
+
+.salary-flow-card span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.salary-flow-card ol {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .report-center-catalog-list {
     display: flex;
     flex-wrap: wrap;

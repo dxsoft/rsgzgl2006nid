@@ -69,7 +69,7 @@ public class PersonAssessmentService {
         NormalizedAssessment assessment = normalize(new PersonAssessmentRequest(year, "合格", ""));
         organizationAccessService.requireOrgAccess(safeOrgCode);
         int safeLimit = Math.min(Math.max(limit == null ? 500 : limit, 1), 1000);
-        return jdbcTemplate.query("""
+        String sql = """
                 SELECT existing.id,
                        CONCAT(TRIM(p.dwbm), '-', TRIM(p.grbm)) AS person_code,
                        TRIM(p.xm) AS person_name,
@@ -81,10 +81,11 @@ public class PersonAssessmentService {
                       AND existing.grbm = p.grbm
                       AND existing.khnd = ?
                 WHERE p.dwbm LIKE CONCAT(?, '%')
-                  AND %s
+                  AND __ORG_ACCESS_SQL__
                 ORDER BY p.dwbm, p.grbm
                 LIMIT ?
-                """.formatted(organizationAccessService.orgCodeAccessSql("p.dwbm")),
+                """.replace("__ORG_ACCESS_SQL__", organizationAccessService.orgCodeAccessSql("p.dwbm"));
+        return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new PersonAssessmentBatchCandidate(
                         rs.getObject("id") == null ? null : rs.getLong("id"),
                         rs.getString("person_code"),
